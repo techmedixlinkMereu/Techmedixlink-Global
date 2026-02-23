@@ -3,516 +3,432 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tanzania Gateway · TechMedixLink · Global Door</title>
+    <title>TechMedixLink · Global Door | Complete System</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Font Awesome 6 -->
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
-    
     <!-- Supabase -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <!-- Vue.js -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     
     <style>
-        * { font-family: 'Inter', sans-serif; margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: #f0f2f5; }
-        
-        /* Professional Container */
-        .app-container {
-            max-width: 1440px;
-            margin: 0 auto;
-            background: white;
-            min-height: 100vh;
-            box-shadow: 0 0 40px rgba(0,0,0,0.05);
-        }
-        
-        /* User Type Selector */
-        .user-type-btn {
-            transition: all 0.2s;
-            border: 2px solid transparent;
-        }
-        .user-type-btn.active {
-            border-color: #2563eb;
-            background: #eff6ff;
-        }
-        
-        /* Cards */
-        .card {
-            background: white;
-            border-radius: 20px;
-            padding: 24px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-            border: 1px solid #edf2f7;
-            transition: all 0.2s;
-        }
-        .card:hover {
-            box-shadow: 0 12px 24px -8px rgba(0,0,0,0.1);
-            transform: translateY(-2px);
-        }
-        
-        /* Badges */
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 4px 12px;
-            border-radius: 100px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-        .badge-individual { background: #e3f2fd; color: #0a5b8c; }
-        .badge-business { background: #ede7f6; color: #5e3c8c; }
-        .badge-healthcare { background: #e0f7fa; color: #006064; }
-        .badge-international { background: #fff3e0; color: #b45b0a; }
-        
-        /* Status */
-        .status-pending { background: #fff3e0; color: #b45b0a; }
-        .status-processing { background: #e3f2fd; color: #0a5b8c; }
-        .status-shipped { background: #ede7f6; color: #5e3c8c; }
-        .status-delivered { background: #e8f5e9; color: #1b5e20; }
-        
-        /* Timeline */
-        .timeline-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: #cbd5e0;
-            position: relative;
-        }
-        .timeline-dot.completed { background: #10b981; }
-        .timeline-line {
-            width: 2px;
-            height: 40px;
-            background: #e2e8f0;
-            margin-left: 5px;
-        }
-        
-        /* Loading */
-        .spinner { width: 40px; height: 40px; border: 3px solid #e2e8f0; border-top-color: #2563eb; border-radius: 50%; animation: spin 1s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        
-        /* Toast */
-        .toast-container { position: fixed; top: 20px; right: 20px; z-index: 1000; }
-        .toast { background: white; border-radius: 12px; padding: 16px 20px; margin-bottom: 10px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); border-left: 4px solid; animation: slideIn 0.3s; }
-        .toast-success { border-left-color: #10b981; }
-        .toast-error { border-left-color: #ef4444; }
-        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        [v-cloak] { display: none; }
+        .loading-spinner { border: 3px solid #f3f3f3; border-top: 3px solid #3b82f6; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<body>
+<body class="bg-gray-100 p-4">
 
-<div id="app" v-cloak>
-    <!-- Toast Notifications -->
-    <div class="toast-container">
-        <div v-for="toast in toasts" :key="toast.id" class="toast" :class="'toast-' + toast.type">
-            <div class="flex items-center gap-3">
-                <i :class="toast.icon" class="text-lg"></i>
-                <span class="text-sm">{{ toast.message }}</span>
-                <button @click="removeToast(toast.id)" class="ml-4 text-gray-400 hover:text-gray-600">✕</button>
-            </div>
+<div id="app" v-cloak class="max-w-7xl mx-auto">
+    <!-- Loading Overlay -->
+    <div v-if="loading" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-xl text-center">
+            <div class="loading-spinner mx-auto mb-4"></div>
+            <p>{{ loadingMessage }}</p>
         </div>
     </div>
 
-    <!-- Main Container -->
-    <div class="app-container">
-        <!-- Hero Header -->
-        <div class="bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 text-white px-8 py-12">
-            <div class="max-w-6xl mx-auto">
-                <h1 class="text-4xl font-bold mb-3">Tanzania Gateway</h1>
-                <p class="text-xl text-blue-100 mb-8">One platform for all your needs — local, international, medical, business</p>
-                
-                <!-- User Type Selector - The Innovation -->
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
-                    <button @click="setUserType('individual')" class="user-type-btn p-4 rounded-xl text-left transition" :class="userType === 'individual' ? 'active bg-white/10 border-white/30' : 'bg-white/5 hover:bg-white/10'">
-                        <i class="fas fa-user text-2xl mb-2 text-blue-300"></i>
-                        <h3 class="font-semibold">Individual</h3>
-                        <p class="text-sm text-blue-200">Shop local & international</p>
-                    </button>
-                    
-                    <button @click="setUserType('healthcare')" class="user-type-btn p-4 rounded-xl text-left transition" :class="userType === 'healthcare' ? 'active bg-white/10 border-white/30' : 'bg-white/5 hover:bg-white/10'">
-                        <i class="fas fa-hospital text-2xl mb-2 text-blue-300"></i>
-                        <h3 class="font-semibold">Healthcare</h3>
-                        <p class="text-sm text-blue-200">Medical equipment & TMDA</p>
-                    </button>
-                    
-                    <button @click="setUserType('business')" class="user-type-btn p-4 rounded-xl text-left transition" :class="userType === 'business' ? 'active bg-white/10 border-white/30' : 'bg-white/5 hover:bg-white/10'">
-                        <i class="fas fa-briefcase text-2xl mb-2 text-blue-300"></i>
-                        <h3 class="font-semibold">Business</h3>
-                        <p class="text-sm text-blue-200">Bulk sourcing & market entry</p>
-                    </button>
-                    
-                    <button @click="setUserType('international')" class="user-type-btn p-4 rounded-xl text-left transition" :class="userType === 'international' ? 'active bg-white/10 border-white/30' : 'bg-white/5 hover:bg-white/10'">
-                        <i class="fas fa-globe text-2xl mb-2 text-blue-300"></i>
-                        <h3 class="font-semibold">International</h3>
-                        <p class="text-sm text-blue-200">Enter Tanzanian market</p>
-                    </button>
-                </div>
+    <!-- Header -->
+    <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+        <div class="flex justify-between items-center">
+            <div>
+                <h1 class="text-2xl font-bold">{{ platformName }}</h1>
+                <p class="text-gray-500 text-sm mt-1">{{ platformTagline }}</p>
             </div>
-        </div>
-
-        <!-- Profile Bar -->
-        <div class="bg-white border-b px-8 py-4 flex justify-between items-center">
-            <div class="flex items-center gap-6">
-                <span class="text-sm font-medium text-gray-600">Welcome,</span>
-                <span class="font-semibold">{{ currentProfile?.full_name || 'Guest' }}</span>
-                <span class="badge" :class="'badge-' + userType">{{ userTypeLabel }}</span>
-            </div>
-            <div class="flex items-center gap-4">
-                <button @click="showProfileModal = true" class="text-gray-600 hover:text-gray-900">
-                    <i class="fas fa-user-circle text-2xl"></i>
-                </button>
-                <button @click="showCart" class="relative">
-                    <i class="fas fa-shopping-cart text-xl text-gray-600"></i>
-                    <span v-if="cartCount" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">{{ cartCount }}</span>
+            <div class="flex gap-4">
+                <button @click="showUserModal = true" class="px-4 py-2 bg-blue-600 text-white rounded-lg">
+                    <i class="fas fa-user mr-2"></i>{{ currentUser?.full_name || 'Login' }}
                 </button>
             </div>
         </div>
-
-        <!-- Main Navigation -->
-        <div class="bg-white border-b px-8">
-            <nav class="flex gap-8">
-                <button @click="currentView = 'marketplace'" class="py-4 text-sm font-medium border-b-2 transition" :class="currentView === 'marketplace' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500'">
-                    Marketplace
-                </button>
-                <button @click="currentView = 'requests'" class="py-4 text-sm font-medium border-b-2 transition" :class="currentView === 'requests' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500'">
-                    My Orders
-                </button>
-                <button @click="currentView = 'tracking'" class="py-4 text-sm font-medium border-b-2 transition" :class="currentView === 'tracking' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500'">
-                    Track
-                </button>
-                <button @click="currentView = 'consulting'" class="py-4 text-sm font-medium border-b-2 transition" :class="currentView === 'consulting' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500'">
-                    Consulting
-                </button>
-            </nav>
+        
+        <!-- Platform Switcher -->
+        <div class="flex gap-2 mt-4 border-t pt-4">
+            <button @click="switchPlatform('techmedix')" class="px-4 py-2 rounded-lg" :class="platform === 'techmedix' ? 'bg-blue-600 text-white' : 'bg-gray-100'">
+                <i class="fas fa-heartbeat mr-2"></i>TechMedixLink
+            </button>
+            <button @click="switchPlatform('globaldoor')" class="px-4 py-2 rounded-lg" :class="platform === 'globaldoor' ? 'bg-blue-600 text-white' : 'bg-gray-100'">
+                <i class="fas fa-globe mr-2"></i>Global Door
+            </button>
         </div>
+    </div>
 
-        <!-- Main Content -->
-        <div class="p-8 min-h-[600px]">
-            <!-- Loading -->
-            <div v-if="loading" class="flex flex-col items-center justify-center py-12">
-                <div class="spinner mb-4"></div>
-                <p class="text-gray-600">{{ loadingMessage }}</p>
-            </div>
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div class="bg-white p-6 rounded-xl shadow-sm">
+            <p class="text-gray-500 text-sm">Products</p>
+            <p class="text-2xl font-bold">{{ products.length }}</p>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-sm">
+            <p class="text-gray-500 text-sm">Active Requests</p>
+            <p class="text-2xl font-bold">{{ activeRequests.length }}</p>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-sm">
+            <p class="text-gray-500 text-sm">Shoppers</p>
+            <p class="text-2xl font-bold">{{ shoppers.length }}</p>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-sm">
+            <p class="text-gray-500 text-sm">Completed</p>
+            <p class="text-2xl font-bold">{{ completedRequests.length }}</p>
+        </div>
+    </div>
 
-            <!-- Error -->
-            <div v-else-if="error" class="bg-red-50 border border-red-200 rounded-xl p-8 text-center">
-                <i class="fas fa-exclamation-triangle text-3xl text-red-500 mb-4"></i>
-                <h3 class="text-red-800 font-medium mb-2">Something went wrong</h3>
-                <p class="text-red-600 mb-4">{{ error }}</p>
-                <button @click="loadAllData" class="bg-red-600 text-white px-6 py-2 rounded-lg">Retry</button>
-            </div>
+    <!-- Main Navigation -->
+    <div class="bg-white rounded-xl shadow-sm p-4 mb-6">
+        <div class="flex gap-4">
+            <button @click="currentTab = 'products'" class="px-4 py-2" :class="currentTab === 'products' ? 'text-blue-600 font-semibold' : ''">Products</button>
+            <button @click="currentTab = 'requests'" class="px-4 py-2" :class="currentTab === 'requests' ? 'text-blue-600 font-semibold' : ''">Requests</button>
+            <button @click="currentTab = 'shoppers'" class="px-4 py-2" :class="currentTab === 'shoppers' ? 'text-blue-600 font-semibold' : ''">Shoppers</button>
+            <button @click="currentTab = 'tracking'" class="px-4 py-2" :class="currentTab === 'tracking' ? 'text-blue-600 font-semibold' : ''">Tracking</button>
+            <button @click="currentTab = 'payments'" class="px-4 py-2" :class="currentTab === 'payments' ? 'text-blue-600 font-semibold' : ''">Payments</button>
+        </div>
+    </div>
 
-            <!-- Content -->
-            <div v-else>
-                <!-- MARKETPLACE VIEW - Adapts based on user type -->
-                <div v-if="currentView === 'marketplace'">
-                    <!-- Dynamic Header -->
-                    <div class="mb-8">
-                        <h2 class="text-2xl font-bold mb-2">
-                            {{ userType === 'individual' ? 'Discover Products' : 
-                               userType === 'healthcare' ? 'Medical Equipment Catalog' :
-                               userType === 'business' ? 'Business Sourcing' :
-                               'Tanzania Market Intelligence' }}
-                        </h2>
-                        <p class="text-gray-600">{{ marketplaceSubtitle }}</p>
+    <!-- Products Tab -->
+    <div v-if="currentTab === 'products'" class="bg-white rounded-xl shadow-sm p-6">
+        <div class="flex justify-between mb-6">
+            <h2 class="text-xl font-semibold">Products</h2>
+            <button @click="showProductModal = true" class="px-4 py-2 bg-green-600 text-white rounded-lg">
+                <i class="fas fa-plus mr-2"></i>Add Product
+            </button>
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="p-3 text-left">Name</th>
+                        <th class="p-3 text-left">Platform</th>
+                        <th class="p-3 text-left">Type</th>
+                        <th class="p-3 text-left">Manufacturer</th>
+                        <th class="p-3 text-left">Price (USD)</th>
+                        <th class="p-3 text-left">TMDA</th>
+                        <th class="p-3 text-left">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="product in products" :key="product.id" class="border-t">
+                        <td class="p-3">{{ product.name }}</td>
+                        <td class="p-3">
+                            <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">{{ product.platform_type }}</span>
+                        </td>
+                        <td class="p-3">{{ product.product_type }}</td>
+                        <td class="p-3">{{ product.manufacturer }}</td>
+                        <td class="p-3">${{ product.base_price_usd }}</td>
+                        <td class="p-3">
+                            <span class="px-2 py-1" :class="product.tmda_certified ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'">
+                                {{ product.tmda_certified ? 'Certified' : 'Pending' }}
+                            </span>
+                        </td>
+                        <td class="p-3">
+                            <button @click="editProduct(product)" class="text-blue-600 mr-2"><i class="fas fa-edit"></i></button>
+                            <button @click="deleteProduct(product.id)" class="text-red-600"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Requests Tab -->
+    <div v-if="currentTab === 'requests'" class="bg-white rounded-xl shadow-sm p-6">
+        <div class="flex justify-between mb-6">
+            <h2 class="text-xl font-semibold">Requests</h2>
+            <button @click="showRequestModal = true" class="px-4 py-2 bg-green-600 text-white rounded-lg">
+                <i class="fas fa-plus mr-2"></i>New Request
+            </button>
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="p-3 text-left">Request #</th>
+                        <th class="p-3 text-left">Platform</th>
+                        <th class="p-3 text-left">Status</th>
+                        <th class="p-3 text-left">Total Cost</th>
+                        <th class="p-3 text-left">Balance</th>
+                        <th class="p-3 text-left">Payment</th>
+                        <th class="p-3 text-left">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="request in requests" :key="request.id" class="border-t">
+                        <td class="p-3 font-mono">{{ request.request_number }}</td>
+                        <td class="p-3">{{ request.platform_type }}</td>
+                        <td class="p-3">
+                            <span class="px-2 py-1" :class="{
+                                'bg-green-100 text-green-800': request.status === 'delivered',
+                                'bg-blue-100 text-blue-800': request.status === 'processing',
+                                'bg-yellow-100 text-yellow-800': request.status === 'pending'
+                            }">{{ request.status }}</span>
+                        </td>
+                        <td class="p-3">TZS {{ formatNumber(request.total_cost) }}</td>
+                        <td class="p-3">TZS {{ formatNumber(request.balance_due) }}</td>
+                        <td class="p-3">
+                            <span class="px-2 py-1" :class="request.payment_status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'">
+                                {{ request.payment_status }}
+                            </span>
+                        </td>
+                        <td class="p-3">
+                            <button @click="viewRequest(request)" class="text-blue-600 mr-2"><i class="fas fa-eye"></i></button>
+                            <button @click="trackRequest(request.request_number)" class="text-green-600"><i class="fas fa-map-marker-alt"></i></button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Shoppers Tab -->
+    <div v-if="currentTab === 'shoppers'" class="bg-white rounded-xl shadow-sm p-6">
+        <div class="flex justify-between mb-6">
+            <h2 class="text-xl font-semibold">Shoppers</h2>
+            <button @click="showShopperModal = true" class="px-4 py-2 bg-green-600 text-white rounded-lg">
+                <i class="fas fa-plus mr-2"></i>Add Shopper
+            </button>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div v-for="shopper in shoppers" :key="shopper.id" class="border rounded-lg p-4">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white text-xl">
+                        {{ shopper.full_name?.charAt(0) }}
                     </div>
-
-                    <!-- Quick Actions -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                        <div v-if="userType === 'individual'" class="bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl p-4">
-                            <i class="fas fa-truck text-2xl text-purple-600 mb-2"></i>
-                            <h4 class="font-semibold">Local Delivery</h4>
-                            <p class="text-sm text-gray-600">From shops near you</p>
-                        </div>
-                        <div v-if="userType === 'individual'" class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4">
-                            <i class="fas fa-plane text-2xl text-blue-600 mb-2"></i>
-                            <h4 class="font-semibold">International</h4>
-                            <p class="text-sm text-gray-600">From Europe, USA, Asia</p>
-                        </div>
-                        
-                        <div v-if="userType === 'healthcare'" class="bg-gradient-to-r from-teal-50 to-green-50 rounded-xl p-4">
-                            <i class="fas fa-certificate text-2xl text-teal-600 mb-2"></i>
-                            <h4 class="font-semibold">TMDA Certified</h4>
-                            <p class="text-sm text-gray-600">Fully compliant equipment</p>
-                        </div>
-                        <div v-if="userType === 'healthcare'" class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4">
-                            <i class="fas fa-chalkboard-teacher text-2xl text-blue-600 mb-2"></i>
-                            <h4 class="font-semibold">Training Included</h4>
-                            <p class="text-sm text-gray-600">Staff training & installation</p>
-                        </div>
-                        
-                        <div v-if="userType === 'business'" class="bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl p-4">
-                            <i class="fas fa-chart-line text-2xl text-amber-600 mb-2"></i>
-                            <h4 class="font-semibold">Market Research</h4>
-                            <p class="text-sm text-gray-600">Tanzania consumer insights</p>
-                        </div>
-                        <div v-if="userType === 'business'" class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4">
-                            <i class="fas fa-handshake text-2xl text-green-600 mb-2"></i>
-                            <h4 class="font-semibold">Local Partnerships</h4>
-                            <p class="text-sm text-gray-600">Connect with distributors</p>
-                        </div>
-                        
-                        <div v-if="userType === 'international'" class="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-4">
-                            <i class="fas fa-building text-2xl text-indigo-600 mb-2"></i>
-                            <h4 class="font-semibold">Market Entry</h4>
-                            <p class="text-sm text-gray-600">Regulatory & compliance</p>
-                        </div>
-                        <div v-if="userType === 'international'" class="bg-gradient-to-r from-pink-50 to-rose-50 rounded-xl p-4">
-                            <i class="fas fa-users text-2xl text-pink-600 mb-2"></i>
-                            <h4 class="font-semibold">Local Network</h4>
-                            <p class="text-sm text-gray-600">Distributors & partners</p>
-                        </div>
-                    </div>
-
-                    <!-- Products Grid -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <div v-for="product in filteredProducts" :key="product.id" class="card">
-                            <div class="flex justify-between items-start mb-3">
-                                <span class="badge" :class="product.platform_type === 'techmedix' ? 'badge-healthcare' : 'badge-individual'">
-                                    {{ product.platform_type === 'techmedix' ? 'Medical' : 'Consumer' }}
-                                </span>
-                                <span v-if="product.tmda_certified" class="badge badge-healthcare text-xs">
-                                    <i class="fas fa-certificate mr-1"></i>TMDA
-                                </span>
-                            </div>
-                            
-                            <h3 class="font-semibold text-lg mb-1">{{ product.name }}</h3>
-                            <p class="text-sm text-gray-500 mb-3">{{ product.manufacturer }}</p>
-                            
-                            <div class="flex items-center justify-between mb-4">
-                                <div>
-                                    <span class="text-sm text-gray-500">Price</span>
-                                    <p class="text-2xl font-bold">${{ formatNumber(product.base_price_usd) }}</p>
-                                </div>
-                                <div class="text-right">
-                                    <span class="text-sm text-gray-500">TZS</span>
-                                    <p class="text-lg font-semibold">{{ formatNumber(product.base_price_usd * 2500) }}</p>
-                                </div>
-                            </div>
-                            
-                            <!-- Dynamic CTA based on user type -->
-                            <button @click="startOrder(product)" class="w-full py-3 rounded-xl font-medium transition" :class="{
-                                'bg-blue-600 text-white hover:bg-blue-700': userType === 'individual',
-                                'bg-teal-600 text-white hover:bg-teal-700': userType === 'healthcare',
-                                'bg-amber-600 text-white hover:bg-amber-700': userType === 'business',
-                                'bg-indigo-600 text-white hover:bg-indigo-700': userType === 'international'
-                            }">
-                                {{ userType === 'individual' ? 'Order Now' :
-                                   userType === 'healthcare' ? 'Request Quote' :
-                                   userType === 'business' ? 'Bulk Inquiry' :
-                                   'Market Analysis' }}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- REQUESTS VIEW -->
-                <div v-if="currentView === 'requests'">
-                    <h2 class="text-2xl font-bold mb-6">My Orders</h2>
-                    
-                    <div class="space-y-4">
-                        <div v-for="request in userRequests" :key="request.id" class="card">
-                            <div class="flex justify-between items-start mb-4">
-                                <div>
-                                    <span class="text-sm text-gray-500">#{{ request.request_number }}</span>
-                                    <span class="ml-3 badge" :class="'status-' + request.status">{{ request.status }}</span>
-                                </div>
-                                <span class="badge" :class="request.platform_type === 'techmedix' ? 'badge-healthcare' : 'badge-individual'">
-                                    {{ request.platform_type }}
-                                </span>
-                            </div>
-                            
-                            <div class="space-y-2 mb-4">
-                                <div v-for="item in request.items" :key="item.id" class="flex justify-between text-sm">
-                                    <span>{{ item.product_name }} x{{ item.quantity }}</span>
-                                    <span>TZS {{ formatNumber(item.total_price) }}</span>
-                                </div>
-                            </div>
-                            
-                            <div class="flex justify-between items-center pt-4 border-t">
-                                <div>
-                                    <p class="text-sm text-gray-500">Total</p>
-                                    <p class="text-xl font-bold">TZS {{ formatNumber(request.total_cost) }}</p>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button @click="trackOrder(request)" class="px-4 py-2 bg-gray-100 rounded-lg text-sm">
-                                        Track
-                                    </button>
-                                    <button v-if="request.balance_due > 0" @click="payForOrder(request)" class="px-4 py-2 bg-green-600 text-white rounded-lg text-sm">
-                                        Pay TZS {{ formatNumber(request.balance_due) }}
-                                    </button>
-                                </div>
-                            </div>
-                            
-                            <!-- Timeline Preview -->
-                            <div v-if="request.tracking_events?.length" class="mt-4 pt-4 border-t">
-                                <p class="text-sm font-medium mb-2">Latest Update</p>
-                                <div class="flex items-center gap-3 text-sm">
-                                    <div class="w-2 h-2 rounded-full bg-green-500"></div>
-                                    <span>{{ request.tracking_events[0].event_type }}</span>
-                                    <span class="text-gray-400">{{ formatDate(request.tracking_events[0].event_time) }}</span>
-                                </div>
-                            </div>
-                        </div>
+                    <div>
+                        <h3 class="font-semibold">{{ shopper.full_name }}</h3>
+                        <p class="text-sm text-gray-500">{{ shopper.shopper_type }}</p>
                     </div>
                 </div>
-
-                <!-- TRACKING VIEW -->
-                <div v-if="currentView === 'tracking'">
-                    <div class="max-w-2xl mx-auto">
-                        <div class="card mb-6">
-                            <h3 class="font-semibold mb-4">Track Your Order</h3>
-                            <div class="flex gap-3">
-                                <input type="text" v-model="trackingInput" placeholder="Enter request number" class="flex-1 px-4 py-3 border rounded-xl">
-                                <button @click="searchTracking" class="px-6 bg-blue-600 text-white rounded-xl">Track</button>
-                            </div>
-                        </div>
-                        
-                        <div v-if="trackedOrder" class="card">
-                            <h4 class="font-semibold mb-4">Order #{{ trackedOrder.request_number }}</h4>
-                            
-                            <div class="space-y-4">
-                                <div v-for="(event, index) in trackedOrder.tracking_events" :key="index" class="flex gap-4">
-                                    <div class="flex flex-col items-center">
-                                        <div class="w-3 h-3 rounded-full" :class="index === 0 ? 'bg-green-500' : 'bg-gray-300'"></div>
-                                        <div v-if="index < trackedOrder.tracking_events.length - 1" class="w-0.5 h-12 bg-gray-200"></div>
-                                    </div>
-                                    <div class="flex-1 pb-4">
-                                        <p class="font-medium">{{ event.event_type }}</p>
-                                        <p class="text-sm text-gray-500">{{ event.location }}</p>
-                                        <p class="text-xs text-gray-400">{{ formatDateTime(event.event_time) }}</p>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="mt-6 p-4 bg-blue-50 rounded-xl">
-                                <p class="text-sm text-blue-600 font-medium">Estimated Delivery</p>
-                                <p class="text-lg font-semibold">{{ formatDate(trackedOrder.expected_delivery_date) || 'Pending' }}</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- CONSULTING VIEW -->
-                <div v-if="currentView === 'consulting'">
-                    <h2 class="text-2xl font-bold mb-6">Business & Healthcare Consulting</h2>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <!-- Market Entry -->
-                        <div class="card">
-                            <div class="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center text-indigo-600 text-xl mb-4">
-                                <i class="fas fa-chart-line"></i>
-                            </div>
-                            <h3 class="font-semibold text-lg mb-2">Market Entry Strategy</h3>
-                            <p class="text-gray-600 text-sm mb-4">Complete analysis of Tanzanian market for international companies</p>
-                            <ul class="space-y-2 text-sm mb-6">
-                                <li class="flex items-center gap-2"><i class="fas fa-check text-green-500"></i> Regulatory requirements</li>
-                                <li class="flex items-center gap-2"><i class="fas fa-check text-green-500"></i> Competitor analysis</li>
-                                <li class="flex items-center gap-2"><i class="fas fa-check text-green-500"></i> Distribution channels</li>
-                            </ul>
-                            <button class="w-full py-3 bg-indigo-600 text-white rounded-xl">Request Consultation</button>
-                        </div>
-                        
-                        <!-- Healthcare Compliance -->
-                        <div class="card">
-                            <div class="w-12 h-12 bg-teal-100 rounded-xl flex items-center justify-center text-teal-600 text-xl mb-4">
-                                <i class="fas fa-shield-alt"></i>
-                            </div>
-                            <h3 class="font-semibold text-lg mb-2">TMDA & Regulatory Compliance</h3>
-                            <p class="text-gray-600 text-sm mb-4">Full support for medical equipment certification</p>
-                            <ul class="space-y-2 text-sm mb-6">
-                                <li class="flex items-center gap-2"><i class="fas fa-check text-green-500"></i> TMDA certification</li>
-                                <li class="flex items-center gap-2"><i class="fas fa-check text-green-500"></i> Quality assurance</li>
-                                <li class="flex items-center gap-2"><i class="fas fa-check text-green-500"></i> Staff training programs</li>
-                            </ul>
-                            <button class="w-full py-3 bg-teal-600 text-white rounded-xl">Get Support</button>
-                        </div>
-                        
-                        <!-- Local Partnerships -->
-                        <div class="card">
-                            <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center text-amber-600 text-xl mb-4">
-                                <i class="fas fa-handshake"></i>
-                            </div>
-                            <h3 class="font-semibold text-lg mb-2">Local Partnership Network</h3>
-                            <p class="text-gray-600 text-sm mb-4">Connect with verified local distributors and agents</p>
-                            <ul class="space-y-2 text-sm mb-6">
-                                <li class="flex items-center gap-2"><i class="fas fa-check text-green-500"></i> Verified partners</li>
-                                <li class="flex items-center gap-2"><i class="fas fa-check text-green-500"></i> Due diligence</li>
-                                <li class="flex items-center gap-2"><i class="fas fa-check text-green-500"></i> Contract support</li>
-                            </ul>
-                            <button class="w-full py-3 bg-amber-600 text-white rounded-xl">Find Partners</button>
-                        </div>
-                        
-                        <!-- Market Research -->
-                        <div class="card">
-                            <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center text-purple-600 text-xl mb-4">
-                                <i class="fas fa-search"></i>
-                            </div>
-                            <h3 class="font-semibold text-lg mb-2">Market Research Reports</h3>
-                            <p class="text-gray-600 text-sm mb-4">Custom research on Tanzanian consumer behavior</p>
-                            <ul class="space-y-2 text-sm mb-6">
-                                <li class="flex items-center gap-2"><i class="fas fa-check text-green-500"></i> Industry trends</li>
-                                <li class="flex items-center gap-2"><i class="fas fa-check text-green-500"></i> Consumer insights</li>
-                                <li class="flex items-center gap-2"><i class="fas fa-check text-green-500"></i> Price analysis</li>
-                            </ul>
-                            <button class="w-full py-3 bg-purple-600 text-white rounded-xl">Request Report</button>
-                        </div>
-                    </div>
+                <p class="text-sm"><i class="fas fa-envelope mr-2"></i>{{ shopper.email }}</p>
+                <p class="text-sm"><i class="fas fa-phone mr-2"></i>{{ shopper.phone }}</p>
+                <p class="text-sm"><i class="fas fa-map-marker mr-2"></i>{{ shopper.city }}, {{ shopper.country }}</p>
+                <div class="mt-3 pt-3 border-t flex justify-between">
+                    <span class="text-sm">⭐ {{ shopper.rating || '0.0' }}</span>
+                    <span class="text-sm">💰 {{ shopper.commission_rate }}%</span>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- PROFILE MODAL -->
-    <div v-if="showProfileModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-2xl max-w-md w-full p-6">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-bold">Your Profile</h3>
-                <button @click="showProfileModal = false" class="text-gray-400 hover:text-gray-600">✕</button>
-            </div>
+    <!-- Tracking Tab -->
+    <div v-if="currentTab === 'tracking'" class="bg-white rounded-xl shadow-sm p-6">
+        <h2 class="text-xl font-semibold mb-6">Track Request</h2>
+        
+        <div class="flex gap-4 mb-8">
+            <input type="text" v-model="trackingNumber" placeholder="Enter request number" class="flex-1 p-3 border rounded-lg">
+            <button @click="fetchTracking" class="px-6 py-3 bg-blue-600 text-white rounded-lg">Track</button>
+        </div>
+        
+        <div v-if="trackedRequest" class="border rounded-lg p-6">
+            <h3 class="font-semibold mb-4">Request #{{ trackedRequest.request_number }}</h3>
             
-            <form @submit.prevent="saveProfile">
+            <div class="space-y-4">
+                <div v-for="(event, index) in trackedRequest.tracking_events" :key="event.id" class="flex gap-4">
+                    <div class="flex flex-col items-center">
+                        <div class="w-3 h-3 rounded-full" :class="index === 0 ? 'bg-green-500' : 'bg-gray-300'"></div>
+                        <div v-if="index < trackedRequest.tracking_events.length - 1" class="w-0.5 h-12 bg-gray-200"></div>
+                    </div>
+                    <div class="flex-1">
+                        <p class="font-medium">{{ event.event_type }}</p>
+                        <p class="text-sm text-gray-500">{{ event.location }}</p>
+                        <p class="text-xs text-gray-400">{{ formatDate(event.event_time) }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payments Tab -->
+    <div v-if="currentTab === 'payments'" class="bg-white rounded-xl shadow-sm p-6">
+        <h2 class="text-xl font-semibold mb-6">Payments</h2>
+        
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="p-3 text-left">Request #</th>
+                        <th class="p-3 text-left">Amount</th>
+                        <th class="p-3 text-left">Method</th>
+                        <th class="p-3 text-left">Status</th>
+                        <th class="p-3 text-left">M-Pesa Ref</th>
+                        <th class="p-3 text-left">Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="payment in payments" :key="payment.id" class="border-t">
+                        <td class="p-3">{{ payment.request_id }}</td>
+                        <td class="p-3">TZS {{ formatNumber(payment.amount) }}</td>
+                        <td class="p-3">{{ payment.payment_method }}</td>
+                        <td class="p-3">
+                            <span class="px-2 py-1" :class="payment.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'">
+                                {{ payment.status }}
+                            </span>
+                        </td>
+                        <td class="p-3">{{ payment.mpesa_reference }}</td>
+                        <td class="p-3">{{ formatDate(payment.payment_date) }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Product Modal -->
+    <div v-if="showProductModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-6 w-full max-w-md">
+            <h3 class="text-xl font-semibold mb-4">{{ editingProduct ? 'Edit' : 'Add' }} Product</h3>
+            
+            <form @submit.prevent="saveProduct">
                 <div class="space-y-4">
                     <div>
-                        <label class="text-sm font-medium text-gray-700 block mb-1">Full Name</label>
-                        <input type="text" v-model="profileForm.full_name" class="w-full px-4 py-2 border rounded-lg" required>
-                    </div>
-                    
-                    <div>
-                        <label class="text-sm font-medium text-gray-700 block mb-1">Email</label>
-                        <input type="email" v-model="profileForm.email" class="w-full px-4 py-2 border rounded-lg" required>
-                    </div>
-                    
-                    <div>
-                        <label class="text-sm font-medium text-gray-700 block mb-1">Phone</label>
-                        <input type="tel" v-model="profileForm.phone" class="w-full px-4 py-2 border rounded-lg" placeholder="+255...">
-                    </div>
-                    
-                    <div>
-                        <label class="text-sm font-medium text-gray-700 block mb-1">User Type</label>
-                        <select v-model="profileForm.user_type" class="w-full px-4 py-2 border rounded-lg">
-                            <option value="individual">Individual</option>
-                            <option value="healthcare">Healthcare</option>
-                            <option value="business">Business</option>
-                            <option value="international">International</option>
+                        <label class="block text-sm font-medium mb-1">Platform</label>
+                        <select v-model="productForm.platform_type" class="w-full p-3 border rounded-lg" required>
+                            <option value="techmedix">TechMedixLink</option>
+                            <option value="globaldoor">Global Door</option>
                         </select>
                     </div>
                     
-                    <div v-if="profileForm.user_type === 'business' || profileForm.user_type === 'international'">
-                        <label class="text-sm font-medium text-gray-700 block mb-1">Company Name</label>
-                        <input type="text" v-model="profileForm.company_name" class="w-full px-4 py-2 border rounded-lg">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Product Type</label>
+                        <input type="text" v-model="productForm.product_type" class="w-full p-3 border rounded-lg" required>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Name</label>
+                        <input type="text" v-model="productForm.name" class="w-full p-3 border rounded-lg" required>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Manufacturer</label>
+                        <input type="text" v-model="productForm.manufacturer" class="w-full p-3 border rounded-lg">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Price (USD)</label>
+                        <input type="number" v-model="productForm.base_price_usd" step="0.01" class="w-full p-3 border rounded-lg" required>
+                    </div>
+                    
+                    <div>
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox" v-model="productForm.tmda_certified">
+                            <span>TMDA Certified</span>
+                        </label>
+                    </div>
+                    
+                    <div class="flex gap-3">
+                        <button type="submit" class="flex-1 bg-blue-600 text-white py-3 rounded-lg">Save</button>
+                        <button type="button" @click="showProductModal = false" class="flex-1 bg-gray-100 py-3 rounded-lg">Cancel</button>
                     </div>
                 </div>
-                
-                <div class="flex gap-3 mt-6">
-                    <button type="submit" class="flex-1 bg-blue-600 text-white py-3 rounded-lg font-medium">Save</button>
-                    <button type="button" @click="showProfileModal = false" class="flex-1 bg-gray-100 py-3 rounded-lg font-medium">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Request Modal -->
+    <div v-if="showRequestModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-6 w-full max-w-md">
+            <h3 class="text-xl font-semibold mb-4">New Request</h3>
+            
+            <form @submit.prevent="createRequest">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Platform</label>
+                        <select v-model="requestForm.platform_type" class="w-full p-3 border rounded-lg" required>
+                            <option value="techmedix">TechMedixLink</option>
+                            <option value="globaldoor">Global Door</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Product</label>
+                        <select v-model="requestForm.product_id" class="w-full p-3 border rounded-lg" required>
+                            <option value="">Select product</option>
+                            <option v-for="p in products" :key="p.id" :value="p.id" v-if="p.platform_type === requestForm.platform_type">
+                                {{ p.name }} - ${{ p.base_price_usd }}
+                            </option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Quantity</label>
+                        <input type="number" v-model="requestForm.quantity" min="1" class="w-full p-3 border rounded-lg" required>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Urgency</label>
+                        <select v-model="requestForm.urgency" class="w-full p-3 border rounded-lg">
+                            <option value="low">Low</option>
+                            <option value="normal">Normal</option>
+                            <option value="high">High</option>
+                            <option value="critical">Critical</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Notes</label>
+                        <textarea v-model="requestForm.source_notes" rows="3" class="w-full p-3 border rounded-lg"></textarea>
+                    </div>
+                    
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <p class="text-sm text-blue-600">Estimated Total: TZS {{ formatNumber(calculatedTotal) }}</p>
+                    </div>
+                    
+                    <div class="flex gap-3">
+                        <button type="submit" class="flex-1 bg-blue-600 text-white py-3 rounded-lg">Submit</button>
+                        <button type="button" @click="showRequestModal = false" class="flex-1 bg-gray-100 py-3 rounded-lg">Cancel</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- User Modal -->
+    <div v-if="showUserModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-6 w-full max-w-md">
+            <h3 class="text-xl font-semibold mb-4">{{ currentUser ? 'Edit Profile' : 'Login / Register' }}</h3>
+            
+            <form @submit.prevent="saveUser">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Full Name</label>
+                        <input type="text" v-model="userForm.full_name" class="w-full p-3 border rounded-lg" required>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Email</label>
+                        <input type="email" v-model="userForm.email" class="w-full p-3 border rounded-lg" required>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Phone</label>
+                        <input type="tel" v-model="userForm.phone" class="w-full p-3 border rounded-lg" required>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-1">User Type</label>
+                        <select v-model="userForm.user_type" class="w-full p-3 border rounded-lg">
+                            <option value="individual">Individual</option>
+                            <option value="hospital">Hospital</option>
+                            <option value="clinic">Clinic</option>
+                            <option value="business">Business</option>
+                        </select>
+                    </div>
+                    
+                    <div v-if="userForm.user_type === 'business'">
+                        <label class="block text-sm font-medium mb-1">Company Name</label>
+                        <input type="text" v-model="userForm.company_name" class="w-full p-3 border rounded-lg">
+                    </div>
+                    
+                    <div class="flex gap-3">
+                        <button type="submit" class="flex-1 bg-blue-600 text-white py-3 rounded-lg">Save</button>
+                        <button type="button" @click="showUserModal = false" class="flex-1 bg-gray-100 py-3 rounded-lg">Cancel</button>
+                    </div>
                 </div>
             </form>
         </div>
@@ -520,320 +436,407 @@
 </div>
 
 <script>
-    (function() {
-        const SUPABASE_URL = 'https://nvmwblzoyewgvawdmkyo.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im52bXdibHpveWV3Z3Zhd2Rta3lvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE4ODQ2NzAsImV4cCI6MjA4NzQ2MDY3MH0.5AcVEcOYqy7784DRr_UGSKsVCpyh2Zvx7zjjLOLur_k';
-        
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const { createApp, ref, reactive, computed, onMounted } = Vue;
 
-        const { createApp, ref, reactive, computed, onMounted } = Vue;
+    // Supabase setup
+    const supabaseUrl = 'https://nvmwblzoyewgvawdmkyo.supabase.co'
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im52bXdibHpveWV3Z3Zhd2Rta3lvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE4ODQ2NzAsImV4cCI6MjA4NzQ2MDY3MH0.5AcVEcOYqy7784DRr_UGSKsVCpyh2Zvx7zjjLOLur_k'
+    
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey)
 
-        const app = createApp({
-            setup() {
-                // ========== STATE ==========
-                const loading = ref(false);
-                const loadingMessage = ref('Loading...');
-                const error = ref(null);
+    const app = createApp({
+        setup() {
+            // State
+            const loading = ref(false)
+            const loadingMessage = ref('Loading...')
+            const platform = ref('techmedix')
+            const currentTab = ref('products')
+            
+            // Data
+            const products = ref([])
+            const requests = ref([])
+            const shoppers = ref([])
+            const payments = ref([])
+            const currentUser = ref(null)
+            
+            // UI State
+            const showProductModal = ref(false)
+            const showRequestModal = ref(false)
+            const showShopperModal = ref(false)
+            const showUserModal = ref(false)
+            const editingProduct = ref(null)
+            const trackingNumber = ref('')
+            const trackedRequest = ref(null)
+            
+            // Forms
+            const productForm = reactive({
+                platform_type: 'techmedix',
+                product_type: '',
+                name: '',
+                manufacturer: '',
+                base_price_usd: null,
+                tmda_certified: false
+            })
+            
+            const requestForm = reactive({
+                platform_type: 'techmedix',
+                product_id: '',
+                quantity: 1,
+                urgency: 'normal',
+                source_notes: ''
+            })
+            
+            const userForm = reactive({
+                full_name: '',
+                email: '',
+                phone: '',
+                user_type: 'individual',
+                company_name: ''
+            })
+
+            // Computed
+            const platformName = computed(() => 
+                platform.value === 'techmedix' ? 'TechMedixLink' : 'Global Door'
+            )
+            
+            const platformTagline = computed(() => 
+                platform.value === 'techmedix' 
+                    ? 'Medical Equipment & Supplies' 
+                    : 'International Package Concierge'
+            )
+
+            const activeRequests = computed(() => 
+                requests.value.filter(r => !['delivered', 'completed'].includes(r.status))
+            )
+
+            const completedRequests = computed(() => 
+                requests.value.filter(r => ['delivered', 'completed'].includes(r.status))
+            )
+
+            const calculatedTotal = computed(() => {
+                if (!requestForm.product_id) return 0
+                const product = products.value.find(p => p.id === requestForm.product_id)
+                if (!product) return 0
                 
-                // User Context
-                const userType = ref('individual'); // individual, healthcare, business, international
-                const currentProfile = ref(null);
-                const showProfileModal = ref(false);
+                const usdToTzs = 2500
+                const itemCost = (product.base_price_usd * usdToTzs) * requestForm.quantity
+                const shipping = platform.value === 'techmedix' ? itemCost * 0.15 : 85000 * requestForm.quantity
+                const serviceFee = itemCost * 0.1
+                const duty = platform.value === 'globaldoor' ? itemCost * 0.2 : 0
                 
-                // Views
-                const currentView = ref('marketplace');
-                
-                // Data
-                const products = ref([]);
-                const requests = ref([]);
-                const shoppers = ref([]);
-                
-                // Tracking
-                const trackingInput = ref('');
-                const trackedOrder = ref(null);
-                
-                // Cart
-                const cart = ref([]);
-                
-                // Toasts
-                const toasts = ref([]);
-                let toastId = 0;
-                
-                // Forms
-                const profileForm = reactive({
-                    full_name: '',
-                    email: '',
-                    phone: '',
-                    user_type: 'individual',
-                    company_name: ''
-                });
+                return itemCost + shipping + serviceFee + duty
+            })
 
-                // ========== COMPUTED ==========
-                const userTypeLabel = computed(() => {
-                    const labels = {
-                        individual: 'Individual',
-                        healthcare: 'Healthcare',
-                        business: 'Business',
-                        international: 'International'
-                    };
-                    return labels[userType.value];
-                });
-
-                const marketplaceSubtitle = computed(() => {
-                    const subtitles = {
-                        individual: 'Shop from local stores or order internationally',
-                        healthcare: 'Medical equipment with full TMDA certification',
-                        business: 'Source products globally with bulk discounts',
-                        international: 'Market intelligence and entry strategies'
-                    };
-                    return subtitles[userType.value];
-                });
-
-                const filteredProducts = computed(() => {
-                    if (userType.value === 'healthcare') {
-                        return products.value.filter(p => p.platform_type === 'techmedix');
-                    }
-                    // Everyone else sees both, but with different CTAs
-                    return products.value;
-                });
-
-                const userRequests = computed(() => {
-                    // Filter requests by current user (simplified for demo)
-                    return requests.value;
-                });
-
-                const cartCount = computed(() => cart.value.length);
-
-                // ========== METHODS ==========
-                async function loadAllData() {
-                    loading.value = true;
-                    error.value = null;
-                    try {
-                        await Promise.all([
-                            loadProducts(),
-                            loadRequests(),
-                            loadShoppers(),
-                            loadUserProfile()
-                        ]);
-                    } catch (err) {
-                        error.value = err.message;
-                        showToast('error', 'Failed to load data');
-                    } finally {
-                        loading.value = false;
-                    }
+            // Methods
+            async function loadAllData() {
+                loading.value = true
+                try {
+                    await Promise.all([
+                        loadProducts(),
+                        loadRequests(),
+                        loadShoppers(),
+                        loadPayments(),
+                        loadCurrentUser()
+                    ])
+                } catch (error) {
+                    console.error('Error loading data:', error)
+                    alert('Error loading data: ' + error.message)
+                } finally {
+                    loading.value = false
                 }
+            }
 
-                async function loadProducts() {
-                    const { data, error } = await supabase
-                        .from('products')
-                        .select('*')
-                        .eq('is_active', true);
+            async function loadProducts() {
+                const { data, error } = await supabase
+                    .from('products')
+                    .select('*')
+                    .eq('is_active', true)
+                    .order('created_at', { ascending: false })
+                
+                if (error) throw error
+                products.value = data || []
+            }
+
+            async function loadRequests() {
+                const { data, error } = await supabase
+                    .from('requests')
+                    .select(`
+                        *,
+                        items:request_items(*)
+                    `)
+                    .order('created_at', { ascending: false })
+                
+                if (error) throw error
+                requests.value = data || []
+            }
+
+            async function loadShoppers() {
+                const { data, error } = await supabase
+                    .from('shoppers')
+                    .select('*')
+                    .limit(50)
+                
+                if (error) throw error
+                shoppers.value = data || []
+            }
+
+            async function loadPayments() {
+                const { data, error } = await supabase
+                    .from('payments')
+                    .select('*')
+                    .order('payment_date', { ascending: false })
+                
+                if (error) throw error
+                payments.value = data || []
+            }
+
+            async function loadCurrentUser() {
+                // For demo, get first user
+                const { data, error } = await supabase
+                    .from('users')
+                    .select('*')
+                    .limit(1)
+                
+                if (error) throw error
+                if (data && data.length) {
+                    currentUser.value = data[0]
+                    Object.assign(userForm, data[0])
+                }
+            }
+
+            async function saveProduct() {
+                loading.value = true
+                try {
+                    if (editingProduct.value) {
+                        const { error } = await supabase
+                            .from('products')
+                            .update(productForm)
+                            .eq('id', editingProduct.value.id)
+                        
+                        if (error) throw error
+                    } else {
+                        const { error } = await supabase
+                            .from('products')
+                            .insert([productForm])
+                        
+                        if (error) throw error
+                    }
                     
-                    if (error) throw error;
-                    products.value = data || [];
+                    showProductModal.value = false
+                    resetProductForm()
+                    await loadProducts()
+                    alert('Product saved successfully')
+                } catch (error) {
+                    alert('Error saving product: ' + error.message)
+                } finally {
+                    loading.value = false
                 }
+            }
 
-                async function loadRequests() {
+            async function deleteProduct(id) {
+                if (!confirm('Are you sure?')) return
+                
+                loading.value = true
+                try {
+                    const { error } = await supabase
+                        .from('products')
+                        .update({ is_active: false })
+                        .eq('id', id)
+                    
+                    if (error) throw error
+                    await loadProducts()
+                    alert('Product deleted')
+                } catch (error) {
+                    alert('Error deleting product: ' + error.message)
+                } finally {
+                    loading.value = false
+                }
+            }
+
+            async function createRequest() {
+                if (!requestForm.product_id) return
+                
+                loading.value = true
+                try {
+                    const product = products.value.find(p => p.id === requestForm.product_id)
+                    const requestNumber = `${platform.value}-${Date.now()}`
+                    
+                    const { data, error } = await supabase
+                        .from('requests')
+                        .insert([{
+                            request_number: requestNumber,
+                            user_id: currentUser.value?.id || '00000000-0000-0000-0000-000000000000',
+                            platform_type: requestForm.platform_type,
+                            status: 'pending',
+                            urgency: requestForm.urgency,
+                            source_notes: requestForm.source_notes,
+                            total_cost: calculatedTotal.value,
+                            balance_due: calculatedTotal.value,
+                            payment_status: 'pending'
+                        }])
+                        .select()
+                    
+                    if (error) throw error
+                    
+                    showRequestModal.value = false
+                    resetRequestForm()
+                    await loadRequests()
+                    alert('Request created successfully')
+                } catch (error) {
+                    alert('Error creating request: ' + error.message)
+                } finally {
+                    loading.value = false
+                }
+            }
+
+            async function fetchTracking() {
+                if (!trackingNumber.value) return
+                
+                loading.value = true
+                try {
                     const { data, error } = await supabase
                         .from('requests')
                         .select(`
                             *,
-                            items:request_items(*),
                             tracking_events(*)
                         `)
-                        .order('created_at', { ascending: false });
+                        .eq('request_number', trackingNumber.value)
+                        .single()
                     
-                    if (error) throw error;
-                    requests.value = data || [];
+                    if (error) throw error
+                    trackedRequest.value = data
+                } catch (error) {
+                    alert('Request not found')
+                    trackedRequest.value = null
+                } finally {
+                    loading.value = false
                 }
-
-                async function loadShoppers() {
-                    const { data, error } = await supabase
-                        .from('shoppers')
-                        .select('*')
-                        .limit(10);
-                    
-                    if (error) throw error;
-                    shoppers.value = data || [];
-                }
-
-                async function loadUserProfile() {
-                    // For demo, create or load profile
-                    const { data } = await supabase
-                        .from('users')
-                        .select('*')
-                        .limit(1);
-                    
-                    if (data && data.length) {
-                        currentProfile.value = data[0];
-                        profileForm.full_name = data[0].full_name || '';
-                        profileForm.email = data[0].email || '';
-                        profileForm.phone = data[0].phone || '';
-                    }
-                }
-
-                function setUserType(type) {
-                    userType.value = type;
-                    showToast('success', `Switched to ${userTypeLabel.value} view`);
-                }
-
-                function startOrder(product) {
-                    cart.value.push({
-                        ...product,
-                        quantity: 1,
-                        addedAt: new Date()
-                    });
-                    showToast('success', `${product.name} added to cart`);
-                }
-
-                async function saveProfile() {
-                    try {
-                        const { error } = await supabase
-                            .from('users')
-                            .upsert({
-                                ...profileForm,
-                                updated_at: new Date()
-                            });
-                        
-                        if (error) throw error;
-                        
-                        currentProfile.value = profileForm;
-                        userType.value = profileForm.user_type;
-                        showProfileModal.value = false;
-                        showToast('success', 'Profile saved successfully');
-                    } catch (err) {
-                        showToast('error', 'Failed to save profile');
-                    }
-                }
-
-                async function searchTracking() {
-                    if (!trackingInput.value) return;
-                    
-                    loading.value = true;
-                    try {
-                        const { data, error } = await supabase
-                            .from('requests')
-                            .select(`
-                                *,
-                                tracking_events(*)
-                            `)
-                            .eq('request_number', trackingInput.value)
-                            .single();
-                        
-                        if (error) throw error;
-                        
-                        trackedOrder.value = data;
-                        showToast('success', 'Order found');
-                    } catch (err) {
-                        showToast('error', 'Order not found');
-                        trackedOrder.value = null;
-                    } finally {
-                        loading.value = false;
-                    }
-                }
-
-                function trackOrder(request) {
-                    trackingInput.value = request.request_number;
-                    currentView.value = 'tracking';
-                    searchTracking();
-                }
-
-                async function payForOrder(request) {
-                    showToast('success', 'Payment initiated via M-Pesa');
-                    // Simulate payment
-                    setTimeout(() => {
-                        showToast('success', 'Payment confirmed');
-                    }, 2000);
-                }
-
-                function showToast(type, message) {
-                    const id = toastId++;
-                    toasts.value.push({
-                        id,
-                        type,
-                        message,
-                        icon: type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle'
-                    });
-                    
-                    setTimeout(() => {
-                        const index = toasts.value.findIndex(t => t.id === id);
-                        if (index !== -1) toasts.value.splice(index, 1);
-                    }, 4000);
-                }
-
-                function removeToast(id) {
-                    const index = toasts.value.findIndex(t => t.id === id);
-                    if (index !== -1) toasts.value.splice(index, 1);
-                }
-
-                function showCart() {
-                    showToast('info', `Cart has ${cartCount.value} items`);
-                }
-
-                function formatNumber(num) {
-                    if (!num) return '0';
-                    return Number(num).toLocaleString();
-                }
-
-                function formatDate(date) {
-                    if (!date) return 'N/A';
-                    return new Date(date).toLocaleDateString('en-TZ');
-                }
-
-                function formatDateTime(date) {
-                    if (!date) return 'N/A';
-                    return new Date(date).toLocaleString('en-TZ');
-                }
-
-                // Initialize
-                onMounted(() => {
-                    loadAllData();
-                });
-
-                return {
-                    // State
-                    loading,
-                    loadingMessage,
-                    error,
-                    userType,
-                    currentProfile,
-                    showProfileModal,
-                    currentView,
-                    products,
-                    requests,
-                    trackingInput,
-                    trackedOrder,
-                    cart,
-                    toasts,
-                    profileForm,
-                    
-                    // Computed
-                    userTypeLabel,
-                    marketplaceSubtitle,
-                    filteredProducts,
-                    userRequests,
-                    cartCount,
-                    
-                    // Methods
-                    setUserType,
-                    startOrder,
-                    saveProfile,
-                    searchTracking,
-                    trackOrder,
-                    payForOrder,
-                    showToast,
-                    removeToast,
-                    showCart,
-                    loadAllData,
-                    formatNumber,
-                    formatDate,
-                    formatDateTime
-                };
             }
-        });
 
-        app.mount('#app');
-    })();
+            async function saveUser() {
+                loading.value = true
+                try {
+                    const { error } = await supabase
+                        .from('users')
+                        .upsert([userForm])
+                    
+                    if (error) throw error
+                    
+                    showUserModal.value = false
+                    await loadCurrentUser()
+                    alert('Profile saved')
+                } catch (error) {
+                    alert('Error saving profile: ' + error.message)
+                } finally {
+                    loading.value = false
+                }
+            }
+
+            function switchPlatform(newPlatform) {
+                platform.value = newPlatform
+                loadProducts()
+            }
+
+            function editProduct(product) {
+                editingProduct.value = product
+                Object.assign(productForm, product)
+                showProductModal.value = true
+            }
+
+            function trackRequest(number) {
+                trackingNumber.value = number
+                currentTab.value = 'tracking'
+                fetchTracking()
+            }
+
+            function viewRequest(request) {
+                alert(JSON.stringify(request, null, 2))
+            }
+
+            function resetProductForm() {
+                editingProduct.value = null
+                Object.assign(productForm, {
+                    platform_type: 'techmedix',
+                    product_type: '',
+                    name: '',
+                    manufacturer: '',
+                    base_price_usd: null,
+                    tmda_certified: false
+                })
+            }
+
+            function resetRequestForm() {
+                Object.assign(requestForm, {
+                    platform_type: 'techmedix',
+                    product_id: '',
+                    quantity: 1,
+                    urgency: 'normal',
+                    source_notes: ''
+                })
+            }
+
+            function formatNumber(num) {
+                if (!num) return '0'
+                return Math.round(num).toLocaleString()
+            }
+
+            function formatDate(date) {
+                if (!date) return 'N/A'
+                return new Date(date).toLocaleDateString()
+            }
+
+            // Initialize
+            onMounted(() => {
+                loadAllData()
+            })
+
+            return {
+                // State
+                loading,
+                loadingMessage,
+                platform,
+                currentTab,
+                products,
+                requests,
+                shoppers,
+                payments,
+                currentUser,
+                showProductModal,
+                showRequestModal,
+                showShopperModal,
+                showUserModal,
+                editingProduct,
+                trackingNumber,
+                trackedRequest,
+                productForm,
+                requestForm,
+                userForm,
+                
+                // Computed
+                platformName,
+                platformTagline,
+                activeRequests,
+                completedRequests,
+                calculatedTotal,
+                
+                // Methods
+                switchPlatform,
+                loadAllData,
+                saveProduct,
+                deleteProduct,
+                createRequest,
+                fetchTracking,
+                saveUser,
+                editProduct,
+                trackRequest,
+                viewRequest,
+                formatNumber,
+                formatDate
+            }
+        }
+    })
+
+    app.mount('#app')
 </script>
 </body>
 </html>
