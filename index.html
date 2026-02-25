@@ -1563,16 +1563,10 @@
                     payments.value = data || [];
                 }
 
-                async function loadNotifications() {
-                    const { data, error } = await supabase
-                        .from('notifications')
-                        .select('*')
-                        .eq('is_read', false)
-                        .order('created_at', { ascending: false });
-                    
-                    if (error) throw error;
-                    notifications.value = data || [];
-                }
+               async function loadNotifications() {
+    // Skip notifications for now - not critical
+    notifications.value = [];
+}
 
                 async function loadCurrentUser() {
                     const { data, error } = await supabase
