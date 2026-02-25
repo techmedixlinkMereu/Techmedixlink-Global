@@ -1704,7 +1704,9 @@
     // Simple toggle - you can enhance this
     product.showFullDescription = !product.showFullDescription;
 }
-
+function toggleDescription(product) {
+    product.showFullDescription = !product.showFullDescription;
+}
                 async function loadRequests() {
                     const { data, error } = await supabase
                         .from('requests')
