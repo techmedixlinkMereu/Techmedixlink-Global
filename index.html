@@ -2382,829 +2382,828 @@ input, select, textarea { font-family: var(--font-body); }
   const { createApp, ref, reactive, computed, onMounted, nextTick, watch } = Vue;
 
   createApp({
-    setup(){
-      // State
-      const loading = ref(false);
-      const loadMsg = ref('Loading…');
-      const platform = ref('techmedixlink');
-      const tab = ref('home');
-      const sidebarOpen = ref(false);
-      const globalSearch = ref('');
-      const showNotifications = ref(false);
-      
-      // Data
-      const products = ref([]);
-      const requests = ref([]);
-      const payments = ref([]);
-      const profile = ref(null);
-      const confirm = ref(null);
-      const cart = ref([]);
-      const guestEmail = ref('');
-      
-      // UI State
-      const showProfileModal = ref(false);
-      const showListingModal = ref(false);
-      const showReqModal = ref(false);
-      const editingProd = ref(null);
-      const detailReq = ref(null);
-      const viewedProduct = ref(null);
-      const trackId = ref('');
-      const trackedReq = ref(null);
-      const prodSearch = ref('');
-      const prodFilter = ref('all');
-      const locFilter = ref('all');
-      const sortProd = ref('newest');
-      const reqSearch = ref('');
-      const reqFilter = ref('all');
-      const reqPlatFilter = ref('all');
-      const openStatusMenu = ref(null);
-      
-      // Admin state
-      const adminSubTab = ref('users');
-      const adminUsers = ref([]);
-      const adminReqSearch = ref('');
-      const adminReqFilter = ref('all');
-      const adminReqPlatFilter = ref('all');
-      const userStats = ref({});
-      
-      // Notifications
-      const notifications = ref([]);
-      
-      // Form state
-      const pF = reactive({
-        platform_type:'techmedixlink', product_type:'', name:'', description:'',
-        manufacturer:'', base_price_usd:null, estimated_weight_kg:null,
-        stock_quantity:null, warranty_months:12, import_duty_percent:0,
-        tmda_certified:false, requires_installation:false, requires_training:false,
-        location_type:'tanzania', country:'Tanzania', city:'', is_active:true
-      });
-      
-      const rF = reactive({ platform_type:'techmedixlink', product_id:'', quantity:1, urgency:'normal', notes:'' });
-      
-      const uF = reactive({ full_name:'', email:'', phone:'', user_type:'individual', user_role:'buyer', company_name:'', is_active:true });
+   // Replace your existing setup function with this complete version
+setup(){
+  // State
+  const loading = ref(false);
+  const loadMsg = ref('Loading…');
+  const platform = ref('techmedixlink');
+  const tab = ref('home');
+  const sidebarOpen = ref(false);
+  const globalSearch = ref('');
+  const showNotifications = ref(false);
+  
+  // Data
+  const products = ref([]);
+  const requests = ref([]);
+  const payments = ref([]);
+  const profile = ref(null);
+  const confirm = ref(null);
+  const cart = ref([]);
+  const guestEmail = ref('');
+  
+  // UI State
+  const showProfileModal = ref(false);
+  const showListingModal = ref(false);
+  const showReqModal = ref(false);
+  const editingProd = ref(null);
+  const detailReq = ref(null);
+  const viewedProduct = ref(null);
+  const trackId = ref('');
+  const trackedReq = ref(null);
+  const prodSearch = ref('');
+  const prodFilter = ref('all');
+  const locFilter = ref('all');
+  const sortProd = ref('newest');
+  const reqSearch = ref('');
+  const reqFilter = ref('all');
+  const reqPlatFilter = ref('all');
+  const openStatusMenu = ref(null);
+  
+  // Admin state
+  const adminSubTab = ref('users');
+  const adminUsers = ref([]);
+  const adminReqSearch = ref('');
+  const adminReqFilter = ref('all');
+  const adminReqPlatFilter = ref('all');
+  const userStats = ref({});
+  
+  // Notifications
+  const notifications = ref([]);
+  
+  // Form state
+  const pF = reactive({
+    platform_type:'techmedixlink', product_type:'', name:'', description:'',
+    manufacturer:'', base_price_usd:null, estimated_weight_kg:null,
+    stock_quantity:null, warranty_months:12, import_duty_percent:0,
+    tmda_certified:false, requires_installation:false, requires_training:false,
+    location_type:'tanzania', country:'Tanzania', city:'', is_active:true
+  });
+  
+  const rF = reactive({ platform_type:'techmedixlink', product_id:'', quantity:1, urgency:'normal', notes:'' });
+  
+  const uF = reactive({ full_name:'', email:'', phone:'', user_type:'individual', user_role:'buyer', company_name:'', is_active:true });
 
-      // Load cart from localStorage
-      const loadCart = () => {
-        const saved = localStorage.getItem('techmedixlink_cart');
-        if (saved) {
-          try {
-            cart.value = JSON.parse(saved);
-          } catch (e) {
-            cart.value = [];
-          }
-        }
-      };
-      
-      // Save cart to localStorage
-      const saveCart = () => {
-        localStorage.setItem('techmedixlink_cart', JSON.stringify(cart.value));
-      };
-
-      // Reset forms
-      const resetPF = () => Object.assign(pF, {
-        platform_type:platform.value, product_type:'', name:'', description:'',
-        manufacturer:'', base_price_usd:null, estimated_weight_kg:null,
-        stock_quantity:null, warranty_months:12, import_duty_percent:0,
-        tmda_certified:false, requires_installation:false, requires_training:false,
-        location_type:'tanzania', country:'Tanzania', city:'', is_active:true
-      });
-      
-      const resetRF = () => Object.assign(rF, { platform_type:platform.value, product_id:'', quantity:1, urgency:'normal', notes:'' });
-
-      // Toasts
-      const toasts = ref([]);
-      let tid = 0;
-      function toast(type, title, msg=''){
-        const id = tid++;
-        toasts.value.push({ id, type, title, msg });
-        setTimeout(() => killToast(id), 4500);
+  // Load cart from localStorage
+  const loadCart = () => {
+    const saved = localStorage.getItem('techmedixlink_cart');
+    if (saved) {
+      try {
+        cart.value = JSON.parse(saved);
+      } catch (e) {
+        cart.value = [];
       }
-      function killToast(id){ toasts.value = toasts.value.filter(t => t.id !== id); }
+    }
+  };
+  
+  // Save cart to localStorage
+  const saveCart = () => {
+    localStorage.setItem('techmedixlink_cart', JSON.stringify(cart.value));
+  };
 
-      // Role helpers
-      const isAdmin = computed(() => profile.value?.user_role === 'admin');
-      const canBuy = computed(() => !profile.value || ['buyer','both','admin'].includes(profile.value.user_role));
-      const canSell = computed(() => profile.value && ['seller','both','admin'].includes(profile.value.user_role));
+  // Reset forms
+  const resetPF = () => Object.assign(pF, {
+    platform_type:platform.value, product_type:'', name:'', description:'',
+    manufacturer:'', base_price_usd:null, estimated_weight_kg:null,
+    stock_quantity:null, warranty_months:12, import_duty_percent:0,
+    tmda_certified:false, requires_installation:false, requires_training:false,
+    location_type:'tanzania', country:'Tanzania', city:'', is_active:true
+  });
+  
+  const resetRF = () => Object.assign(rF, { platform_type:platform.value, product_id:'', quantity:1, urgency:'normal', notes:'' });
 
-      function roleLabel(r){ 
-        return {buyer:'Buyer',seller:'Seller',both:'Buyer & Seller',admin:'Admin'}[r]||r; 
+  // Toasts
+  const toasts = ref([]);
+  let tid = 0;
+  function toast(type, title, msg=''){
+    const id = tid++;
+    toasts.value.push({ id, type, title, msg });
+    setTimeout(() => killToast(id), 4500);
+  }
+  function killToast(id){ toasts.value = toasts.value.filter(t => t.id !== id); }
+
+  // Role helpers
+  const isAdmin = computed(() => profile.value?.user_role === 'admin');
+  const canBuy = computed(() => !profile.value || ['buyer','both','admin'].includes(profile.value.user_role));
+  const canSell = computed(() => profile.value && ['seller','both','admin'].includes(profile.value.user_role));
+
+  function roleLabel(r){ 
+    return {buyer:'Buyer',seller:'Seller',both:'Buyer & Seller',admin:'Admin'}[r]||r; 
+  }
+  function roleIcon(r){ 
+    return {buyer:'fa-cart-shopping',seller:'fa-store',both:'fa-arrows-left-right',admin:'fa-shield-halved'}[r]||'fa-user'; 
+  }
+
+  // Computed
+  const pageTitle = computed(() => ({
+    home:'Home', browse:'Browse Products', 'my-listings':'My Listings',
+    inquiries:'Inquiries', 'my-requests':'My Requests',
+    tracking:'Tracking', payments:'Payments', cart:'Cart', admin:'Admin'
+  }[tab.value]||'Home'));
+
+  const primaryLabel = computed(() => {
+    if (tab.value === 'admin' && isAdmin.value) return 'Add User';
+    if (tab.value === 'my-listings' || !canBuy.value) return 'Add Listing';
+    if (!profile.value) return 'Browse';
+    return 'New Request';
+  });
+
+  const userInitial = computed(() => profile.value?.full_name?.charAt(0)?.toUpperCase()||'?');
+  const today = computed(() => new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'}));
+
+  const notificationCount = computed(() => notifications.value.filter(n => !n.read).length);
+
+  const uniqueCategories = computed(() => {
+    const cats = new Set(products.value.map(p => p.product_type).filter(Boolean));
+    return cats.size;
+  });
+
+  const uniqueSellers = computed(() => {
+    const sellers = new Set(products.value.map(p => p.seller_name).filter(Boolean));
+    return sellers.size;
+  });
+
+  const filteredProds = computed(() => {
+    let a = [...products.value];
+    if(prodFilter.value==='techmedixlink')   a = a.filter(p=>p.platform_type==='techmedixlink');
+    else if(prodFilter.value==='globaldoor') a = a.filter(p=>p.platform_type==='globaldoor');
+    else if(prodFilter.value==='tmda')   a = a.filter(p=>p.tmda_certified);
+    if(locFilter.value==='tz')   a = a.filter(p=>p.location_type==='tanzania'||!p.country||p.country.toLowerCase().includes('tanzania'));
+    if(locFilter.value==='intl') a = a.filter(p=>p.location_type==='international');
+    if(prodSearch.value){
+      const q = prodSearch.value.toLowerCase();
+      a = a.filter(p=>p.name?.toLowerCase().includes(q)||p.manufacturer?.toLowerCase().includes(q)||p.seller_name?.toLowerCase().includes(q)||p.country?.toLowerCase().includes(q));
+    }
+    if(sortProd.value==='price-asc')  a.sort((x,y)=>(x.base_price_usd||0)-(y.base_price_usd||0));
+    if(sortProd.value==='price-desc') a.sort((x,y)=>(y.base_price_usd||0)-(x.base_price_usd||0));
+    return a;
+  });
+
+  const myListings = computed(() => !profile.value?[]:products.value.filter(p=>p.user_id===profile.value.id));
+  const myRequests = computed(() => !profile.value?[]:requests.value.filter(r=>r.user_id===profile.value.id));
+  const incomingReqs = computed(() => {
+    if(!profile.value) return [];
+    const ids = new Set(myListings.value.map(p=>p.id));
+    return requests.value.filter(r=>r.items?.some(it=>ids.has(it.product_id)));
+  });
+  const myActiveReqs = computed(() => myRequests.value.filter(r=>!['delivered','completed','cancelled'].includes(r.status)));
+  const myDoneReqs = computed(() => myRequests.value.filter(r=>['delivered','completed'].includes(r.status)));
+  const myTotalSpent = computed(() => myRequests.value.reduce((s,r)=>s+(r.deposit_paid||0),0));
+  const myBalanceDue = computed(() => myRequests.value.reduce((s,r)=>s+(r.balance_due||0),0));
+  const pendingPayCount = computed(() => myRequests.value.filter(r=>(r.balance_due||0)>0).length);
+  const avgListingPrice = computed(() => !myListings.value.length?0:myListings.value.reduce((s,p)=>s+(p.base_price_usd||0),0)/myListings.value.length);
+  
+  const filteredMyReqs = computed(() => {
+    let a = myRequests.value;
+    if(reqFilter.value!=='all')     a = a.filter(r=>r.status===reqFilter.value);
+    if(reqPlatFilter.value!=='all') a = a.filter(r=>r.platform_type===reqPlatFilter.value);
+    if(reqSearch.value){ const q=reqSearch.value.toLowerCase(); a=a.filter(r=>r.request_number?.toLowerCase().includes(q)); }
+    return a;
+  });
+
+  const recentActivity = computed(() => {
+    if (!profile.value) {
+      return products.value.slice(0,5).map(p => ({
+        id: p.id,
+        title: p.name,
+        sub: 'New product available',
+        status: 'active',
+        icon: p.platform_type === 'techmedixlink' ? 'fas fa-heart-pulse' : 'fas fa-globe',
+        ico: p.platform_type === 'techmedixlink' ? 'tm' : 'gd'
+      }));
+    }
+    return [...myRequests.value].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,5).map(r=>({
+      id:r.id, title:'#'+r.request_number, sub:fDate(r.created_at), status:r.status,
+      icon:r.platform_type==='techmedixlink'?'fas fa-heart-pulse':'fas fa-globe',
+      ico:r.platform_type==='techmedixlink'?'tm':'gd'
+    }));
+  });
+
+  const pStats = computed(() => {
+    const t = products.value.length;
+    if(!t) return {tm:0,gd:0};
+    const tm = products.value.filter(p=>p.platform_type==='techmedixlink').length;
+    return {tm:Math.round(tm/t*100),gd:100-Math.round(tm/t*100)};
+  });
+
+  // Cart calculations
+  const cartTotal = computed(() => {
+    return cart.value.reduce((sum, item) => sum + (item.price * 2500 * item.quantity), 0);
+  });
+
+  const calcCartShipping = computed(() => {
+    return cart.value.reduce((sum, item) => {
+      return sum + (item.platform_type === 'techmedixlink' ? item.price * 2500 * 0.15 : 85000);
+    }, 0);
+  });
+
+  const calcCartFee = computed(() => cartTotal.value * 0.1);
+
+  // Request cost calc
+  const selProd = computed(() => products.value.find(p=>p.id===rF.product_id));
+  const calcItem = computed(() => selProd.value?(selProd.value.base_price_usd*2500)*(rF.quantity||1):0);
+  const calcShip = computed(() => rF.platform_type==='techmedixlink'?calcItem.value*0.15:85000*(rF.quantity||1));
+  const calcFee = computed(() => calcItem.value*0.1);
+  const calcDuty = computed(() => rF.platform_type==='globaldoor'&&selProd.value?calcItem.value*((selProd.value.import_duty_percent||20)/100):0);
+  const calcTotal = computed(() => calcItem.value+calcShip.value+calcFee.value+calcDuty.value);
+
+  // Stepper
+  const stepLabels = ['Placed','Paid','Sourcing','Shipping','Delivered'];
+  const STATUS_ORDER = ['pending','processing','sourcing','shipping','delivered'];
+  const statusList = [
+    {val:'pending',label:'Pending',color:'#e8a53c'},
+    {val:'processing',label:'Processing',color:'#6a9de8'},
+    {val:'sourcing',label:'Sourcing',color:'#6a9de8'},
+    {val:'shipping',label:'Shipping',color:'#00c9a0'},
+    {val:'delivered',label:'Delivered',color:'#22c47a'},
+    {val:'completed',label:'Completed',color:'#22c47a'},
+    {val:'cancelled',label:'Cancelled',color:'#e86060'}
+  ];
+  const sellerStatusList = statusList.filter(s=>['sourcing','shipping','delivered','completed','cancelled'].includes(s.val));
+
+  function stepCls(status, idx){
+    if(status==='cancelled') return '';
+    if(status==='completed') return 'done';
+    const cur = STATUS_ORDER.indexOf(status);
+    if(cur<0) return idx===0?'cur':'';
+    if(idx<cur) return 'done';
+    if(idx===cur) return 'cur';
+    return '';
+  }
+
+  // Data loading
+  async function loadAll(){
+    loading.value=true; loadMsg.value='Loading…';
+    const r = await Promise.allSettled([loadProds(),loadReqs(),loadPayments(),loadProfile(),loadAdminData()]);
+    r.forEach(x=>{ if(x.status==='rejected') console.warn('Load err:',x.reason); });
+    loading.value=false;
+  }
+  
+  async function loadProds(){
+    const {data,error}=await sb.from('products').select('*').order('created_at',{ascending:false});
+    if(error) throw error;
+    products.value=data||[];
+  }
+  
+  async function loadReqs(){
+    const {data,error}=await sb.from('requests').select('*,items:request_items(*)').order('created_at',{ascending:false});
+    if(error) throw error;
+    requests.value=data||[];
+  }
+  
+  async function loadPayments(){
+    const {data,error}=await sb.from('payments').select('*').order('payment_date',{ascending:false});
+    if(error) throw error;
+    payments.value=(data||[]).map(pay=>({...pay,_reqNum:requests.value.find(r=>r.id===pay.request_id)?.request_number||null}));
+  }
+  
+  async function loadProfile(){
+    const {data,error}=await sb.from('users').select('*').limit(1);
+    if(error) throw error;
+    if(data?.length){ 
+      profile.value=data[0]; 
+      Object.assign(uF,data[0]);
+      if (cart.value.length > 0) {
+        toast('info', 'Welcome back!', 'Your cart has been saved');
       }
-      function roleIcon(r){ 
-        return {buyer:'fa-cart-shopping',seller:'fa-store',both:'fa-arrows-left-right',admin:'fa-shield-halved'}[r]||'fa-user'; 
+    }
+  }
+
+  async function loadAdminData() {
+    if (!profile.value?.user_role === 'admin') return;
+    const { data: users } = await sb.from('users').select('*').order('created_at', { ascending: false });
+    adminUsers.value = users || [];
+    
+    const stats = {};
+    requests.value.forEach(req => {
+      if (!stats[req.user_id]) {
+        stats[req.user_id] = { requestCount: 0, totalSpent: 0 };
       }
+      stats[req.user_id].requestCount++;
+      stats[req.user_id].totalSpent += req.deposit_paid || 0;
+    });
+    userStats.value = stats;
+  }
 
-      // Computed
-      const pageTitle = computed(() => ({
-        home:'Home', browse:'Browse Products', 'my-listings':'My Listings',
-        inquiries:'Inquiries', 'my-requests':'My Requests',
-        tracking:'Tracking', payments:'Payments', cart:'Cart', admin:'Admin'
-      }[tab.value]||'Home'));
+  // Admin computed
+  const adminStats = computed(() => {
+    const users = adminUsers.value.length;
+    const totalReqs = requests.value.length;
+    const pendingReqs = requests.value.filter(r => r.status === 'pending').length;
+    const activeProds = products.value.filter(p => p.is_active).length;
+    const monthlyRevenue = requests.value
+      .filter(r => new Date(r.created_at) > new Date(Date.now() - 30*24*60*60*1000))
+      .reduce((s, r) => s + (r.deposit_paid || 0), 0);
+    
+    const tmRequests = requests.value.filter(r => r.platform_type === 'techmedixlink').length;
+    const gdRequests = requests.value.filter(r => r.platform_type === 'globaldoor').length;
+    const totalPaid = requests.value.reduce((s, r) => s + (r.deposit_paid || 0), 0);
+    
+    return {
+      totalUsers: users,
+      newUsersThisMonth: adminUsers.value.filter(u => 
+        new Date(u.created_at) > new Date(Date.now() - 30*24*60*60*1000)).length,
+      totalRequests: totalReqs,
+      pendingRequests: pendingReqs,
+      activeProducts: activeProds,
+      totalProducts: products.value.length,
+      monthlyRevenue,
+      revenueGrowth: 12,
+      tmRequests,
+      gdRequests,
+      tmPercentage: totalReqs ? (tmRequests / totalReqs * 100).toFixed(1) : 0,
+      gdPercentage: totalReqs ? (gdRequests / totalReqs * 100).toFixed(1) : 0,
+      avgOrderValue: totalPaid / (totalReqs || 1),
+      conversionRate: 68
+    };
+  });
 
-      const primaryLabel = computed(() => {
-        if (tab.value === 'admin') return 'Add User';
-        if (tab.value === 'my-listings' || !canBuy.value) return 'Add Listing';
-        if (!profile.value) return 'Browse';
-        return 'New Request';
+  const filteredAdminReqs = computed(() => {
+    let a = [...requests.value];
+    if (adminReqFilter.value !== 'all') a = a.filter(r => r.status === adminReqFilter.value);
+    if (adminReqPlatFilter.value !== 'all') a = a.filter(r => r.platform_type === adminReqPlatFilter.value);
+    if (adminReqSearch.value) {
+      const q = adminReqSearch.value.toLowerCase();
+      a = a.filter(r => 
+        r.request_number?.toLowerCase().includes(q) ||
+        getUserName(r.user_id)?.toLowerCase().includes(q)
+      );
+    }
+    return a.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+  });
+
+  const revenueChartData = computed(() => {
+    const days = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dayReqs = requests.value.filter(r => 
+        new Date(r.created_at).toDateString() === d.toDateString()
+      );
+      const total = dayReqs.reduce((s, r) => s + (r.deposit_paid || 0), 0);
+      days.push({
+        label: d.toLocaleDateString('en-GB', { weekday: 'short' }),
+        value: total,
+        height: Math.min(150, total / 10000)
       });
+    }
+    return days;
+  });
 
-      const userInitial = computed(() => profile.value?.full_name?.charAt(0)?.toUpperCase()||'?');
-      const today = computed(() => new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'}));
+  // Platform switch
+  function setPlatform(p){
+    platform.value=p; 
+    pF.platform_type=p; 
+    rF.platform_type=p;
+    document.documentElement.setAttribute('data-platform',p==='techmedixlink'?'techmedixlink':'globaldoor');
+    toast('info',p==='techmedixlink'?'TechMedixLink':'Global Door','Platform switched');
+  }
 
-      const notificationCount = computed(() => notifications.value.filter(n => !n.read).length);
-
-      const uniqueCategories = computed(() => {
-        const cats = new Set(products.value.map(p => p.product_type).filter(Boolean));
-        return cats.size;
-      });
-
-      const uniqueSellers = computed(() => {
-        const sellers = new Set(products.value.map(p => p.seller_name).filter(Boolean));
-        return sellers.size;
-      });
-
-      const filteredProds = computed(() => {
-        let a = [...products.value];
-        if(prodFilter.value==='techmedixlink')   a = a.filter(p=>p.platform_type==='techmedixlink');
-        else if(prodFilter.value==='globaldoor') a = a.filter(p=>p.platform_type==='globaldoor');
-        else if(prodFilter.value==='tmda')   a = a.filter(p=>p.tmda_certified);
-        if(locFilter.value==='tz')   a = a.filter(p=>p.location_type==='tanzania'||!p.country||p.country.toLowerCase().includes('tanzania'));
-        if(locFilter.value==='intl') a = a.filter(p=>p.location_type==='international');
-        if(prodSearch.value){
-          const q = prodSearch.value.toLowerCase();
-          a = a.filter(p=>p.name?.toLowerCase().includes(q)||p.manufacturer?.toLowerCase().includes(q)||p.seller_name?.toLowerCase().includes(q)||p.country?.toLowerCase().includes(q));
-        }
-        if(sortProd.value==='price-asc')  a.sort((x,y)=>(x.base_price_usd||0)-(y.base_price_usd||0));
-        if(sortProd.value==='price-desc') a.sort((x,y)=>(y.base_price_usd||0)-(x.base_price_usd||0));
-        return a;
-      });
-
-      const myListings = computed(() => !profile.value?[]:products.value.filter(p=>p.user_id===profile.value.id));
-      const myRequests = computed(() => !profile.value?[]:requests.value.filter(r=>r.user_id===profile.value.id));
-      const incomingReqs = computed(() => {
-        if(!profile.value) return [];
-        const ids = new Set(myListings.value.map(p=>p.id));
-        return requests.value.filter(r=>r.items?.some(it=>ids.has(it.product_id)));
-      });
-      const myActiveReqs = computed(() => myRequests.value.filter(r=>!['delivered','completed','cancelled'].includes(r.status)));
-      const myDoneReqs = computed(() => myRequests.value.filter(r=>['delivered','completed'].includes(r.status)));
-      const myTotalSpent = computed(() => myRequests.value.reduce((s,r)=>s+(r.deposit_paid||0),0));
-      const myBalanceDue = computed(() => myRequests.value.reduce((s,r)=>s+(r.balance_due||0),0));
-      const pendingPayCount = computed(() => myRequests.value.filter(r=>(r.balance_due||0)>0).length);
-      const avgListingPrice = computed(() => !myListings.value.length?0:myListings.value.reduce((s,p)=>s+(p.base_price_usd||0),0)/myListings.value.length);
-      
-      const filteredMyReqs = computed(() => {
-        let a = myRequests.value;
-        if(reqFilter.value!=='all')     a = a.filter(r=>r.status===reqFilter.value);
-        if(reqPlatFilter.value!=='all') a = a.filter(r=>r.platform_type===reqPlatFilter.value);
-        if(reqSearch.value){ const q=reqSearch.value.toLowerCase(); a=a.filter(r=>r.request_number?.toLowerCase().includes(q)); }
-        return a;
-      });
-
-      const recentActivity = computed(() => {
-        if (!profile.value) {
-          return products.value.slice(0,5).map(p => ({
-            id: p.id,
-            title: p.name,
-            sub: 'New product available',
-            status: 'active',
-            icon: p.platform_type === 'techmedixlink' ? 'fas fa-heart-pulse' : 'fas fa-globe',
-            ico: p.platform_type === 'techmedixlink' ? 'tm' : 'gd'
-          }));
-        }
-        return [...myRequests.value].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,5).map(r=>({
-          id:r.id, title:'#'+r.request_number, sub:fDate(r.created_at), status:r.status,
-          icon:r.platform_type==='techmedixlink'?'fas fa-heart-pulse':'fas fa-globe',
-          ico:r.platform_type==='techmedixlink'?'tm':'gd'
-        }));
-      });
-
-      const pStats = computed(() => {
-        const t = products.value.length;
-        if(!t) return {tm:0,gd:0};
-        const tm = products.value.filter(p=>p.platform_type==='techmedixlink').length;
-        return {tm:Math.round(tm/t*100),gd:100-Math.round(tm/t*100)};
-      });
-
-      // Cart calculations
-      const cartTotal = computed(() => {
-        return cart.value.reduce((sum, item) => sum + (item.price * 2500 * item.quantity), 0);
-      });
-
-      const calcCartShipping = computed(() => {
-        return cart.value.reduce((sum, item) => {
-          return sum + (item.platform_type === 'techmedixlink' ? item.price * 2500 * 0.15 : 85000);
-        }, 0);
-      });
-
-      const calcCartFee = computed(() => cartTotal.value * 0.1);
-
-      // Request cost calc
-      const selProd = computed(() => products.value.find(p=>p.id===rF.product_id));
-      const calcItem = computed(() => selProd.value?(selProd.value.base_price_usd*2500)*(rF.quantity||1):0);
-      const calcShip = computed(() => rF.platform_type==='techmedixlink'?calcItem.value*0.15:85000*(rF.quantity||1));
-      const calcFee = computed(() => calcItem.value*0.1);
-      const calcDuty = computed(() => rF.platform_type==='globaldoor'&&selProd.value?calcItem.value*((selProd.value.import_duty_percent||20)/100):0);
-      const calcTotal = computed(() => calcItem.value+calcShip.value+calcFee.value+calcDuty.value);
-
-      // Stepper
-      const stepLabels = ['Placed','Paid','Sourcing','Shipping','Delivered'];
-      const STATUS_ORDER = ['pending','processing','sourcing','shipping','delivered'];
-      const statusList = [
-        {val:'pending',label:'Pending',color:'#e8a53c'},
-        {val:'processing',label:'Processing',color:'#6a9de8'},
-        {val:'sourcing',label:'Sourcing',color:'#6a9de8'},
-        {val:'shipping',label:'Shipping',color:'#00c9a0'},
-        {val:'delivered',label:'Delivered',color:'#22c47a'},
-        {val:'completed',label:'Completed',color:'#22c47a'},
-        {val:'cancelled',label:'Cancelled',color:'#e86060'}
-      ];
-      const sellerStatusList = statusList.filter(s=>['sourcing','shipping','delivered','completed','cancelled'].includes(s.val));
-
-      function stepCls(status, idx){
-        if(status==='cancelled') return '';
-        if(status==='completed') return 'done';
-        const cur = STATUS_ORDER.indexOf(status);
-        if(cur<0) return idx===0?'cur':'';
-        if(idx<cur) return 'done';
-        if(idx===cur) return 'cur';
-        return '';
-      }
-
-      // Data loading
-      async function loadAll(){
-        loading.value=true; loadMsg.value='Loading…';
-        const r = await Promise.allSettled([loadProds(),loadReqs(),loadPayments(),loadProfile(),loadAdminData()]);
-        r.forEach(x=>{ if(x.status==='rejected') console.warn('Load err:',x.reason); });
-        loading.value=false;
-      }
-      
-      async function loadProds(){
-        const {data,error}=await sb.from('products').select('*').order('created_at',{ascending:false});
-        if(error) throw error;
-        products.value=data||[];
-      }
-      
-      async function loadReqs(){
-        const {data,error}=await sb.from('requests').select('*,items:request_items(*)').order('created_at',{ascending:false});
-        if(error) throw error;
-        requests.value=data||[];
-      }
-      
-      async function loadPayments(){
-        const {data,error}=await sb.from('payments').select('*').order('payment_date',{ascending:false});
-        if(error) throw error;
-        payments.value=(data||[]).map(pay=>({...pay,_reqNum:requests.value.find(r=>r.id===pay.request_id)?.request_number||null}));
-      }
-      
-      async function loadProfile(){
-        const {data,error}=await sb.from('users').select('*').limit(1);
-        if(error) throw error;
-        if(data?.length){ 
-          profile.value=data[0]; 
-          Object.assign(uF,data[0]);
-          // If user has profile, clear guest cart and migrate if needed
-          if (cart.value.length > 0) {
-            toast('info', 'Welcome back!', 'Your cart has been saved');
-          }
-        }
-      }
-
-      async function loadAdminData() {
-        if (!profile.value?.user_role === 'admin') return;
-        const { data: users } = await sb.from('users').select('*').order('created_at', { ascending: false });
-        adminUsers.value = users || [];
-        
-        const stats = {};
-        requests.value.forEach(req => {
-          if (!stats[req.user_id]) {
-            stats[req.user_id] = { requestCount: 0, totalSpent: 0 };
-          }
-          stats[req.user_id].requestCount++;
-          stats[req.user_id].totalSpent += req.deposit_paid || 0;
-        });
-        userStats.value = stats;
-      }
-
-      // Admin computed
-      const adminStats = computed(() => {
-        const users = adminUsers.value.length;
-        const totalReqs = requests.value.length;
-        const pendingReqs = requests.value.filter(r => r.status === 'pending').length;
-        const activeProds = products.value.filter(p => p.is_active).length;
-        const monthlyRevenue = requests.value
-          .filter(r => new Date(r.created_at) > new Date(Date.now() - 30*24*60*60*1000))
-          .reduce((s, r) => s + (r.deposit_paid || 0), 0);
-        
-        const tmRequests = requests.value.filter(r => r.platform_type === 'techmedixlink').length;
-        const gdRequests = requests.value.filter(r => r.platform_type === 'globaldoor').length;
-        const totalPaid = requests.value.reduce((s, r) => s + (r.deposit_paid || 0), 0);
-        
-        return {
-          totalUsers: users,
-          newUsersThisMonth: adminUsers.value.filter(u => 
-            new Date(u.created_at) > new Date(Date.now() - 30*24*60*60*1000)).length,
-          totalRequests: totalReqs,
-          pendingRequests: pendingReqs,
-          activeProducts: activeProds,
-          totalProducts: products.value.length,
-          monthlyRevenue,
-          revenueGrowth: 12,
-          tmRequests,
-          gdRequests,
-          tmPercentage: totalReqs ? (tmRequests / totalReqs * 100).toFixed(1) : 0,
-          gdPercentage: totalReqs ? (gdRequests / totalReqs * 100).toFixed(1) : 0,
-          avgOrderValue: totalPaid / (totalReqs || 1),
-          conversionRate: 68
-        };
-      });
-
-      const filteredAdminReqs = computed(() => {
-        let a = [...requests.value];
-        if (adminReqFilter.value !== 'all') a = a.filter(r => r.status === adminReqFilter.value);
-        if (adminReqPlatFilter.value !== 'all') a = a.filter(r => r.platform_type === adminReqPlatFilter.value);
-        if (adminReqSearch.value) {
-          const q = adminReqSearch.value.toLowerCase();
-          a = a.filter(r => 
-            r.request_number?.toLowerCase().includes(q) ||
-            getUserName(r.user_id)?.toLowerCase().includes(q)
-          );
-        }
-        return a.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
-      });
-
-      const revenueChartData = computed(() => {
-        const days = [];
-        for (let i = 6; i >= 0; i--) {
-          const d = new Date();
-          d.setDate(d.getDate() - i);
-          const dayReqs = requests.value.filter(r => 
-            new Date(r.created_at).toDateString() === d.toDateString()
-          );
-          const total = dayReqs.reduce((s, r) => s + (r.deposit_paid || 0), 0);
-          days.push({
-            label: d.toLocaleDateString('en-GB', { weekday: 'short' }),
-            value: total,
-            height: Math.min(150, total / 10000)
-          });
-        }
-        return days;
-      });
-
-      // Platform switch
-      function setPlatform(p){
-        platform.value=p; 
-        pF.platform_type=p; 
-        rF.platform_type=p;
-        document.documentElement.setAttribute('data-platform',p==='techmedixlink'?'techmedixlink':'globaldoor');
-        toast('info',p==='techmedixlink'?'TechMedixLink':'Global Door','Platform switched');
-      }
-
-      // Navigation
-      function goTab(t){ 
-        tab.value=t; 
-        sidebarOpen.value=false; 
-        if (t === 'cart' && !profile.value) {
-          loadCart();
-        }
-      }
-      
-      function primaryAction(){
-        if (tab.value === 'admin' && isAdmin.value) {
-          showProfileModal.value = true;
-        } else if(tab.value==='my-listings'||!canBuy.value) {
-          if (!profile.value) {
-            showProfileModal.value = true;
-            toast('info', 'Create account', 'Sign up to start selling');
-          } else {
-            showListingModal.value=true;
-          }
-        } else if (!profile.value) {
-          goTab('browse');
-        } else {
-          showReqModal.value=true;
-        }
-      }
-
-      function performSearch() {
-        if (globalSearch.value) {
-          prodSearch.value = globalSearch.value;
-          goTab('browse');
-        }
-      }
-
-      // Profile
-      async function saveProfile(){
-        if(!uF.full_name||!uF.email){ toast('err','Validation','Name and email required.'); return; }
-        loading.value=true; loadMsg.value='Saving…';
-        try {
-          let error;
-          if(profile.value?.id){ 
-            ({error}=await sb.from('users').update({...uF}).eq('id',profile.value.id)); 
-          } else { 
-            ({error}=await sb.from('users').insert([{...uF}])); 
-            // If there was a guest cart, associate it
-            if (cart.value.length > 0) {
-              toast('info', 'Cart saved', 'Your items have been linked to your account');
-            }
-          }
-          if(error) throw error;
-          toast('ok','Profile Saved'); 
-          showProfileModal.value=false; 
-          await loadProfile();
-        } catch(e){ toast('err','Error',e.message); }
-        finally { loading.value=false; }
-      }
-
-      // Listings
-      function editListing(p){
-        editingProd.value=p;
-        const fields=['platform_type','product_type','name','description','manufacturer','base_price_usd','estimated_weight_kg','stock_quantity','warranty_months','import_duty_percent','tmda_certified','requires_installation','requires_training','location_type','country','city','is_active'];
-        fields.forEach(k=>{ if(k in p) pF[k]=p[k]; });
+  // Navigation
+  function goTab(t){ 
+    tab.value=t; 
+    sidebarOpen.value=false; 
+    if (t === 'cart' && !profile.value) {
+      loadCart();
+    }
+  }
+  
+  function primaryAction(){
+    if (tab.value === 'admin' && isAdmin.value) {
+      showProfileModal.value = true;
+    } else if(tab.value==='my-listings'||!canBuy.value) {
+      if (!profile.value) {
+        showProfileModal.value = true;
+        toast('info', 'Create account', 'Sign up to start selling');
+      } else {
         showListingModal.value=true;
       }
-      
-      function closeListing(){ showListingModal.value=false; editingProd.value=null; resetPF(); }
-
-      async function saveListing(){
-        if(!pF.name||!pF.base_price_usd){ toast('err','Validation','Name and price required.'); return; }
-        if(!profile.value?.id){ toast('warn','Profile Required'); showProfileModal.value=true; return; }
-        if(pF.location_type==='tanzania') pF.country='Tanzania';
-        loading.value=true; loadMsg.value='Saving…';
-        try {
-          const payload={
-            platform_type:pF.platform_type, product_type:pF.product_type, name:pF.name,
-            description:pF.description, manufacturer:pF.manufacturer,
-            base_price_usd:pF.base_price_usd, estimated_weight_kg:pF.estimated_weight_kg,
-            stock_quantity:pF.stock_quantity, warranty_months:pF.warranty_months,
-            import_duty_percent:pF.import_duty_percent, tmda_certified:pF.tmda_certified,
-            requires_installation:pF.requires_installation, requires_training:pF.requires_training,
-            location_type:pF.location_type, country:pF.country, city:pF.city,
-            is_active:pF.is_active, seller_name:profile.value.full_name, user_id:profile.value.id
-          };
-          if(editingProd.value){
-            const {error}=await sb.from('products').update(payload).eq('id',editingProd.value.id);
-            if(error) throw error; toast('ok','Updated');
-          } else {
-            const {error}=await sb.from('products').insert([payload]);
-            if(error) throw error; toast('ok','Published','Product is now live.');
-          }
-          closeListing(); await loadProds();
-        } catch(e){ toast('err','Error',e.message); }
-        finally { loading.value=false; }
-      }
-
-      async function toggleListingStatus(p){
-        loading.value=true;
-        try {
-          const {error}=await sb.from('products').update({is_active:!p.is_active}).eq('id',p.id);
-          if(error) throw error;
-          toast('ok',p.is_active?'Paused':'Activated',`"${p.name}" ${p.is_active?'hidden':'now visible'}.`);
-          await loadProds();
-        } catch(e){ toast('err','Error',e.message); }
-        finally { loading.value=false; }
-      }
-
-      function askDeleteProduct(id){
-        confirm.value={
-          title:'Delete Listing?', tone:'err', icon:'fas fa-trash',
-          msg:'This will permanently remove the product.',
-          okLabel:'Delete', ok:()=>deleteProduct(id)
-        };
-      }
-      
-      async function deleteProduct(id){
-        loading.value=true;
-        try {
-          const {error}=await sb.from('products').update({is_active:false}).eq('id',id);
-          if(error) throw error; toast('ok','Removed'); await loadProds();
-        } catch(e){ toast('err','Error',e.message); }
-        finally { loading.value=false; }
-      }
-
-      // Cart functions
-      function addToCart(p){
-        const existing = cart.value.find(item => item.id === p.id);
-        if (existing) {
-          existing.quantity += 1;
-        } else {
-          cart.value.push({
-            id: p.id,
-            name: p.name,
-            price: p.base_price_usd,
-            platform_type: p.platform_type,
-            quantity: 1
-          });
-        }
-        saveCart();
-        toast('ok', 'Added to cart', p.name);
-        
-        if (!profile.value) {
-          notifications.value.push({
-            id: Date.now(),
-            title: 'Item added to cart',
-            time: 'Just now',
-            read: false
-          });
-        }
-      }
-
-      function removeFromCart(index) {
-        cart.value.splice(index, 1);
-        saveCart();
-        toast('info', 'Removed from cart');
-      }
-
-      async function checkout() {
-        if (!profile.value) {
-          // Save cart and prompt for profile
-          saveCart();
-          showProfileModal.value = true;
-          toast('info', 'Complete your profile', 'Your items are saved');
-        } else {
-          // Proceed to request creation
-          if (cart.value.length > 0) {
-            // For now, just create request from first item
-            const item = cart.value[0];
-            rF.platform_type = item.platform_type;
-            rF.product_id = item.id;
-            rF.quantity = item.quantity;
-            showReqModal.value = true;
-            cart.value = [];
-            saveCart();
-          }
-        }
-      }
-
-      // Requests
-      async function saveReq(){
-        if(!rF.product_id){ toast('err','Validation','Select a product.'); return; }
-        if(!rF.quantity||rF.quantity<1){ toast('err','Validation','Qty must be ≥ 1.'); return; }
-        if(!profile.value?.id){ toast('warn','Profile Required'); showProfileModal.value=true; return; }
-        loading.value=true; loadMsg.value='Creating request…';
-        try {
-          const prod=products.value.find(p=>p.id===rF.product_id);
-          const prefix=rF.platform_type==='techmedixlink'?'TML':'GDR';
-          const suffix=Date.now().toString(36).toUpperCase().slice(-6);
-          const num=`${prefix}-${new Date().getFullYear()}-${suffix}`;
-          const {data:req,error:e1}=await sb.from('requests').insert([{
-            request_number:num, user_id:profile.value.id, platform_type:rF.platform_type,
-            status:'pending', urgency:rF.urgency, source_notes:rF.notes,
-            item_cost:calcItem.value, shipping_cost:calcShip.value,
-            service_fee:calcFee.value, duty_cost:calcDuty.value,
-            total_cost:calcTotal.value, balance_due:calcTotal.value, payment_status:'pending'
-          }]).select().single();
-          if(e1) throw e1;
-          const {error:e2}=await sb.from('request_items').insert([{
-            request_id:req.id, product_id:rF.product_id, product_name:prod.name,
-            quantity:rF.quantity, unit_price:prod.base_price_usd*2500, total_price:calcItem.value
-          }]);
-          if(e2) throw e2;
-          await sb.from('tracking_events').insert([{
-            request_id:req.id, event_type:'order_placed', event_status:'completed',
-            location:'Online', event_time:new Date().toISOString()
-          }]);
-          showReqModal.value=false; resetRF();
-          toast('ok','Request Submitted',`#${num} submitted.`);
-          await loadReqs();
-        } catch(e){ toast('err','Failed',e.message); }
-        finally { loading.value=false; }
-      }
-
-      // Status
-      function toggleStatusMenu(id){ openStatusMenu.value=openStatusMenu.value===id?null:id; }
-      function closeAllMenus(){ openStatusMenu.value=null; }
-
-      async function updateStatus(r, newStatus){
-        openStatusMenu.value=null;
-        if(r.status===newStatus) return;
-        loading.value=true; loadMsg.value='Updating…';
-        try {
-          const {error}=await sb.from('requests').update({status:newStatus}).eq('id',r.id);
-          if(error) throw error;
-          await sb.from('tracking_events').insert([{
-            request_id:r.id, event_type:`status_${newStatus}`,
-            event_status:'completed', location:'System', event_time:new Date().toISOString()
-          }]);
-          toast('ok','Updated',`Moved to "${newStatus}".`);
-          await loadReqs();
-        } catch(e){ toast('err','Error',e.message); }
-        finally { loading.value=false; }
-      }
-
-      // Tracking
-      async function fetchTracking(){
-        if(!trackId.value.trim()){ toast('warn','Required','Enter a request number.'); return; }
-        loading.value=true;
-        try {
-          const {data,error}=await sb.from('requests').select('*,tracking_events(*)').eq('request_number',trackId.value.trim()).single();
-          if(error) throw error;
-          trackedReq.value=data; toast('ok','Found',`#${data.request_number} loaded.`);
-        } catch(e){ toast('err','Not Found','No request with that number.'); trackedReq.value=null; }
-        finally { loading.value=false; }
-      }
-
-      async function fetchGuestTracking() {
-        if (!guestEmail.value.trim()) { toast('warn', 'Required', 'Enter your email'); return; }
-        loading.value = true;
-        try {
-          const { data, error } = await sb.from('requests')
-            .select('*,tracking_events(*)')
-            .eq('guest_email', guestEmail.value)
-            .order('created_at', { ascending: false });
-          if (error) throw error;
-          if (data?.length) {
-            trackedReq.value = data[0];
-            toast('ok', 'Found', `Latest request for ${guestEmail.value}`);
-          } else {
-            toast('err', 'Not Found', 'No requests with that email');
-          }
-        } catch (e) {
-          toast('err', 'Error', e.message);
-        } finally {
-          loading.value = false;
-        }
-      }
-
-      function doTrack(num){ tab.value='tracking'; trackId.value=num; trackedReq.value=null; nextTick(fetchTracking); }
-
-      // Payment
-      function askPayment(r){
-        confirm.value={
-          title:'Confirm Payment', tone:'ok', icon:'fas fa-credit-card',
-          msg:`Record payment of ${tzs(r.balance_due||r.total_cost)} for #${r.request_number}?`,
-          okLabel:'Confirm Payment', ok:()=>doPayment(r)
-        };
-      }
-      
-      async function doPayment(r){
-        loading.value=true; loadMsg.value='Recording…';
-        try {
-          const balanceToPay=r.balance_due||0;
-          const {error:re}=await sb.from('requests').update({
-            deposit_paid:(r.deposit_paid||0)+balanceToPay,
-            balance_due:0, payment_status:'paid',
-            status:r.status==='pending'?'processing':r.status
-          }).eq('id',r.id);
-          if(re) throw re;
-          const {error:pe}=await sb.from('payments').insert([{
-            request_id:r.id, amount:balanceToPay,
-            payment_method:'mpesa', status:'completed',
-            payment_date:new Date().toISOString()
-          }]);
-          if(pe) throw pe;
-          await sb.from('tracking_events').insert([{
-            request_id:r.id, event_type:'payment_received',
-            event_status:'completed', location:'Online', event_time:new Date().toISOString()
-          }]);
-          toast('ok','Payment Recorded',tzs(balanceToPay)+' received.');
-          await loadReqs(); await loadPayments();
-        } catch(e){ toast('err','Error',e.message); }
-        finally { loading.value=false; }
-      }
-
-      // Admin functions
-      function getUserName(userId) {
-        return adminUsers.value.find(u => u.id === userId)?.full_name || 'Unknown';
-      }
-      
-      function getUserEmail(userId) {
-        return adminUsers.value.find(u => u.id === userId)?.email || '';
-      }
-
-      async function toggleUserStatus(user) {
-        confirm.value = {
-          title: user.is_active ? 'Suspend User?' : 'Activate User?',
-          msg: `Are you sure you want to ${user.is_active ? 'suspend' : 'activate'} ${user.full_name}?`,
-          ok: async () => {
-            await sb.from('users').update({ is_active: !user.is_active }).eq('id', user.id);
-            await loadAdminData();
-            toast('ok', `User ${user.is_active ? 'suspended' : 'activated'}`);
-          }
-        };
-      }
-
-      function viewUserRequests(user) {
-        reqSearch.value = user.email;
-        goTab('my-requests');
-      }
-
-      function editUser(user) {
-        Object.assign(uF, user);
-        showProfileModal.value = true;
-      }
-
-      function markAllRead() {
-        notifications.value.forEach(n => n.read = true);
-      }
-
-      // Helpers
-      function sBadge(s){
-        return {completed:'b-ok',delivered:'b-ok',pending:'b-warn',processing:'b-info',sourcing:'b-info',shipping:'b-accent',cancelled:'b-err'}[s]||'b-muted';
-      }
-      
-      function stockLabel(n){
-        if(n==null||n==='') return 'Unknown';
-        if(n===0) return 'Out of Stock';
-        if(n<=5)  return `Low (${n})`;
-        return `In Stock (${n})`;
-      }
-      
-      function stockClass(n){
-        if(n==null||n==='') return '';
-        if(n===0) return 'out-stock';
-        if(n<=5)  return 'low-stock';
-        return 'in-stock';
-      }
-      
-      function fNum(n){ if(n==null) return '0'; return Math.round(n).toLocaleString(); }
-      function tzs(n){ return 'TZS '+fNum(n); }
-      
-      function fDate(d){
-        if(!d) return '—';
-        const dt=new Date(d); if(isNaN(dt)) return '—';
-        return dt.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
-      }
-      
-      function fDateTime(d){
-        if(!d) return '—';
-        const dt=new Date(d); if(isNaN(dt)) return '—';
-        return dt.toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
-      }
-      
-      function fEvent(t){ if(!t) return '—'; return t.split('_').map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' '); }
-
-      // Keyboard handler
-      function handleKey(e){
-        if(e.key==='Escape'){
-          if(confirm.value)          { confirm.value=null; return; }
-          if(viewedProduct.value)    { viewedProduct.value=null; return; }
-          if(detailReq.value)        { detailReq.value=null; return; }
-          if(showListingModal.value) { closeListing(); return; }
-          if(showReqModal.value)     { showReqModal.value=false; return; }
-          if(showProfileModal.value) { showProfileModal.value=false; return; }
-          if(sidebarOpen.value)      { sidebarOpen.value=false; return; }
-          if(openStatusMenu.value)   { openStatusMenu.value=null; return; }
-          if(showNotifications.value){ showNotifications.value=false; return; }
-        }
-      }
-
-      // Watch for profile changes
-      watch(profile, (newProfile) => {
-        if (newProfile) {
-          // If user just signed up and had cart, maybe auto-create request?
-          if (cart.value.length > 0) {
-            // Optionally offer to convert cart to request
-            toast('info', 'Your cart is ready', 'You can now create requests');
-          }
-        }
-      });
-
-      onMounted(async () => {
-        document.addEventListener('keydown', handleKey);
-        loadCart();
-        await loadAll();
-        // Add sample notification
-        if (!profile.value) {
-          notifications.value.push({
-            id: 1,
-            title: 'Welcome to TechMedixLink!',
-            time: 'Just now',
-            read: false
-          });
-        }
-      });
-
-      return {
-        loading, loadMsg, platform, tab, sidebarOpen, globalSearch, showNotifications,
-        products, requests, payments, profile, confirm, cart, guestEmail,
-        showProfileModal, showListingModal, showReqModal,
-        editingProd, detailReq, viewedProduct, trackId, trackedReq,
-        prodSearch, prodFilter, locFilter, sortProd,
-        reqSearch, reqFilter, reqPlatFilter, openStatusMenu,
-        toasts, pF, rF, uF,
-        isAdmin, adminSubTab, adminUsers, adminReqSearch, adminReqFilter, adminReqPlatFilter,
-        userStats, notifications,
-        pageTitle, primaryLabel, userInitial, today,
-        canBuy, canSell, notificationCount,
-        uniqueCategories, uniqueSellers,
-        filteredProds, myListings, myRequests, filteredMyReqs,
-        incomingReqs, myActiveReqs, myDoneReqs, recentActivity,
-        myTotalSpent, myBalanceDue, pendingPayCount, avgListingPrice, pStats,
-        cartTotal, calcCartShipping, calcCartFee,
-        calcItem, calcShip, calcFee, calcDuty, calcTotal,
-        stepLabels, statusList, sellerStatusList,
-        adminStats, filteredAdminReqs, revenueChartData,
-        setPlatform, goTab, primaryAction, closeAllMenus, performSearch,
-        editListing, closeListing, saveListing, toggleListingStatus,
-        askDeleteProduct, addToCart, removeFromCart, checkout,
-        saveReq, fetchTracking, fetchGuestTracking, doTrack, askPayment,
-        saveProfile, toggleStatusMenu, updateStatus,
-        getUserName, getUserEmail, toggleUserStatus, viewUserRequests, editUser, markAllRead,
-        roleLabel, roleIcon,
-        sBadge, stepCls, stockLabel, stockClass,
-        fNum, tzs, fDate, fDateTime, fEvent, killToast
-      };
+    } else if (!profile.value) {
+      goTab('browse');
+    } else {
+      showReqModal.value=true;
     }
+  }
+
+  function performSearch() {
+    if (globalSearch.value) {
+      prodSearch.value = globalSearch.value;
+      goTab('browse');
+    }
+  }
+
+  // Profile
+  async function saveProfile(){
+    if(!uF.full_name||!uF.email){ toast('err','Validation','Name and email required.'); return; }
+    loading.value=true; loadMsg.value='Saving…';
+    try {
+      let error;
+      if(profile.value?.id){ 
+        ({error}=await sb.from('users').update({...uF}).eq('id',profile.value.id)); 
+      } else { 
+        ({error}=await sb.from('users').insert([{...uF}])); 
+        if (cart.value.length > 0) {
+          toast('info', 'Cart saved', 'Your items have been linked to your account');
+        }
+      }
+      if(error) throw error;
+      toast('ok','Profile Saved'); 
+      showProfileModal.value=false; 
+      await loadProfile();
+    } catch(e){ toast('err','Error',e.message); }
+    finally { loading.value=false; }
+  }
+
+  // Listings
+  function editListing(p){
+    editingProd.value=p;
+    const fields=['platform_type','product_type','name','description','manufacturer','base_price_usd','estimated_weight_kg','stock_quantity','warranty_months','import_duty_percent','tmda_certified','requires_installation','requires_training','location_type','country','city','is_active'];
+    fields.forEach(k=>{ if(k in p) pF[k]=p[k]; });
+    showListingModal.value=true;
+  }
+  
+  function closeListing(){ showListingModal.value=false; editingProd.value=null; resetPF(); }
+
+  async function saveListing(){
+    if(!pF.name||!pF.base_price_usd){ toast('err','Validation','Name and price required.'); return; }
+    if(!profile.value?.id){ toast('warn','Profile Required'); showProfileModal.value=true; return; }
+    if(pF.location_type==='tanzania') pF.country='Tanzania';
+    loading.value=true; loadMsg.value='Saving…';
+    try {
+      const payload={
+        platform_type:pF.platform_type, product_type:pF.product_type, name:pF.name,
+        description:pF.description, manufacturer:pF.manufacturer,
+        base_price_usd:pF.base_price_usd, estimated_weight_kg:pF.estimated_weight_kg,
+        stock_quantity:pF.stock_quantity, warranty_months:pF.warranty_months,
+        import_duty_percent:pF.import_duty_percent, tmda_certified:pF.tmda_certified,
+        requires_installation:pF.requires_installation, requires_training:pF.requires_training,
+        location_type:pF.location_type, country:pF.country, city:pF.city,
+        is_active:pF.is_active, seller_name:profile.value.full_name, user_id:profile.value.id
+      };
+      if(editingProd.value){
+        const {error}=await sb.from('products').update(payload).eq('id',editingProd.value.id);
+        if(error) throw error; toast('ok','Updated');
+      } else {
+        const {error}=await sb.from('products').insert([payload]);
+        if(error) throw error; toast('ok','Published','Product is now live.');
+      }
+      closeListing(); await loadProds();
+    } catch(e){ toast('err','Error',e.message); }
+    finally { loading.value=false; }
+  }
+
+  async function toggleListingStatus(p){
+    loading.value=true;
+    try {
+      const {error}=await sb.from('products').update({is_active:!p.is_active}).eq('id',p.id);
+      if(error) throw error;
+      toast('ok',p.is_active?'Paused':'Activated',`"${p.name}" ${p.is_active?'hidden':'now visible'}.`);
+      await loadProds();
+    } catch(e){ toast('err','Error',e.message); }
+    finally { loading.value=false; }
+  }
+
+  function askDeleteProduct(id){
+    confirm.value={
+      title:'Delete Listing?', tone:'err', icon:'fas fa-trash',
+      msg:'This will permanently remove the product.',
+      okLabel:'Delete', ok:()=>deleteProduct(id)
+    };
+  }
+  
+  async function deleteProduct(id){
+    loading.value=true;
+    try {
+      const {error}=await sb.from('products').update({is_active:false}).eq('id',id);
+      if(error) throw error; toast('ok','Removed'); await loadProds();
+    } catch(e){ toast('err','Error',e.message); }
+    finally { loading.value=false; }
+  }
+
+  // Product view function - THIS WAS MISSING
+  function viewProduct(p) {
+    viewedProduct.value = p;
+  }
+
+  // Cart functions
+  function addToCart(p){
+    const existing = cart.value.find(item => item.id === p.id);
+    if (existing) {
+      existing.quantity += 1;
+    } else {
+      cart.value.push({
+        id: p.id,
+        name: p.name,
+        price: p.base_price_usd,
+        platform_type: p.platform_type,
+        quantity: 1
+      });
+    }
+    saveCart();
+    toast('ok', 'Added to cart', p.name);
+    
+    if (!profile.value) {
+      notifications.value.push({
+        id: Date.now(),
+        title: 'Item added to cart',
+        time: 'Just now',
+        read: false
+      });
+    }
+  }
+
+  function removeFromCart(index) {
+    cart.value.splice(index, 1);
+    saveCart();
+    toast('info', 'Removed from cart');
+  }
+
+  async function checkout() {
+    if (!profile.value) {
+      saveCart();
+      showProfileModal.value = true;
+      toast('info', 'Complete your profile', 'Your items are saved');
+    } else {
+      if (cart.value.length > 0) {
+        const item = cart.value[0];
+        rF.platform_type = item.platform_type;
+        rF.product_id = item.id;
+        rF.quantity = item.quantity;
+        showReqModal.value = true;
+        cart.value = [];
+        saveCart();
+      }
+    }
+  }
+
+  // Requests
+  async function saveReq(){
+    if(!rF.product_id){ toast('err','Validation','Select a product.'); return; }
+    if(!rF.quantity||rF.quantity<1){ toast('err','Validation','Qty must be ≥ 1.'); return; }
+    if(!profile.value?.id){ toast('warn','Profile Required'); showProfileModal.value=true; return; }
+    loading.value=true; loadMsg.value='Creating request…';
+    try {
+      const prod=products.value.find(p=>p.id===rF.product_id);
+      const prefix=rF.platform_type==='techmedixlink'?'TML':'GDR';
+      const suffix=Date.now().toString(36).toUpperCase().slice(-6);
+      const num=`${prefix}-${new Date().getFullYear()}-${suffix}`;
+      const {data:req,error:e1}=await sb.from('requests').insert([{
+        request_number:num, user_id:profile.value.id, platform_type:rF.platform_type,
+        status:'pending', urgency:rF.urgency, source_notes:rF.notes,
+        item_cost:calcItem.value, shipping_cost:calcShip.value,
+        service_fee:calcFee.value, duty_cost:calcDuty.value,
+        total_cost:calcTotal.value, balance_due:calcTotal.value, payment_status:'pending'
+      }]).select().single();
+      if(e1) throw e1;
+      const {error:e2}=await sb.from('request_items').insert([{
+        request_id:req.id, product_id:rF.product_id, product_name:prod.name,
+        quantity:rF.quantity, unit_price:prod.base_price_usd*2500, total_price:calcItem.value
+      }]);
+      if(e2) throw e2;
+      await sb.from('tracking_events').insert([{
+        request_id:req.id, event_type:'order_placed', event_status:'completed',
+        location:'Online', event_time:new Date().toISOString()
+      }]);
+      showReqModal.value=false; resetRF();
+      toast('ok','Request Submitted',`#${num} submitted.`);
+      await loadReqs();
+    } catch(e){ toast('err','Failed',e.message); }
+    finally { loading.value=false; }
+  }
+
+  // Status
+  function toggleStatusMenu(id){ openStatusMenu.value=openStatusMenu.value===id?null:id; }
+  function closeAllMenus(){ openStatusMenu.value=null; }
+
+  async function updateStatus(r, newStatus){
+    openStatusMenu.value=null;
+    if(r.status===newStatus) return;
+    loading.value=true; loadMsg.value='Updating…';
+    try {
+      const {error}=await sb.from('requests').update({status:newStatus}).eq('id',r.id);
+      if(error) throw error;
+      await sb.from('tracking_events').insert([{
+        request_id:r.id, event_type:`status_${newStatus}`,
+        event_status:'completed', location:'System', event_time:new Date().toISOString()
+      }]);
+      toast('ok','Updated',`Moved to "${newStatus}".`);
+      await loadReqs();
+    } catch(e){ toast('err','Error',e.message); }
+    finally { loading.value=false; }
+  }
+
+  // Tracking
+  async function fetchTracking(){
+    if(!trackId.value.trim()){ toast('warn','Required','Enter a request number.'); return; }
+    loading.value=true;
+    try {
+      const {data,error}=await sb.from('requests').select('*,tracking_events(*)').eq('request_number',trackId.value.trim()).single();
+      if(error) throw error;
+      trackedReq.value=data; toast('ok','Found',`#${data.request_number} loaded.`);
+    } catch(e){ toast('err','Not Found','No request with that number.'); trackedReq.value=null; }
+    finally { loading.value=false; }
+  }
+
+  async function fetchGuestTracking() {
+    if (!guestEmail.value.trim()) { toast('warn', 'Required', 'Enter your email'); return; }
+    loading.value = true;
+    try {
+      const { data, error } = await sb.from('requests')
+        .select('*,tracking_events(*)')
+        .eq('guest_email', guestEmail.value)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      if (data?.length) {
+        trackedReq.value = data[0];
+        toast('ok', 'Found', `Latest request for ${guestEmail.value}`);
+      } else {
+        toast('err', 'Not Found', 'No requests with that email');
+      }
+    } catch (e) {
+      toast('err', 'Error', e.message);
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  function doTrack(num){ tab.value='tracking'; trackId.value=num; trackedReq.value=null; nextTick(fetchTracking); }
+
+  // Payment
+  function askPayment(r){
+    confirm.value={
+      title:'Confirm Payment', tone:'ok', icon:'fas fa-credit-card',
+      msg:`Record payment of ${tzs(r.balance_due||r.total_cost)} for #${r.request_number}?`,
+      okLabel:'Confirm Payment', ok:()=>doPayment(r)
+    };
+  }
+  
+  async function doPayment(r){
+    loading.value=true; loadMsg.value='Recording…';
+    try {
+      const balanceToPay=r.balance_due||0;
+      const {error:re}=await sb.from('requests').update({
+        deposit_paid:(r.deposit_paid||0)+balanceToPay,
+        balance_due:0, payment_status:'paid',
+        status:r.status==='pending'?'processing':r.status
+      }).eq('id',r.id);
+      if(re) throw re;
+      const {error:pe}=await sb.from('payments').insert([{
+        request_id:r.id, amount:balanceToPay,
+        payment_method:'mpesa', status:'completed',
+        payment_date:new Date().toISOString()
+      }]);
+      if(pe) throw pe;
+      await sb.from('tracking_events').insert([{
+        request_id:r.id, event_type:'payment_received',
+        event_status:'completed', location:'Online', event_time:new Date().toISOString()
+      }]);
+      toast('ok','Payment Recorded',tzs(balanceToPay)+' received.');
+      await loadReqs(); await loadPayments();
+    } catch(e){ toast('err','Error',e.message); }
+    finally { loading.value=false; }
+  }
+
+  // Admin functions
+  function getUserName(userId) {
+    return adminUsers.value.find(u => u.id === userId)?.full_name || 'Unknown';
+  }
+  
+  function getUserEmail(userId) {
+    return adminUsers.value.find(u => u.id === userId)?.email || '';
+  }
+
+  async function toggleUserStatus(user) {
+    confirm.value = {
+      title: user.is_active ? 'Suspend User?' : 'Activate User?',
+      msg: `Are you sure you want to ${user.is_active ? 'suspend' : 'activate'} ${user.full_name}?`,
+      ok: async () => {
+        await sb.from('users').update({ is_active: !user.is_active }).eq('id', user.id);
+        await loadAdminData();
+        toast('ok', `User ${user.is_active ? 'suspended' : 'activated'}`);
+      }
+    };
+  }
+
+  function viewUserRequests(user) {
+    reqSearch.value = user.email;
+    goTab('my-requests');
+  }
+
+  function editUser(user) {
+    Object.assign(uF, user);
+    showProfileModal.value = true;
+  }
+
+  function markAllRead() {
+    notifications.value.forEach(n => n.read = true);
+  }
+
+  // Helpers
+  function sBadge(s){
+    return {completed:'b-ok',delivered:'b-ok',pending:'b-warn',processing:'b-info',sourcing:'b-info',shipping:'b-accent',cancelled:'b-err'}[s]||'b-muted';
+  }
+  
+  function stockLabel(n){
+    if(n==null||n==='') return 'Unknown';
+    if(n===0) return 'Out of Stock';
+    if(n<=5)  return `Low (${n})`;
+    return `In Stock (${n})`;
+  }
+  
+  function stockClass(n){
+    if(n==null||n==='') return '';
+    if(n===0) return 'out-stock';
+    if(n<=5)  return 'low-stock';
+    return 'in-stock';
+  }
+  
+  function fNum(n){ if(n==null) return '0'; return Math.round(n).toLocaleString(); }
+  function tzs(n){ return 'TZS '+fNum(n); }
+  
+  function fDate(d){
+    if(!d) return '—';
+    const dt=new Date(d); if(isNaN(dt)) return '—';
+    return dt.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+  }
+  
+  function fDateTime(d){
+    if(!d) return '—';
+    const dt=new Date(d); if(isNaN(dt)) return '—';
+    return dt.toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+  }
+  
+  function fEvent(t){ if(!t) return '—'; return t.split('_').map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' '); }
+
+  // Keyboard handler
+  function handleKey(e){
+    if(e.key==='Escape'){
+      if(confirm.value)          { confirm.value=null; return; }
+      if(viewedProduct.value)    { viewedProduct.value=null; return; }
+      if(detailReq.value)        { detailReq.value=null; return; }
+      if(showListingModal.value) { closeListing(); return; }
+      if(showReqModal.value)     { showReqModal.value=false; return; }
+      if(showProfileModal.value) { showProfileModal.value=false; return; }
+      if(sidebarOpen.value)      { sidebarOpen.value=false; return; }
+      if(openStatusMenu.value)   { openStatusMenu.value=null; return; }
+      if(showNotifications.value){ showNotifications.value=false; return; }
+    }
+  }
+
+  // Watch for profile changes
+  watch(profile, (newProfile) => {
+    if (newProfile) {
+      if (cart.value.length > 0) {
+        toast('info', 'Your cart is ready', 'You can now create requests');
+      }
+    }
+  });
+
+  onMounted(async () => {
+    document.addEventListener('keydown', handleKey);
+    loadCart();
+    await loadAll();
+    if (!profile.value) {
+      notifications.value.push({
+        id: 1,
+        title: 'Welcome to TechMedixLink!',
+        time: 'Just now',
+        read: false
+      });
+    }
+  });
+
+  return {
+    loading, loadMsg, platform, tab, sidebarOpen, globalSearch, showNotifications,
+    products, requests, payments, profile, confirm, cart, guestEmail,
+    showProfileModal, showListingModal, showReqModal,
+    editingProd, detailReq, viewedProduct, trackId, trackedReq,
+    prodSearch, prodFilter, locFilter, sortProd,
+    reqSearch, reqFilter, reqPlatFilter, openStatusMenu,
+    toasts, pF, rF, uF,
+    isAdmin, adminSubTab, adminUsers, adminReqSearch, adminReqFilter, adminReqPlatFilter,
+    userStats, notifications,
+    pageTitle, primaryLabel, userInitial, today,
+    canBuy, canSell, notificationCount,
+    uniqueCategories, uniqueSellers,
+    filteredProds, myListings, myRequests, filteredMyReqs,
+    incomingReqs, myActiveReqs, myDoneReqs, recentActivity,
+    myTotalSpent, myBalanceDue, pendingPayCount, avgListingPrice, pStats,
+    cartTotal, calcCartShipping, calcCartFee,
+    calcItem, calcShip, calcFee, calcDuty, calcTotal,
+    stepLabels, statusList, sellerStatusList,
+    adminStats, filteredAdminReqs, revenueChartData,
+    setPlatform, goTab, primaryAction, closeAllMenus, performSearch,
+    editListing, closeListing, saveListing, toggleListingStatus,
+    askDeleteProduct, addToCart, removeFromCart, checkout,
+    viewProduct, // THIS WAS MISSING - now added
+    saveReq, fetchTracking, fetchGuestTracking, doTrack, askPayment,
+    saveProfile, toggleStatusMenu, updateStatus,
+    getUserName, getUserEmail, toggleUserStatus, viewUserRequests, editUser, markAllRead,
+    roleLabel, roleIcon,
+    sBadge, stepCls, stockLabel, stockClass,
+    fNum, tzs, fDate, fDateTime, fEvent, killToast
+  };
+}
   }).mount('#app');
 })();
 </script>
