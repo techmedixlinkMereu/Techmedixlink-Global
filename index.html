@@ -1077,19 +1077,24 @@ input, select, textarea { font-family: var(--font-body); }
             {{ platform==='techmedixlink'?'TechMedixLink':'Global Door' }}
           </div>
         </div>
-        <div class="tb-right">
-          <div class="search-wrap">
-            <i class="fas fa-search"></i>
-            <input type="text" v-model="globalSearch" placeholder="Search…" @keydown.enter="performSearch">
-          </div>
-          <div class="tb-icon" @click="showNotifications = !showNotifications">
-            <i class="fas fa-bell"></i>
-            <span v-if="notificationCount > 0" style="position:absolute;top:-2px;right:-2px;background:var(--err);color:white;border-radius:50%;width:14px;height:14px;font-size:8px;display:flex;align-items:center;justify-content:center;">{{ notificationCount }}</span>
-          </div>
-          <button @click="primaryAction" class="btn btn-primary btn-sm">
-            <i class="fas fa-plus"></i><span>{{ primaryLabel }}</span>
-          </button>
-        </div>
+       <div class="tb-right">
+  <div class="search-wrap">
+    <i class="fas fa-search"></i>
+    <input type="text" v-model="globalSearch" placeholder="Search…" @keydown.enter="performSearch">
+  </div>
+  <div class="tb-icon" @click="showNotifications = !showNotifications">
+    <i class="fas fa-bell"></i>
+    <span v-if="notificationCount > 0" style="position:absolute;top:-2px;right:-2px;background:var(--err);color:white;border-radius:50%;width:14px;height:14px;font-size:8px;display:flex;align-items:center;justify-content:center;">{{ notificationCount }}</span>
+  </div>
+  <!-- User Switch Button -->
+  <div class="tb-icon" @click="showUserSwitcher = !showUserSwitcher" :style="{background: profile ? 'var(--a-soft)' : 'var(--bg-2)'}">
+    <i class="fas fa-user-circle"></i>
+    <span v-if="profile" style="position:absolute;bottom:-2px;right:-2px;background:var(--ok);border-radius:50%;width:8px;height:8px;"></span>
+  </div>
+  <button @click="primaryAction" class="btn btn-primary btn-sm">
+    <i class="fas fa-plus"></i><span>{{ primaryLabel }}</span>
+  </button>
+</div>
       </header>
 
       <!-- Notifications Dropdown -->
@@ -1111,6 +1116,75 @@ input, select, textarea { font-family: var(--font-body); }
           </div>
         </div>
       </transition>
+       <!-- User Switcher / Login Dropdown -->
+<transition name="fade">
+  <div v-if="showUserSwitcher" class="card" style="position:absolute;top:60px;right:20px;width:280px;z-index:150;padding:var(--s3);">
+    <div style="display:flex;justify-content:space-between;margin-bottom:var(--s2);">
+      <span style="font-weight:600;">Switch User</span>
+      <button @click="showUserSwitcher=false" class="btn btn-ghost btn-sm" style="font-size:9px;">✕</button>
+    </div>
+    
+    <!-- Quick user presets for testing -->
+    <div style="margin-bottom:var(--s3);">
+      <div style="font-size:9px;color:var(--tx-3);margin-bottom:var(--s2);">TEST ACCOUNTS</div>
+      <div class="feed-row" style="cursor:pointer;padding:6px;" @click="switchUser('buyer')">
+        <div class="feed-ico ok"><i class="fas fa-cart-shopping"></i></div>
+        <div style="flex:1;">
+          <div style="font-weight:600;">Buyer Account</div>
+          <div style="font-size:9px;">Can browse and request products</div>
+        </div>
+        <span class="badge b-accent">Test</span>
+      </div>
+      
+      <div class="feed-row" style="cursor:pointer;padding:6px;" @click="switchUser('seller')">
+        <div class="feed-ico tm"><i class="fas fa-store"></i></div>
+        <div style="flex:1;">
+          <div style="font-weight:600;">Seller Account</div>
+          <div style="font-size:9px;">Can list products and manage inquiries</div>
+        </div>
+        <span class="badge b-accent">Test</span>
+      </div>
+      
+      <div class="feed-row" style="cursor:pointer;padding:6px;" @click="switchUser('both')">
+        <div class="feed-ico info"><i class="fas fa-arrows-left-right"></i></div>
+        <div style="flex:1;">
+          <div style="font-weight:600;">Buyer & Seller</div>
+          <div style="font-size:9px;">Full access to all features</div>
+        </div>
+        <span class="badge b-accent">Test</span>
+      </div>
+      
+      <div class="feed-row" style="cursor:pointer;padding:6px;" @click="switchUser('admin')">
+        <div class="feed-ico" style="background:var(--err-bg);color:var(--err);"><i class="fas fa-shield-halved"></i></div>
+        <div style="flex:1;">
+          <div style="font-weight:600;">Admin Account</div>
+          <div style="font-size:9px;">Full platform control</div>
+        </div>
+        <span class="badge b-err">Test</span>
+      </div>
+    </div>
+    
+    <div class="hr"></div>
+    
+    <!-- Guest mode -->
+    <div class="feed-row" style="cursor:pointer;padding:6px;" @click="switchUser(null)">
+      <div class="feed-ico" style="background:var(--bg-4);color:var(--tx-2);"><i class="fas fa-user"></i></div>
+      <div style="flex:1;">
+        <div style="font-weight:600;">Guest Mode</div>
+        <div style="font-size:9px;">Browse only, no profile</div>
+      </div>
+    </div>
+    
+    <!-- Custom login form -->
+    <div class="fg" style="margin-top:var(--s2);">
+      <label class="label">Or enter user email</label>
+      <div style="display:flex;gap:4px;">
+        <input type="email" v-model="loginEmail" placeholder="user@example.com" class="inp" style="flex:1;" @keydown.enter="loginUser">
+        <button @click="loginUser" class="btn btn-primary btn-sm"><i class="fas fa-sign-in-alt"></i></button>
+      </div>
+    </div>
+  </div>
+</transition>
 
       <!-- ────── CONTENT ────── -->
       <div class="content" @click="closeAllMenus">
@@ -2455,7 +2529,168 @@ setup(){
       }
     }
   };
+  // User switching and login
+const showUserSwitcher = ref(false);
+const loginEmail = ref('');
+
+// Sample test users data
+const testUsers = {
+  buyer: {
+    id: 'test-buyer-1',
+    full_name: 'John Buyer',
+    email: 'buyer@example.com',
+    phone: '+255 123 456 789',
+    user_type: 'individual',
+    user_role: 'buyer',
+    company_name: null,
+    is_active: true,
+    created_at: new Date().toISOString()
+  },
+  seller: {
+    id: 'test-seller-1',
+    full_name: 'Sarah Seller',
+    email: 'seller@example.com',
+    phone: '+255 987 654 321',
+    user_type: 'business',
+    user_role: 'seller',
+    company_name: 'MedTech Supplies Ltd',
+    is_active: true,
+    created_at: new Date().toISOString()
+  },
+  both: {
+    id: 'test-both-1',
+    full_name: 'Alex Both',
+    email: 'both@example.com',
+    phone: '+255 555 123 456',
+    user_type: 'hospital',
+    user_role: 'both',
+    company_name: 'City General Hospital',
+    is_active: true,
+    created_at: new Date().toISOString()
+  },
+  admin: {
+    id: 'test-admin-1',
+    full_name: 'Admin User',
+    email: 'admin@techmedixlink.com',
+    phone: '+255 777 888 999',
+    user_type: 'business',
+    user_role: 'admin',
+    company_name: 'TechMedixLink',
+    is_active: true,
+    created_at: new Date().toISOString()
+  }
+};
+
+// Switch to test user
+function switchUser(role) {
+  if (!role) {
+    // Guest mode - clear profile
+    profile.value = null;
+    Object.assign(uF, {
+      full_name: '', email: '', phone: '', 
+      user_type: 'individual', user_role: 'buyer', 
+      company_name: '', is_active: true
+    });
+    toast('info', 'Guest Mode', 'Browsing as guest');
+  } else {
+    // Set test user profile
+    const testUser = testUsers[role];
+    if (testUser) {
+      profile.value = testUser;
+      Object.assign(uF, testUser);
+      toast('success', `Logged in as ${testUser.full_name}`, `Role: ${roleLabel(role)}`);
+      
+      // Update platform based on user preferences
+      if (role === 'admin') {
+        // Admin sees both platforms
+      }
+    }
+  }
+  showUserSwitcher.value = false;
   
+  // Refresh data for new user
+  loadReqs();
+  loadPayments();
+  if (profile.value?.user_role === 'admin') {
+    loadAdminData();
+  }
+}
+
+// Login with email (look up in database or create temp)
+async function loginUser() {
+  if (!loginEmail.value.trim()) {
+    toast('warn', 'Email required', 'Enter an email address');
+    return;
+  }
+  
+  loading.value = true;
+  loadMsg.value = 'Looking up user...';
+  
+  try {
+    // Try to find existing user
+    const { data, error } = await sb
+      .from('users')
+      .select('*')
+      .eq('email', loginEmail.value.trim())
+      .maybeSingle();
+    
+    if (error) throw error;
+    
+    if (data) {
+      // Existing user found
+      profile.value = data;
+      Object.assign(uF, data);
+      toast('success', `Welcome back, ${data.full_name}!`);
+    } else {
+      // Create temporary user for demo
+      const tempUser = {
+        id: 'temp-' + Date.now(),
+        full_name: loginEmail.value.split('@')[0],
+        email: loginEmail.value,
+        phone: '',
+        user_type: 'individual',
+        user_role: 'buyer',
+        company_name: null,
+        is_active: true,
+        created_at: new Date().toISOString()
+      };
+      profile.value = tempUser;
+      Object.assign(uF, tempUser);
+      toast('info', 'Temporary profile created', 'Complete your profile for full access');
+      showProfileModal.value = true; // Prompt to complete profile
+    }
+    
+    showUserSwitcher.value = false;
+    loginEmail.value = '';
+    
+    // Refresh data
+    await loadReqs();
+    await loadPayments();
+    
+  } catch (e) {
+    toast('err', 'Login failed', e.message);
+  } finally {
+    loading.value = false;
+  }
+}
+
+// Logout function
+function logout() {
+  confirm.value = {
+    title: 'Logout?',
+    msg: 'Are you sure you want to logout?',
+    ok: () => {
+      profile.value = null;
+      Object.assign(uF, {
+        full_name: '', email: '', phone: '', 
+        user_type: 'individual', user_role: 'buyer', 
+        company_name: '', is_active: true
+      });
+      toast('info', 'Logged out', 'You are now in guest mode');
+      goTab('home');
+    }
+  };
+}
   // Save cart to localStorage
   const saveCart = () => {
     localStorage.setItem('techmedixlink_cart', JSON.stringify(cart.value));
@@ -3199,7 +3434,8 @@ setup(){
     saveReq, fetchTracking, fetchGuestTracking, doTrack, askPayment,
     saveProfile, toggleStatusMenu, updateStatus,
     getUserName, getUserEmail, toggleUserStatus, viewUserRequests, editUser, markAllRead,
-    roleLabel, roleIcon,
+    roleLabel, roleIcon, showUserSwitcher, loginEmail,
+  switchUser, loginUser, logout,
     sBadge, stepCls, stockLabel, stockClass,
     fNum, tzs, fDate, fDateTime, fEvent, killToast
   };
