@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-platform="techmedix">
+<html lang="en" data-platform="techmedixlink">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -16,45 +16,32 @@
    DESIGN TOKENS
 ═══════════════════════════════════════ */
 :root {
-  /* Backgrounds — deep navy */
   --bg-0: #04070f;
   --bg-1: #080d1a;
   --bg-2: #0c1221;
   --bg-3: #111828;
   --bg-4: #171f32;
   --bg-5: #1d273e;
-
-  /* Borders */
   --ln-0: rgba(255,255,255,0.04);
   --ln-1: rgba(255,255,255,0.08);
   --ln-2: rgba(255,255,255,0.14);
   --ln-3: rgba(255,255,255,0.24);
-
-  /* Text — warm white scale */
   --tx-1: #eef0f6;
   --tx-2: #8b96ad;
   --tx-3: #4a5570;
   --tx-4: #2c3450;
-
-  /* TechMedix — teal */
   --tm:        #00c9a0;
   --tm-soft:   rgba(0,201,160,0.08);
   --tm-border: rgba(0,201,160,0.18);
   --tm-glow:   rgba(0,201,160,0.12);
-
-  /* Global Door — coral */
   --gd:        #e8856a;
   --gd-soft:   rgba(232,133,106,0.08);
   --gd-border: rgba(232,133,106,0.18);
   --gd-glow:   rgba(232,133,106,0.10);
-
-  /* Active accent */
   --a:        var(--tm);
   --a-soft:   var(--tm-soft);
   --a-border: var(--tm-border);
   --a-glow:   var(--tm-glow);
-
-  /* Semantic */
   --ok:      #22c47a;
   --ok-bg:   rgba(34,196,122,0.08);
   --ok-bd:   rgba(34,196,122,0.18);
@@ -67,12 +54,9 @@
   --info:    #6a9de8;
   --info-bg: rgba(106,157,232,0.08);
   --info-bd: rgba(106,157,232,0.18);
-
-  /* Typography — refined scale */
-  --font-display: 'Fraunces', serif;      /* headings, KPI values */
-  --font-body:    'DM Sans', sans-serif;  /* everything else */
-  --font-mono:    'DM Mono', monospace;   /* codes, numbers */
-
+  --font-display: 'Fraunces', serif;
+  --font-body:    'DM Sans', sans-serif;
+  --font-mono:    'DM Mono', monospace;
   --tx-2xs: 10px;
   --tx-xs:  11px;
   --tx-sm:  13px;
@@ -81,18 +65,11 @@
   --tx-xl:  18px;
   --tx-2xl: 22px;
   --tx-3xl: 28px;
-
-  /* Spacing */
   --s1: 4px;  --s2: 8px;   --s3: 12px;  --s4: 16px;
   --s5: 20px; --s6: 28px;  --s7: 36px;  --s8: 48px;
-
-  /* Radii */
   --r1: 4px; --r2: 6px; --r3: 10px; --r4: 14px; --r5: 20px;
-
-  /* Layout */
   --sidebar-w: 236px;
   --topbar-h:  52px;
-
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --fast: 0.14s var(--ease);
   --med:  0.24s var(--ease);
@@ -105,9 +82,6 @@
   --a-glow:   var(--gd-glow);
 }
 
-/* ═══════════════════════════════════════
-   RESET
-═══════════════════════════════════════ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { font-size: 14px; scroll-behavior: smooth; }
 body {
@@ -119,8 +93,6 @@ body {
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
-
-/* Subtle dot grid */
 body::before {
   content: '';
   position: fixed; inset: 0;
@@ -128,8 +100,6 @@ body::before {
   background-size: 32px 32px;
   pointer-events: none; z-index: 0;
 }
-
-/* Ambient glows */
 .amb-tl {
   position: fixed; top: -100px; left: -100px;
   width: 480px; height: 480px;
@@ -144,25 +114,16 @@ body::before {
   pointer-events: none; z-index: 0; opacity: 0.4;
   transition: background 0.6s var(--ease);
 }
-
 a { color: inherit; text-decoration: none; }
 button { cursor: pointer; font-family: var(--font-body); border: none; background: none; }
 input, select, textarea { font-family: var(--font-body); }
-
 ::-webkit-scrollbar { width: 3px; height: 3px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--bg-5); border-radius: 3px; }
-
 [v-cloak] { display: none; }
 
-/* ═══════════════════════════════════════
-   SHELL
-═══════════════════════════════════════ */
 .shell { display: flex; min-height: 100vh; position: relative; z-index: 1; }
 
-/* ═══════════════════════════════════════
-   SIDEBAR
-═══════════════════════════════════════ */
 .sidebar {
   width: var(--sidebar-w);
   background: var(--bg-1);
@@ -173,7 +134,6 @@ input, select, textarea { font-family: var(--font-body); }
   transition: transform var(--med);
   overflow: hidden;
 }
-
 .sidebar-backdrop {
   display: none;
   position: fixed; inset: 0;
@@ -181,14 +141,11 @@ input, select, textarea { font-family: var(--font-body); }
   backdrop-filter: blur(4px);
   z-index: 190;
 }
-
-/* Sidebar top */
 .sb-top {
   padding: var(--s5) var(--s4) var(--s4);
   border-bottom: 1px solid var(--ln-0);
   flex-shrink: 0;
 }
-
 .logo {
   display: flex; align-items: center; gap: 9px;
   margin-bottom: var(--s4);
@@ -207,8 +164,6 @@ input, select, textarea { font-family: var(--font-body); }
   color: var(--tx-1); letter-spacing: -0.01em; line-height: 1;
 }
 .logo-name em { color: var(--a); font-style: normal; transition: color var(--fast); }
-
-/* Platform switcher */
 .plat-switch {
   display: flex;
   background: var(--bg-3);
@@ -228,8 +183,6 @@ input, select, textarea { font-family: var(--font-body); }
 .plat-btn i { font-size: 8px; }
 .plat-btn.on-tm { background: var(--tm); color: var(--bg-0); }
 .plat-btn.on-gd { background: var(--gd); color: var(--bg-0); }
-
-/* Role pill */
 .role-pill {
   display: inline-flex; align-items: center; gap: 5px;
   padding: 3px 8px; border-radius: 20px;
@@ -239,8 +192,6 @@ input, select, textarea { font-family: var(--font-body); }
   transition: all var(--fast);
   margin-top: var(--s3);
 }
-
-/* Nav */
 .sb-nav { flex: 1; padding: var(--s2) var(--s3); overflow-y: auto; }
 .nav-grp {
   font-size: 9px; font-weight: 700;
@@ -275,8 +226,6 @@ input, select, textarea { font-family: var(--font-body); }
   transition: all var(--fast);
 }
 .nav-item.active .nav-chip { background: var(--a-soft); color: var(--a); border-color: var(--a-border); }
-
-/* User row */
 .sb-user {
   padding: var(--s3) var(--s3);
   border-top: 1px solid var(--ln-0); flex-shrink: 0;
@@ -297,8 +246,6 @@ input, select, textarea { font-family: var(--font-body); }
 }
 .user-name { font-size: var(--tx-sm); font-weight: 600; color: var(--tx-1); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .user-meta { font-size: 10px; color: var(--tx-3); }
-
-/* Sidebar close btn (mobile) */
 .sb-close {
   display: none;
   position: absolute; top: var(--s3); right: var(--s3);
@@ -310,16 +257,12 @@ input, select, textarea { font-family: var(--font-body); }
 }
 .sb-close:hover { color: var(--tx-1); }
 
-/* ═══════════════════════════════════════
-   MAIN
-═══════════════════════════════════════ */
 .main {
   flex: 1; margin-left: var(--sidebar-w);
   display: flex; flex-direction: column;
   min-height: 100vh;
   transition: margin-left var(--med);
 }
-
 .topbar {
   height: var(--topbar-h);
   background: rgba(8,13,26,0.9);
@@ -352,7 +295,6 @@ input, select, textarea { font-family: var(--font-body); }
   transition: all var(--fast);
 }
 .plat-tag i { font-size: 8px; }
-
 .tb-right { display: flex; align-items: center; gap: var(--s2); }
 .search-wrap {
   display: flex; align-items: center; gap: var(--s2);
@@ -376,12 +318,8 @@ input, select, textarea { font-family: var(--font-body); }
   font-size: 11px; transition: all var(--fast); position: relative;
 }
 .tb-icon:hover { border-color: var(--ln-2); color: var(--tx-1); }
-
 .content { flex: 1; padding: var(--s6); overflow-y: auto; }
 
-/* ═══════════════════════════════════════
-   BUTTONS
-═══════════════════════════════════════ */
 .btn {
   display: inline-flex; align-items: center; justify-content: center;
   gap: var(--s2); padding: 7px 14px;
@@ -404,9 +342,6 @@ input, select, textarea { font-family: var(--font-body); }
 .btn-w { width: 100%; justify-content: flex-start; }
 .btn-wc { width: 100%; justify-content: center; }
 
-/* ═══════════════════════════════════════
-   CARDS
-═══════════════════════════════════════ */
 .card {
   background: var(--bg-2);
   border: 1px solid var(--ln-0);
@@ -422,9 +357,6 @@ input, select, textarea { font-family: var(--font-body); }
   padding: var(--s3) var(--s4);
 }
 
-/* ═══════════════════════════════════════
-   KPI TILES — refined typography
-═══════════════════════════════════════ */
 .kpi-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -460,7 +392,6 @@ input, select, textarea { font-family: var(--font-body); }
   color: var(--tx-3); letter-spacing: 0.07em;
   text-transform: uppercase; margin-bottom: var(--s1);
 }
-/* KPI value — display font but CONTROLLED size */
 .kpi-value {
   font-family: var(--font-display);
   font-size: var(--tx-2xl); font-weight: 600;
@@ -475,9 +406,6 @@ input, select, textarea { font-family: var(--font-body); }
 .kpi-sub.up { color: var(--ok); }
 .kpi-sub.down { color: var(--err); }
 
-/* ═══════════════════════════════════════
-   SECTION HEADER
-═══════════════════════════════════════ */
 .section-hd {
   display: flex; align-items: flex-end;
   justify-content: space-between;
@@ -490,9 +418,6 @@ input, select, textarea { font-family: var(--font-body); }
 }
 .section-sub { font-size: var(--tx-xs); color: var(--tx-3); margin-top: 3px; }
 
-/* ═══════════════════════════════════════
-   BADGES
-═══════════════════════════════════════ */
 .badge {
   display: inline-flex; align-items: center; gap: 3px;
   padding: 2px 7px; border-radius: 20px;
@@ -508,9 +433,6 @@ input, select, textarea { font-family: var(--font-body); }
 .b-gd    { background: var(--gd-soft); color: var(--gd);   border-color: var(--gd-border); }
 .b-accent{ background: var(--a-soft);  color: var(--a);    border-color: var(--a-border); }
 
-/* ═══════════════════════════════════════
-   CERTIFICATION STACK
-═══════════════════════════════════════ */
 .cert-stack {
   display: flex; flex-direction: column; gap: 3px; align-items: flex-end;
 }
@@ -524,8 +446,6 @@ input, select, textarea { font-family: var(--font-body); }
   background: var(--bg-4); color: var(--tx-3);
   border: 1px solid var(--ln-1);
 }
-
-/* Cert explainer block (modal) */
 .cert-block {
   background: var(--ok-bg);
   border: 1px solid var(--ok-bd);
@@ -559,9 +479,6 @@ input, select, textarea { font-family: var(--font-body); }
   margin-top: var(--s2);
 }
 
-/* ═══════════════════════════════════════
-   FORMS
-═══════════════════════════════════════ */
 .form-row   { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s3); }
 .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--s3); }
 .fg { margin-bottom: var(--s3); }
@@ -602,11 +519,8 @@ input, select, textarea { font-family: var(--font-body); }
 .form-hint.warn { color: var(--warn); }
 .form-err { font-size: var(--tx-xs); color: var(--err); margin-top: 4px; display: flex; align-items: center; gap: 4px; }
 
-/* ═══════════════════════════════════════
-   TABLE
-═══════════════════════════════════════ */
-.tbl-wrap { background: var(--bg-2); border: 1px solid var(--ln-0); border-radius: var(--r4); overflow: hidden; }
-.tbl { width: 100%; border-collapse: collapse; }
+.tbl-wrap { background: var(--bg-2); border: 1px solid var(--ln-0); border-radius: var(--r4); overflow-x: auto; }
+.tbl { width: 100%; border-collapse: collapse; min-width: 800px; }
 .tbl thead tr { background: var(--bg-3); border-bottom: 1px solid var(--ln-1); }
 .tbl th {
   padding: 9px var(--s4); text-align: left;
@@ -621,9 +535,6 @@ input, select, textarea { font-family: var(--font-body); }
 .tbl tbody tr { transition: background var(--fast); }
 .tbl tbody tr:hover td { background: var(--bg-3); color: var(--tx-1); }
 
-/* ═══════════════════════════════════════
-   PRODUCT CARDS
-═══════════════════════════════════════ */
 .prod-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(268px, 1fr));
@@ -644,7 +555,6 @@ input, select, textarea { font-family: var(--font-body); }
 }
 .prod-card:hover { border-color: var(--a-border); transform: translateY(-2px); }
 .prod-card:hover::after { opacity: 1; }
-
 .pc-head { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: var(--s3); }
 .pc-ico {
   width: 34px; height: 34px; border-radius: var(--r2);
@@ -653,7 +563,6 @@ input, select, textarea { font-family: var(--font-body); }
 }
 .pc-ico.tm { background: var(--tm-soft); color: var(--tm); border: 1px solid var(--tm-border); }
 .pc-ico.gd { background: var(--gd-soft); color: var(--gd); border: 1px solid var(--gd-border); }
-
 .pc-name {
   font-family: var(--font-display);
   font-size: var(--tx-lg); font-weight: 600;
@@ -672,8 +581,6 @@ input, select, textarea { font-family: var(--font-body); }
   flex: 1;
 }
 .pc-tags { display: flex; flex-wrap: wrap; gap: 3px; margin-bottom: var(--s3); }
-
-/* Price row — controlled size */
 .pc-price-row {
   display: flex; align-items: flex-end; justify-content: space-between;
   padding-top: var(--s3); border-top: 1px solid var(--ln-0); margin-bottom: var(--s3);
@@ -694,9 +601,6 @@ input, select, textarea { font-family: var(--font-body); }
 .pc-stock.out-stock { color: var(--err); }
 .pc-actions { display: flex; gap: var(--s2); }
 
-/* ═══════════════════════════════════════
-   REQUEST CARDS
-═══════════════════════════════════════ */
 .req-card {
   background: var(--bg-2); border: 1px solid var(--ln-0);
   border-radius: var(--r4); padding: var(--s4);
@@ -713,8 +617,6 @@ input, select, textarea { font-family: var(--font-body); }
   color: var(--a); background: var(--a-soft); border: 1px solid var(--a-border);
   padding: 2px 9px; border-radius: 20px; transition: all var(--fast);
 }
-
-/* Stepper */
 .stepper { display: flex; align-items: center; margin-bottom: var(--s4); }
 .step {
   flex: 1; display: flex; flex-direction: column; align-items: center;
@@ -737,8 +639,6 @@ input, select, textarea { font-family: var(--font-body); }
 .step.cur  .step-dot { border-color: var(--a); background: var(--a-soft); color: var(--a); box-shadow: 0 0 0 3px var(--a-soft); }
 .step-lbl { font-size: 9px; color: var(--tx-3); white-space: nowrap; }
 .step.done .step-lbl, .step.cur .step-lbl { color: var(--tx-2); }
-
-/* Req financials */
 .req-fin { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s2); margin-bottom: var(--s3); }
 .fin-cell { background: var(--bg-3); border-radius: var(--r2); padding: 9px var(--s3); }
 .fin-lbl {
@@ -749,7 +649,6 @@ input, select, textarea { font-family: var(--font-body); }
 .fin-val { font-family: var(--font-mono); font-size: var(--tx-xs); font-weight: 500; color: var(--tx-1); }
 .fin-val.paid { color: var(--ok); }
 .fin-val.due  { color: var(--warn); }
-
 .req-items {
   background: var(--bg-1); border: 1px solid var(--ln-0);
   border-radius: var(--r2); overflow: hidden; margin-bottom: var(--s3);
@@ -763,9 +662,6 @@ input, select, textarea { font-family: var(--font-body); }
 .ri-qty   { color: var(--tx-3); font-size: var(--tx-xs); }
 .ri-price { font-family: var(--font-mono); font-size: 11px; color: var(--tx-1); font-weight: 500; }
 
-/* ═══════════════════════════════════════
-   STATUS DROPDOWN
-═══════════════════════════════════════ */
 .status-wrap { position: relative; display: inline-block; }
 .status-dd {
   position: absolute; top: calc(100% + 4px); right: 0;
@@ -783,9 +679,6 @@ input, select, textarea { font-family: var(--font-body); }
 .status-opt:hover { background: var(--bg-5); color: var(--tx-1); }
 .s-pip { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
 
-/* ═══════════════════════════════════════
-   TIMELINE
-═══════════════════════════════════════ */
 .timeline { padding-left: var(--s6); position: relative; }
 .timeline::before {
   content: ''; position: absolute;
@@ -805,9 +698,6 @@ input, select, textarea { font-family: var(--font-body); }
 .tl-title { font-size: var(--tx-sm); font-weight: 600; color: var(--tx-1); }
 .tl-sub   { font-size: var(--tx-xs); color: var(--tx-3); margin-top: 2px; }
 
-/* ═══════════════════════════════════════
-   COST BOX
-═══════════════════════════════════════ */
 .cost-box {
   background: var(--bg-1); border: 1px solid var(--a-border);
   border-radius: var(--r3); padding: var(--s4); margin-bottom: var(--s3);
@@ -829,9 +719,6 @@ input, select, textarea { font-family: var(--font-body); }
 .cost-row.total .c-lbl { color: var(--tx-1); font-weight: 600; }
 .cost-row.total .c-val { color: var(--a); font-size: var(--tx-md); font-weight: 600; transition: color var(--fast); }
 
-/* ═══════════════════════════════════════
-   MODAL
-═══════════════════════════════════════ */
 .modal-bg {
   position: fixed; inset: 0;
   background: rgba(4,7,15,0.85);
@@ -871,10 +758,6 @@ input, select, textarea { font-family: var(--font-body); }
   display: flex; gap: var(--s2);
   border-top: 1px solid var(--ln-0);
 }
-
-/* ═══════════════════════════════════════
-   CONFIRM MODAL
-═══════════════════════════════════════ */
 .confirm-modal { max-width: 380px; }
 .confirm-icon {
   width: 44px; height: 44px; border-radius: var(--r4);
@@ -885,9 +768,6 @@ input, select, textarea { font-family: var(--font-body); }
 .confirm-icon.err  { background: var(--err-bg);  color: var(--err); }
 .confirm-icon.ok   { background: var(--ok-bg);   color: var(--ok); }
 
-/* ═══════════════════════════════════════
-   EMPTY STATE
-═══════════════════════════════════════ */
 .empty {
   display: flex; flex-direction: column; align-items: center;
   text-align: center; padding: var(--s8) var(--s6);
@@ -905,21 +785,11 @@ input, select, textarea { font-family: var(--font-body); }
 }
 .empty-sub { font-size: var(--tx-sm); color: var(--tx-3); max-width: 260px; line-height: 1.6; margin-bottom: var(--s5); }
 
-/* ═══════════════════════════════════════
-   PROGRESS BAR
-═══════════════════════════════════════ */
 .prog-track { height: 3px; background: var(--bg-5); border-radius: 3px; overflow: hidden; margin-top: 4px; }
 .prog-fill  { height: 100%; border-radius: 3px; background: var(--a); transition: width 0.6s var(--ease), background var(--fast); }
-
-/* ═══════════════════════════════════════
-   DIVIDER & UTILS
-═══════════════════════════════════════ */
 .hr { height: 1px; background: var(--ln-0); margin: var(--s3) 0; }
 .mono { font-family: var(--font-mono); font-size: 11px; color: var(--tx-3); }
 
-/* ═══════════════════════════════════════
-   FEED / ACTIVITY
-═══════════════════════════════════════ */
 .feed-row {
   display: flex; align-items: center; justify-content: space-between;
   padding: 9px 0; border-bottom: 1px solid var(--ln-0);
@@ -936,9 +806,6 @@ input, select, textarea { font-family: var(--font-body); }
 .feed-ico.ok   { background: var(--ok-bg);   color: var(--ok); }
 .feed-ico.info { background: var(--info-bg); color: var(--info); }
 
-/* ═══════════════════════════════════════
-   PROFILE STRIP
-═══════════════════════════════════════ */
 .profile-strip {
   background: var(--a-soft); border: 1px solid var(--a-border);
   border-radius: var(--r3); padding: var(--s3) var(--s4);
@@ -947,9 +814,6 @@ input, select, textarea { font-family: var(--font-body); }
 }
 .profile-strip i { font-size: 14px; color: var(--a); flex-shrink: 0; }
 
-/* ═══════════════════════════════════════
-   TOAST
-═══════════════════════════════════════ */
 .toast-stack {
   position: fixed; top: var(--s3); right: var(--s3);
   z-index: 900; display: flex; flex-direction: column; gap: var(--s2);
@@ -980,9 +844,6 @@ input, select, textarea { font-family: var(--font-body); }
 .toast-title { font-size: var(--tx-sm); font-weight: 600; color: var(--tx-1); }
 .toast-msg   { font-size: var(--tx-xs); color: var(--tx-3); margin-top: 1px; }
 
-/* ═══════════════════════════════════════
-   LOADING
-═══════════════════════════════════════ */
 .load-overlay {
   position: fixed; inset: 0;
   background: rgba(4,7,15,0.72); backdrop-filter: blur(6px);
@@ -1002,16 +863,12 @@ input, select, textarea { font-family: var(--font-body); }
 @keyframes spin { to { transform: rotate(360deg); } }
 .load-lbl { font-size: var(--tx-sm); color: var(--tx-2); font-weight: 500; }
 
-/* ═══════════════════════════════════════
-   GRIDS / UTILS
-═══════════════════════════════════════ */
 .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s5); }
 .g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--s3); }
 .mb3 { margin-bottom: var(--s5); }
 .mb4 { margin-bottom: var(--s6); }
 .mt2 { margin-top: var(--s3); }
 
-/* Animations */
 .fu   { animation: fu 0.28s var(--ease) both; }
 .fu-1 { animation-delay: 0.04s; }
 .fu-2 { animation-delay: 0.08s; }
@@ -1023,20 +880,15 @@ input, select, textarea { font-family: var(--font-body); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Vue transitions */
 .fade-enter-active, .fade-leave-active   { transition: opacity var(--fast); }
 .fade-enter-from, .fade-leave-to         { opacity: 0; }
 .modal-enter-active, .modal-leave-active { transition: all 0.2s var(--ease); }
 .modal-enter-from { opacity: 0; transform: translateY(10px) scale(0.97); }
 .modal-leave-to   { opacity: 0; transform: translateY(10px) scale(0.97); }
 
-/* ═══════════════════════════════════════
-   RESPONSIVE — MOBILE FIRST
-═══════════════════════════════════════ */
 @media (max-width: 1024px) {
   .plat-tag { display: none; }
 }
-
 @media (max-width: 860px) {
   .sidebar { transform: translateX(-100%); box-shadow: none; }
   .sidebar.open { transform: translateX(0); box-shadow: 8px 0 40px rgba(0,0,0,0.6); }
@@ -1050,7 +902,6 @@ input, select, textarea { font-family: var(--font-body); }
   .topbar { padding: 0 var(--s4); }
   .search-wrap { display: none; }
 }
-
 @media (max-width: 520px) {
   .kpi-grid { grid-template-columns: 1fr 1fr; }
   .form-row, .form-row-3 { grid-template-columns: 1fr; }
@@ -1065,8 +916,6 @@ input, select, textarea { font-family: var(--font-body); }
   .topbar { padding: 0 var(--s3); }
   .tb-right .btn span { display: none; }
 }
-
-/* Safe area for notched phones */
 @supports (padding-bottom: env(safe-area-inset-bottom)) {
   .sb-user { padding-bottom: calc(var(--s3) + env(safe-area-inset-bottom)); }
 }
@@ -1125,20 +974,19 @@ input, select, textarea { font-family: var(--font-body); }
     <div class="sidebar-backdrop" :class="{show:sidebarOpen}" @click="sidebarOpen=false"></div>
 
     <aside class="sidebar" :class="{open:sidebarOpen}">
-      <!-- Mobile close -->
       <button class="sb-close" @click="sidebarOpen=false"><i class="fas fa-times"></i></button>
 
       <div class="sb-top">
         <div class="logo">
           <div class="logo-mark">
-            <i :class="platform==='techmedix'?'fas fa-heart-pulse':'fas fa-globe'"></i>
+            <i :class="platform==='techmedixlink'?'fas fa-heart-pulse':'fas fa-globe'"></i>
           </div>
-          <div class="logo-name">Tech<em>Medix</em>Link</div>
+          <div class="logo-name">Tech<span style="color:var(--a);">Medix</span>Link</div>
         </div>
         <!-- Platform switcher -->
         <div class="plat-switch">
-          <button class="plat-btn" :class="{'on-tm':platform==='techmedix'}" @click="setPlatform('techmedix')">
-            <i class="fas fa-heart-pulse"></i>TechMedix
+          <button class="plat-btn" :class="{'on-tm':platform==='techmedixlink'}" @click="setPlatform('techmedixlink')">
+            <i class="fas fa-heart-pulse"></i>TechMedixLink
           </button>
           <button class="plat-btn" :class="{'on-gd':platform==='globaldoor'}" @click="setPlatform('globaldoor')">
             <i class="fas fa-globe"></i>Global Door
@@ -1154,6 +1002,12 @@ input, select, textarea { font-family: var(--font-body); }
         <div class="nav-grp">Overview</div>
         <div class="nav-item" :class="{active:tab==='home'}" @click="goTab('home')">
           <i class="ni fas fa-house"></i>Home
+        </div>
+
+        <!-- Cart for non-logged in users -->
+        <div v-if="!profile" class="nav-item" :class="{active:tab==='cart'}" @click="goTab('cart')">
+          <i class="ni fas fa-shopping-cart"></i>Cart
+          <span v-if="cart.length" class="nav-chip">{{ cart.length }}</span>
         </div>
 
         <template v-if="canBuy">
@@ -1186,6 +1040,15 @@ input, select, textarea { font-family: var(--font-body); }
             <span v-if="incomingReqs.length" class="nav-chip">{{ incomingReqs.length }}</span>
           </div>
         </template>
+
+        <!-- Admin Section -->
+        <template v-if="isAdmin">
+          <div class="nav-grp">Administration</div>
+          <div class="nav-item" :class="{active:tab==='admin'}" @click="goTab('admin')">
+            <i class="ni fas fa-shield-halved"></i>Admin Dashboard
+            <span v-if="adminStats.pendingRequests > 0" class="nav-chip">{{ adminStats.pendingRequests }}</span>
+          </div>
+        </template>
       </nav>
 
       <div class="sb-user">
@@ -1210,17 +1073,18 @@ input, select, textarea { font-family: var(--font-body); }
           </button>
           <div class="page-title">{{ pageTitle }}</div>
           <div class="plat-tag">
-            <i :class="platform==='techmedix'?'fas fa-heart-pulse':'fas fa-globe'"></i>
-            {{ platform==='techmedix'?'TechMedix':'Global Door' }}
+            <i :class="platform==='techmedixlink'?'fas fa-heart-pulse':'fas fa-globe'"></i>
+            {{ platform==='techmedixlink'?'TechMedixLink':'Global Door' }}
           </div>
         </div>
         <div class="tb-right">
           <div class="search-wrap">
             <i class="fas fa-search"></i>
-            <input type="text" v-model="search" placeholder="Search…">
+            <input type="text" v-model="globalSearch" placeholder="Search…" @keydown.enter="performSearch">
           </div>
-          <div class="tb-icon">
+          <div class="tb-icon" @click="showNotifications = !showNotifications">
             <i class="fas fa-bell"></i>
+            <span v-if="notificationCount > 0" style="position:absolute;top:-2px;right:-2px;background:var(--err);color:white;border-radius:50%;width:14px;height:14px;font-size:8px;display:flex;align-items:center;justify-content:center;">{{ notificationCount }}</span>
           </div>
           <button @click="primaryAction" class="btn btn-primary btn-sm">
             <i class="fas fa-plus"></i><span>{{ primaryLabel }}</span>
@@ -1228,33 +1092,63 @@ input, select, textarea { font-family: var(--font-body); }
         </div>
       </header>
 
+      <!-- Notifications Dropdown -->
+      <transition name="fade">
+        <div v-if="showNotifications" class="card" style="position:absolute;top:60px;right:20px;width:300px;z-index:150;padding:var(--s3);">
+          <div style="display:flex;justify-content:space-between;margin-bottom:var(--s2);">
+            <span style="font-weight:600;">Notifications</span>
+            <button @click="markAllRead" class="btn btn-ghost btn-sm" style="font-size:9px;">Mark all read</button>
+          </div>
+          <div v-if="!notifications.length" class="empty" style="padding:var(--s4);">
+            <div class="empty-sub">No notifications</div>
+          </div>
+          <div v-for="n in notifications" :key="n.id" class="feed-row" style="padding:6px 0;">
+            <div>
+              <div style="font-size:var(--tx-xs);font-weight:600;">{{ n.title }}</div>
+              <div style="font-size:9px;color:var(--tx-3);">{{ n.time }}</div>
+            </div>
+            <span class="badge" :class="n.read ? 'b-muted' : 'b-accent'">{{ n.read ? 'read' : 'new' }}</span>
+          </div>
+        </div>
+      </transition>
+
       <!-- ────── CONTENT ────── -->
       <div class="content" @click="closeAllMenus">
 
         <!-- ══ HOME ══ -->
         <div v-if="tab==='home'">
-          <!-- Profile prompt -->
+          <!-- Profile prompt for new users -->
           <div v-if="!profile" class="profile-strip fu">
             <i class="fas fa-circle-info"></i>
             <div style="flex:1;">
-              <div style="font-size:var(--tx-sm);font-weight:600;color:var(--a);">Complete your profile to get started</div>
-              <div style="font-size:var(--tx-xs);color:var(--tx-3);margin-top:2px;">Set your role to unlock all features.</div>
+              <div style="font-size:var(--tx-sm);font-weight:600;color:var(--a);">Complete your profile to unlock full features</div>
+              <div style="font-size:var(--tx-xs);color:var(--tx-3);margin-top:2px;">Create account to track orders and save your cart</div>
             </div>
             <button @click="showProfileModal=true" class="btn btn-primary btn-sm">Set Up</button>
+          </div>
+
+          <!-- Cart reminder for non-logged in users -->
+          <div v-if="!profile && cart.length > 0" class="profile-strip" style="background:var(--info-bg);border-color:var(--info-bd);margin-top:var(--s2);">
+            <i class="fas fa-shopping-cart" style="color:var(--info);"></i>
+            <div style="flex:1;">
+              <div style="font-size:var(--tx-sm);font-weight:600;color:var(--info);">You have {{ cart.length }} item(s) in cart</div>
+              <div style="font-size:var(--tx-xs);color:var(--tx-3);">Complete checkout or create account to save</div>
+            </div>
+            <button @click="goTab('cart')" class="btn btn-sm" style="background:var(--info);color:var(--bg-0);">View Cart</button>
           </div>
 
           <!-- Welcome -->
           <div style="margin-bottom:var(--s5);" class="fu">
             <div style="font-family:var(--font-display);font-size:var(--tx-3xl);font-weight:600;color:var(--tx-1);letter-spacing:-0.03em;line-height:1.1;">
-              Welcome back{{ profile?.full_name ? ', ' + profile.full_name.split(' ')[0] : '' }}
+              Welcome{{ profile?.full_name ? ', ' + profile.full_name.split(' ')[0] : ' to TechMedixLink' }}
             </div>
             <div style="font-size:var(--tx-sm);color:var(--tx-3);margin-top:5px;">
-              {{ today }} · {{ platform==='techmedix'?'Medical Equipment':'International Sourcing' }}
+              {{ today }} · {{ platform==='techmedixlink'?'Medical Equipment':'International Sourcing' }}
             </div>
           </div>
 
           <!-- Buyer KPIs -->
-          <template v-if="canBuy">
+          <template v-if="profile && canBuy">
             <div class="kpi-grid fu fu-1">
               <div class="kpi">
                 <div class="kpi-icon"><i class="fas fa-clipboard-list"></i></div>
@@ -1289,7 +1183,7 @@ input, select, textarea { font-family: var(--font-body); }
           </template>
 
           <!-- Seller KPIs -->
-          <template v-if="canSell">
+          <template v-if="profile && canSell">
             <div style="font-size:var(--tx-xs);font-weight:700;color:var(--tx-3);letter-spacing:0.09em;text-transform:uppercase;margin-bottom:var(--s3);" :class="canBuy?'mt2 fu fu-2':'fu fu-1'">
               Store Overview
             </div>
@@ -1323,13 +1217,37 @@ input, select, textarea { font-family: var(--font-body); }
             </div>
           </template>
 
+          <!-- Guest KPIs (products overview) -->
+          <template v-if="!profile">
+            <div class="kpi-grid fu fu-1">
+              <div class="kpi">
+                <div class="kpi-icon"><i class="fas fa-box"></i></div>
+                <div class="kpi-label">Products</div>
+                <div class="kpi-value">{{ products.length }}</div>
+                <div class="kpi-sub">Available to browse</div>
+              </div>
+              <div class="kpi">
+                <div class="kpi-icon"><i class="fas fa-tag"></i></div>
+                <div class="kpi-label">Categories</div>
+                <div class="kpi-value">{{ uniqueCategories }}</div>
+                <div class="kpi-sub">To choose from</div>
+              </div>
+              <div class="kpi">
+                <div class="kpi-icon"><i class="fas fa-truck"></i></div>
+                <div class="kpi-label">Sellers</div>
+                <div class="kpi-value">{{ uniqueSellers }}</div>
+                <div class="kpi-sub">Registered</div>
+              </div>
+            </div>
+          </template>
+
           <!-- Bottom two-col -->
           <div class="g2 fu fu-3" style="margin-top:var(--s5);">
             <!-- Recent activity -->
             <div class="card">
               <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--s4);">
                 <div style="font-family:var(--font-display);font-weight:600;font-size:var(--tx-lg);color:var(--tx-1);letter-spacing:-0.01em;">Recent Activity</div>
-                <button v-if="canBuy" @click="tab='my-requests'" class="btn btn-ghost btn-sm">All</button>
+                <button v-if="profile && canBuy" @click="tab='my-requests'" class="btn btn-ghost btn-sm">All</button>
               </div>
               <div v-if="!recentActivity.length" style="padding:var(--s4) 0;text-align:center;color:var(--tx-3);font-size:var(--tx-sm);">No activity yet</div>
               <div v-for="a in recentActivity" :key="a.id" class="feed-row">
@@ -1348,16 +1266,17 @@ input, select, textarea { font-family: var(--font-body); }
             <div class="card">
               <div style="font-family:var(--font-display);font-weight:600;font-size:var(--tx-lg);color:var(--tx-1);letter-spacing:-0.01em;margin-bottom:var(--s4);">Quick Actions</div>
               <div style="display:flex;flex-direction:column;gap:var(--s2);margin-bottom:var(--s4);">
-                <button v-if="canBuy" @click="showReqModal=true" class="btn btn-primary btn-w"><i class="fas fa-plus-circle"></i>New Purchase Request</button>
-                <button v-if="canSell" @click="showListingModal=true" class="btn btn-secondary btn-w"><i class="fas fa-store"></i>Add Product Listing</button>
-                <button v-if="canBuy" @click="goTab('browse')" class="btn btn-ghost btn-w"><i class="fas fa-magnifying-glass"></i>Browse Products</button>
-                <button v-if="canBuy" @click="goTab('tracking')" class="btn btn-ghost btn-w"><i class="fas fa-location-dot"></i>Track a Package</button>
+                <button v-if="!profile" @click="goTab('browse')" class="btn btn-primary btn-w"><i class="fas fa-magnifying-glass"></i>Browse Products</button>
+                <button v-if="profile && canBuy" @click="showReqModal=true" class="btn btn-primary btn-w"><i class="fas fa-plus-circle"></i>New Purchase Request</button>
+                <button v-if="profile && canSell" @click="showListingModal=true" class="btn btn-secondary btn-w"><i class="fas fa-store"></i>Add Product Listing</button>
+                <button v-if="profile && canBuy" @click="goTab('browse')" class="btn btn-ghost btn-w"><i class="fas fa-magnifying-glass"></i>Browse Products</button>
+                <button @click="goTab('tracking')" class="btn btn-ghost btn-w"><i class="fas fa-location-dot"></i>Track a Package</button>
               </div>
               <div class="hr"></div>
               <div style="font-size:9px;font-weight:700;color:var(--tx-3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:var(--s3);">Platform Activity</div>
               <div style="margin-bottom:var(--s3);">
                 <div style="display:flex;justify-content:space-between;font-size:var(--tx-xs);margin-bottom:3px;">
-                  <span style="color:var(--tm);font-weight:600;display:flex;align-items:center;gap:4px;"><i class="fas fa-heart-pulse" style="font-size:8px;"></i>TechMedix</span>
+                  <span style="color:var(--tm);font-weight:600;display:flex;align-items:center;gap:4px;"><i class="fas fa-heart-pulse" style="font-size:8px;"></i>TechMedixLink</span>
                   <span style="color:var(--tx-3);font-family:var(--font-mono);font-size:10px;">{{ pStats.tm }}%</span>
                 </div>
                 <div class="prog-track"><div class="prog-fill" :style="{width:pStats.tm+'%',background:'var(--tm)'}"></div></div>
@@ -1368,6 +1287,55 @@ input, select, textarea { font-family: var(--font-body); }
                   <span style="color:var(--tx-3);font-family:var(--font-mono);font-size:10px;">{{ pStats.gd }}%</span>
                 </div>
                 <div class="prog-track"><div class="prog-fill" :style="{width:pStats.gd+'%',background:'var(--gd)'}"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══ CART (for non-logged in users) ══ -->
+        <div v-if="tab==='cart' && !profile">
+          <div class="section-hd">
+            <div>
+              <div class="section-title">Your Cart</div>
+              <div class="section-sub">{{ cart.length }} item(s) · Total: {{ tzs(cartTotal) }}</div>
+            </div>
+          </div>
+
+          <div v-if="!cart.length" class="empty">
+            <div class="empty-ico"><i class="fas fa-shopping-cart"></i></div>
+            <div class="empty-title">Your cart is empty</div>
+            <div class="empty-sub">Browse products and add items to get started</div>
+            <button @click="goTab('browse')" class="btn btn-primary">Browse Products</button>
+          </div>
+
+          <div v-else class="g2" style="gap:var(--s5);">
+            <div>
+              <div v-for="(item, idx) in cart" :key="idx" class="req-card">
+                <div style="display:flex;justify-content:space-between;margin-bottom:var(--s3);">
+                  <span class="pc-name" style="font-size:var(--tx-md);">{{ item.name }}</span>
+                  <button @click="removeFromCart(idx)" class="btn btn-danger btn-sm btn-sq"><i class="fas fa-trash"></i></button>
+                </div>
+                <div class="pc-seller">Qty: {{ item.quantity }} × ${{ fNum(item.price) }}</div>
+                <div class="pc-price" style="font-size:var(--tx-lg);">TZS {{ fNum(item.price * 2500 * item.quantity) }}</div>
+              </div>
+            </div>
+
+            <div>
+              <div class="cost-box">
+                <div class="cost-title"><i class="fas fa-calculator"></i>Order Summary</div>
+                <div class="cost-row"><span class="c-lbl">Subtotal</span><span class="c-val">{{ tzs(cartTotal) }}</span></div>
+                <div class="cost-row"><span class="c-lbl">Shipping</span><span class="c-val">{{ tzs(calcCartShipping) }}</span></div>
+                <div class="cost-row"><span class="c-lbl">Service Fee</span><span class="c-val">{{ tzs(calcCartFee) }}</span></div>
+                <div class="cost-row total"><span class="c-lbl">Total</span><span class="c-val">{{ tzs(cartTotal + calcCartShipping + calcCartFee) }}</span></div>
+              </div>
+
+              <div style="display:flex;flex-direction:column;gap:var(--s2);">
+                <button @click="checkout" class="btn btn-primary btn-wc"><i class="fas fa-credit-card"></i> Checkout</button>
+                <button @click="showProfileModal=true" class="btn btn-ghost btn-wc"><i class="fas fa-user"></i> Create Account to Save</button>
+              </div>
+
+              <div class="card" style="margin-top:var(--s4);">
+                <div style="font-size:var(--tx-xs);color:var(--tx-3);">Need help? <a href="#" style="color:var(--a);">Contact support</a></div>
               </div>
             </div>
           </div>
@@ -1390,7 +1358,7 @@ input, select, textarea { font-family: var(--font-body); }
             </div>
             <select v-model="prodFilter" class="sel" style="width:145px;">
               <option value="all">All Platforms</option>
-              <option value="techmedix">TechMedix</option>
+              <option value="techmedixlink">TechMedixLink</option>
               <option value="globaldoor">Global Door</option>
               <option value="tmda">TMDA Certified</option>
             </select>
@@ -1415,10 +1383,9 @@ input, select, textarea { font-family: var(--font-body); }
           <div class="prod-grid">
             <div v-for="p in filteredProds" :key="p.id" class="prod-card">
               <div class="pc-head">
-                <div class="pc-ico" :class="p.platform_type==='techmedix'?'tm':'gd'">
-                  <i :class="p.platform_type==='techmedix'?'fas fa-heart-pulse':'fas fa-globe'"></i>
+                <div class="pc-ico" :class="p.platform_type==='techmedixlink'?'tm':'gd'">
+                  <i :class="p.platform_type==='techmedixlink'?'fas fa-heart-pulse':'fas fa-globe'"></i>
                 </div>
-                <!-- Cert stack -->
                 <div v-if="p.tmda_certified" class="cert-stack">
                   <span class="badge b-ok"><i class="fas fa-certificate" style="font-size:7px;"></i>TMDA Certified</span>
                   <div class="cert-intl">
@@ -1428,8 +1395,8 @@ input, select, textarea { font-family: var(--font-body); }
                   </div>
                 </div>
                 <div v-else style="display:flex;gap:3px;flex-wrap:wrap;justify-content:flex-end;">
-                  <span class="badge" :class="p.platform_type==='techmedix'?'b-tm':'b-gd'">
-                    {{ p.platform_type==='techmedix'?'TechMedix':'Global Door' }}
+                  <span class="badge" :class="p.platform_type==='techmedixlink'?'b-tm':'b-gd'">
+                    {{ p.platform_type==='techmedixlink'?'TechMedixLink':'Global Door' }}
                   </span>
                 </div>
               </div>
@@ -1456,8 +1423,8 @@ input, select, textarea { font-family: var(--font-body); }
                 </div>
               </div>
               <div class="pc-actions">
-                <button @click.stop="quickRequest(p)" class="btn btn-primary btn-sm" style="flex:1;justify-content:center;" :disabled="!canBuy">
-                  <i class="fas fa-cart-plus"></i> Request
+                <button @click.stop="addToCart(p)" class="btn btn-primary btn-sm" style="flex:1;justify-content:center;">
+                  <i class="fas fa-cart-plus"></i> {{ profile ? 'Request' : 'Add to Cart' }}
                 </button>
                 <button @click.stop="viewProduct(p)" class="btn btn-ghost btn-sm btn-sq">
                   <i class="fas fa-eye"></i>
@@ -1468,7 +1435,7 @@ input, select, textarea { font-family: var(--font-body); }
         </div>
 
         <!-- ══ MY LISTINGS ══ -->
-        <div v-if="tab==='my-listings'">
+        <div v-if="tab==='my-listings' && profile">
           <div class="section-hd">
             <div>
               <div class="section-title">My Listings</div>
@@ -1487,8 +1454,8 @@ input, select, textarea { font-family: var(--font-body); }
           <div class="prod-grid">
             <div v-for="p in myListings" :key="p.id" class="prod-card">
               <div class="pc-head">
-                <div class="pc-ico" :class="p.platform_type==='techmedix'?'tm':'gd'">
-                  <i :class="p.platform_type==='techmedix'?'fas fa-heart-pulse':'fas fa-globe'"></i>
+                <div class="pc-ico" :class="p.platform_type==='techmedixlink'?'tm':'gd'">
+                  <i :class="p.platform_type==='techmedixlink'?'fas fa-heart-pulse':'fas fa-globe'"></i>
                 </div>
                 <div style="display:flex;gap:3px;flex-wrap:wrap;justify-content:flex-end;">
                   <span class="badge" :class="p.is_active?'b-ok':'b-muted'">
@@ -1523,7 +1490,7 @@ input, select, textarea { font-family: var(--font-body); }
         </div>
 
         <!-- ══ INQUIRIES ══ -->
-        <div v-if="tab==='inquiries'">
+        <div v-if="tab==='inquiries' && profile">
           <div class="section-hd">
             <div>
               <div class="section-title">Inquiries Received</div>
@@ -1541,7 +1508,7 @@ input, select, textarea { font-family: var(--font-body); }
             <div class="req-head">
               <div style="display:flex;align-items:center;gap:var(--s2);flex-wrap:wrap;">
                 <span class="req-num">#{{ r.request_number }}</span>
-                <span class="badge" :class="r.platform_type==='techmedix'?'b-tm':'b-gd'">{{ r.platform_type==='techmedix'?'TechMedix':'Global Door' }}</span>
+                <span class="badge" :class="r.platform_type==='techmedixlink'?'b-tm':'b-gd'">{{ r.platform_type==='techmedixlink'?'TechMedixLink':'Global Door' }}</span>
                 <span v-if="r.urgency&&r.urgency!=='normal'" class="badge" :class="r.urgency==='critical'?'b-err':'b-warn'">{{ r.urgency }}</span>
               </div>
               <div style="display:flex;align-items:center;gap:var(--s2);">
@@ -1581,7 +1548,7 @@ input, select, textarea { font-family: var(--font-body); }
         </div>
 
         <!-- ══ MY REQUESTS ══ -->
-        <div v-if="tab==='my-requests'">
+        <div v-if="tab==='my-requests' && profile">
           <div class="section-hd">
             <div>
               <div class="section-title">My Requests</div>
@@ -1607,7 +1574,7 @@ input, select, textarea { font-family: var(--font-body); }
             </select>
             <select v-model="reqPlatFilter" class="sel" style="width:145px;">
               <option value="all">All Platforms</option>
-              <option value="techmedix">TechMedix</option>
+              <option value="techmedixlink">TechMedixLink</option>
               <option value="globaldoor">Global Door</option>
             </select>
           </div>
@@ -1623,9 +1590,9 @@ input, select, textarea { font-family: var(--font-body); }
             <div class="req-head">
               <div style="display:flex;align-items:center;gap:var(--s2);flex-wrap:wrap;">
                 <span class="req-num">#{{ r.request_number }}</span>
-                <span class="badge" :class="r.platform_type==='techmedix'?'b-tm':'b-gd'">
-                  <i :class="r.platform_type==='techmedix'?'fas fa-heart-pulse':'fas fa-globe'" style="font-size:7px;"></i>
-                  {{ r.platform_type==='techmedix'?'TechMedix':'Global Door' }}
+                <span class="badge" :class="r.platform_type==='techmedixlink'?'b-tm':'b-gd'">
+                  <i :class="r.platform_type==='techmedixlink'?'fas fa-heart-pulse':'fas fa-globe'" style="font-size:7px;"></i>
+                  {{ r.platform_type==='techmedixlink'?'TechMedixLink':'Global Door' }}
                 </span>
                 <span v-if="r.urgency&&r.urgency!=='normal'" class="badge" :class="r.urgency==='critical'?'b-err':'b-warn'">{{ r.urgency }}</span>
               </div>
@@ -1685,13 +1652,26 @@ input, select, textarea { font-family: var(--font-body); }
             </div>
           </div>
 
+          <!-- Guest tracking option -->
+          <div v-if="!profile" class="card fu" style="margin-bottom:var(--s5);background:var(--info-bg);border-color:var(--info-bd);">
+            <div style="display:flex;align-items:center;gap:var(--s3);">
+              <i class="fas fa-envelope" style="color:var(--info);"></i>
+              <div style="flex:1;">
+                <div style="font-size:var(--tx-sm);font-weight:600;color:var(--info);">Track as guest</div>
+                <div style="font-size:var(--tx-xs);color:var(--tx-3);">Enter email used at checkout</div>
+              </div>
+              <input type="email" v-model="guestEmail" placeholder="your@email.com" class="inp" style="width:180px;" @keydown.enter="fetchGuestTracking">
+              <button @click="fetchGuestTracking" class="btn btn-sm" style="background:var(--info);color:var(--bg-0);">Go</button>
+            </div>
+          </div>
+
           <!-- Recent requests quick-links -->
           <div v-if="!trackedReq && myRequests.length" class="card fu" style="margin-bottom:var(--s5);">
             <div style="font-size:9px;font-weight:700;color:var(--tx-3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:var(--s3);">Recent Requests</div>
             <div v-for="r in myRequests.slice(0,5)" :key="r.id" class="feed-row" style="cursor:pointer;" @click="doTrack(r.request_number)">
               <div style="display:flex;align-items:center;gap:9px;">
-                <div class="feed-ico" :class="r.platform_type==='techmedix'?'tm':'gd'">
-                  <i :class="r.platform_type==='techmedix'?'fas fa-heart-pulse':'fas fa-globe'"></i>
+                <div class="feed-ico" :class="r.platform_type==='techmedixlink'?'tm':'gd'">
+                  <i :class="r.platform_type==='techmedixlink'?'fas fa-heart-pulse':'fas fa-globe'"></i>
                 </div>
                 <div>
                   <div style="font-size:var(--tx-sm);font-weight:600;color:var(--tx-1);">#{{ r.request_number }}</div>
@@ -1741,7 +1721,7 @@ input, select, textarea { font-family: var(--font-body); }
         </div>
 
         <!-- ══ PAYMENTS ══ -->
-        <div v-if="tab==='payments'">
+        <div v-if="tab==='payments' && profile">
           <div class="section-hd">
             <div>
               <div class="section-title">Payments</div>
@@ -1776,7 +1756,7 @@ input, select, textarea { font-family: var(--font-body); }
           <div v-if="pendingPayCount>0" style="background:var(--warn-bg);border:1px solid var(--warn-bd);border-radius:var(--r2);padding:var(--s3) var(--s4);margin-bottom:var(--s5);display:flex;align-items:center;gap:var(--s3);flex-wrap:wrap;">
             <i class="fas fa-triangle-exclamation" style="color:var(--warn);font-size:13px;flex-shrink:0;"></i>
             <div style="flex:1;min-width:160px;">
-              <span style="font-size:var(--tx-sm);font-weight:600;color:var(--warn);">{{ pendingPayCount }} request{{ pendingPayCount>1?'s':''}}&nbsp;with outstanding balance</span>
+              <span style="font-size:var(--tx-sm);font-weight:600;color:var(--warn);">{{ pendingPayCount }} request{{ pendingPayCount>1?'s':''}} with outstanding balance</span>
               <span style="font-size:var(--tx-xs);color:var(--tx-3);margin-left:var(--s2);">{{ tzs(myBalanceDue) }}</span>
             </div>
             <button @click="goTab('my-requests')" class="btn btn-sm" style="background:var(--warn);color:var(--bg-0);border-color:var(--warn);">View</button>
@@ -1788,7 +1768,6 @@ input, select, textarea { font-family: var(--font-body); }
             <div class="empty-sub">Payment records appear here once requests are paid.</div>
           </div>
 
-          <!-- Scrollable table wrapper on mobile -->
           <div v-else style="overflow-x:auto;">
             <div class="tbl-wrap" style="min-width:560px;">
               <table class="tbl">
@@ -1814,6 +1793,214 @@ input, select, textarea { font-family: var(--font-body); }
           </div>
         </div>
 
+        <!-- ══ ADMIN DASHBOARD ══ -->
+        <div v-if="tab === 'admin' && isAdmin">
+          <div class="section-hd">
+            <div>
+              <div class="section-title">Admin Dashboard</div>
+              <div class="section-sub">Platform overview and management</div>
+            </div>
+          </div>
+
+          <!-- Admin KPIs -->
+          <div class="kpi-grid fu fu-1">
+            <div class="kpi">
+              <div class="kpi-icon"><i class="fas fa-users"></i></div>
+              <div class="kpi-label">Total Users</div>
+              <div class="kpi-value">{{ adminStats.totalUsers }}</div>
+              <div class="kpi-sub up">+{{ adminStats.newUsersThisMonth }} this month</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-icon"><i class="fas fa-clipboard-list"></i></div>
+              <div class="kpi-label">Total Requests</div>
+              <div class="kpi-value">{{ adminStats.totalRequests }}</div>
+              <div class="kpi-sub" :class="adminStats.pendingRequests > 0 ? 'up' : ''">
+                {{ adminStats.pendingRequests }} pending
+              </div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-icon"><i class="fas fa-store"></i></div>
+              <div class="kpi-label">Active Products</div>
+              <div class="kpi-value">{{ adminStats.activeProducts }}</div>
+              <div class="kpi-sub">{{ adminStats.totalProducts }} total</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-icon"><i class="fas fa-chart-line"></i></div>
+              <div class="kpi-label">Revenue (MTD)</div>
+              <div class="kpi-value sm accent">{{ tzs(adminStats.monthlyRevenue) }}</div>
+              <div class="kpi-sub up">+{{ adminStats.revenueGrowth }}%</div>
+            </div>
+          </div>
+
+          <!-- Users & Requests Tabs -->
+          <div style="display:flex; gap:var(--s2); margin-bottom:var(--s5); border-bottom:1px solid var(--ln-1);">
+            <button class="btn btn-ghost btn-sm" :class="{active: adminSubTab === 'users'}" 
+                    @click="adminSubTab = 'users'">Users</button>
+            <button class="btn btn-ghost btn-sm" :class="{active: adminSubTab === 'requests'}" 
+                    @click="adminSubTab = 'requests'">All Requests</button>
+            <button class="btn btn-ghost btn-sm" :class="{active: adminSubTab === 'analytics'}" 
+                    @click="adminSubTab = 'analytics'">Analytics</button>
+          </div>
+
+          <!-- Users Table -->
+          <div v-if="adminSubTab === 'users'" class="tbl-wrap">
+            <table class="tbl">
+              <thead>
+                <tr>
+                  <th>User</th><th>Role</th><th>Type</th><th>Email</th><th>Phone</th>
+                  <th>Requests</th><th>Spent</th><th>Joined</th><th>Status</th><th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="user in adminUsers" :key="user.id">
+                  <td>
+                    <div style="font-weight:600;">{{ user.full_name }}</div>
+                    <div style="font-size:10px; color:var(--tx-3);">{{ user.company_name || '—' }}</div>
+                  </td>
+                  <td><span class="badge b-accent">{{ roleLabel(user.user_role) }}</span></td>
+                  <td><span class="badge b-muted">{{ user.user_type }}</span></td>
+                  <td><span class="mono">{{ user.email }}</span></td>
+                  <td>{{ user.phone || '—' }}</td>
+                  <td style="text-align:center;">{{ userStats[user.id]?.requestCount || 0 }}</td>
+                  <td>{{ tzs(userStats[user.id]?.totalSpent || 0) }}</td>
+                  <td>{{ fDate(user.created_at) }}</td>
+                  <td>
+                    <span class="badge" :class="user.is_active ? 'b-ok' : 'b-err'">
+                      {{ user.is_active ? 'Active' : 'Suspended' }}
+                    </span>
+                  </td>
+                  <td>
+                    <div style="display:flex; gap:4px;">
+                      <button @click="viewUserRequests(user)" class="btn btn-ghost btn-sm btn-sq" title="View Requests">
+                        <i class="fas fa-clipboard-list"></i>
+                      </button>
+                      <button @click="toggleUserStatus(user)" class="btn btn-ghost btn-sm btn-sq" 
+                              :title="user.is_active ? 'Suspend' : 'Activate'">
+                        <i :class="user.is_active ? 'fas fa-ban' : 'fas fa-check'"></i>
+                      </button>
+                      <button @click="editUser(user)" class="btn btn-ghost btn-sm btn-sq" title="Edit">
+                        <i class="fas fa-pen"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- All Requests View -->
+          <div v-if="adminSubTab === 'requests'">
+            <div style="display:flex; gap:var(--s2); margin-bottom:var(--s5); flex-wrap:wrap;">
+              <div style="flex:1; min-width:200px;">
+                <input type="text" v-model="adminReqSearch" placeholder="Search by request # or user..." class="inp">
+              </div>
+              <select v-model="adminReqFilter" class="sel" style="width:150px;">
+                <option value="all">All Statuses</option>
+                <option v-for="s in statusList" :key="s.val" :value="s.val">{{ s.label }}</option>
+              </select>
+              <select v-model="adminReqPlatFilter" class="sel" style="width:145px;">
+                <option value="all">All Platforms</option>
+                <option value="techmedixlink">TechMedixLink</option>
+                <option value="globaldoor">Global Door</option>
+              </select>
+            </div>
+
+            <div class="tbl-wrap">
+              <table class="tbl">
+                <thead>
+                  <tr>
+                    <th>Request #</th><th>User</th><th>Platform</th><th>Status</th>
+                    <th>Items</th><th>Total</th><th>Paid</th><th>Balance</th>
+                    <th>Created</th><th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="r in filteredAdminReqs" :key="r.id">
+                    <td><span class="mono" style="color:var(--a);">{{ r.request_number }}</span></td>
+                    <td>
+                      <div style="font-weight:500;">{{ getUserName(r.user_id) }}</div>
+                      <div style="font-size:10px; color:var(--tx-3);">{{ getUserEmail(r.user_id) }}</div>
+                    </td>
+                    <td><span class="badge" :class="r.platform_type==='techmedixlink'?'b-tm':'b-gd'">{{ r.platform_type }}</span></td>
+                    <td>
+                      <div class="status-wrap" @click.stop>
+                        <button @click.stop="toggleStatusMenu('admin-'+r.id)" class="badge" :class="sBadge(r.status)">
+                          {{ r.status }} <i class="fas fa-chevron-down" style="font-size:6px;"></i>
+                        </button>
+                        <div v-if="openStatusMenu === 'admin-'+r.id" class="status-dd">
+                          <div v-for="s in statusList" :key="s.val" class="status-opt" @click="updateStatus(r,s.val)">
+                            <div class="s-pip" :style="{background:s.color}"></div>{{ s.label }}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td style="text-align:center;">{{ r.items?.length || 0 }}</td>
+                    <td style="font-weight:600;">{{ tzs(r.total_cost) }}</td>
+                    <td class="paid">{{ tzs(r.deposit_paid || 0) }}</td>
+                    <td :class="(r.balance_due||0) > 0 ? 'due' : 'paid'">{{ tzs(r.balance_due || 0) }}</td>
+                    <td>{{ fDate(r.created_at) }}</td>
+                    <td>
+                      <div style="display:flex; gap:4px;">
+                        <button @click="detailReq=r" class="btn btn-ghost btn-sm btn-sq" title="Details">
+                          <i class="fas fa-eye"></i>
+                        </button>
+                        <button @click="doTrack(r.request_number)" class="btn btn-ghost btn-sm btn-sq" title="Track">
+                          <i class="fas fa-location-dot"></i>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Analytics View -->
+          <div v-if="adminSubTab === 'analytics'" class="g2">
+            <div class="card">
+              <div class="section-title" style="font-size:var(--tx-lg); margin-bottom:var(--s4);">Revenue (Last 30 Days)</div>
+              <div style="height:200px; display:flex; align-items:flex-end; gap:var(--s2);">
+                <div v-for="(day, i) in revenueChartData" :key="i" style="flex:1; display:flex; flex-direction:column; align-items:center;">
+                  <div class="kpi-value sm" style="font-size:11px;">{{ tzs(day.value) }}</div>
+                  <div :style="{height: day.height + 'px', width:'100%', background: 'var(--a)', opacity:0.7, borderRadius:'3px'}"></div>
+                  <div style="font-size:9px; color:var(--tx-3); margin-top:4px;">{{ day.label }}</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="section-title" style="font-size:var(--tx-lg); margin-bottom:var(--s4);">Platform Performance</div>
+              <div style="margin-bottom:var(--s4);">
+                <div style="display:flex; justify-content:space-between; margin-bottom:var(--s2);">
+                  <span style="color:var(--tm); font-weight:600;">TechMedixLink</span>
+                  <span>{{ adminStats.tmRequests }} requests</span>
+                </div>
+                <div class="prog-track"><div class="prog-fill" :style="{width: adminStats.tmPercentage + '%', background:'var(--tm)'}"></div></div>
+              </div>
+              <div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:var(--s2);">
+                  <span style="color:var(--gd); font-weight:600;">Global Door</span>
+                  <span>{{ adminStats.gdRequests }} requests</span>
+                </div>
+                <div class="prog-track"><div class="prog-fill" :style="{width: adminStats.gdPercentage + '%', background:'var(--gd)'}"></div></div>
+              </div>
+              
+              <div class="hr" style="margin:var(--s4) 0;"></div>
+              
+              <div class="g2">
+                <div>
+                  <div style="font-size:9px; color:var(--tx-3);">Avg. Order Value</div>
+                  <div class="kpi-value sm">{{ tzs(adminStats.avgOrderValue) }}</div>
+                </div>
+                <div>
+                  <div style="font-size:9px; color:var(--tx-3);">Conversion Rate</div>
+                  <div class="kpi-value sm">{{ adminStats.conversionRate }}%</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div><!-- /content -->
     </div><!-- /main -->
   </div><!-- /shell -->
@@ -1833,7 +2020,7 @@ input, select, textarea { font-family: var(--font-body); }
         </div>
         <div class="modal-body">
           <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:var(--s3);">
-            <span class="badge" :class="detailReq.platform_type==='techmedix'?'b-tm':'b-gd'">{{ detailReq.platform_type }}</span>
+            <span class="badge" :class="detailReq.platform_type==='techmedixlink'?'b-tm':'b-gd'">{{ detailReq.platform_type }}</span>
             <span class="badge" :class="sBadge(detailReq.status)">{{ detailReq.status }}</span>
             <span class="badge b-muted">{{ detailReq.urgency }}</span>
           </div>
@@ -1945,7 +2132,7 @@ input, select, textarea { font-family: var(--font-body); }
           <div class="fg">
             <label class="label req">Platform</label>
             <select v-model="pF.platform_type" class="sel">
-              <option value="techmedix">TechMedixLink — Medical Equipment</option>
+              <option value="techmedixlink">TechMedixLink — Medical Equipment</option>
               <option value="globaldoor">Global Door — International Sourcing</option>
             </select>
           </div>
@@ -2013,7 +2200,7 @@ input, select, textarea { font-family: var(--font-body); }
             </div>
           </div>
           <div style="display:flex;flex-wrap:wrap;gap:var(--s4);margin-top:var(--s2);">
-            <label class="chk" v-if="pF.platform_type==='techmedix'"><input type="checkbox" v-model="pF.tmda_certified"><span class="chk-lbl">TMDA Certified</span></label>
+            <label class="chk" v-if="pF.platform_type==='techmedixlink'"><input type="checkbox" v-model="pF.tmda_certified"><span class="chk-lbl">TMDA Certified</span></label>
             <label class="chk"><input type="checkbox" v-model="pF.requires_installation"><span class="chk-lbl">Requires Installation</span></label>
             <label class="chk"><input type="checkbox" v-model="pF.requires_training"><span class="chk-lbl">Requires Training</span></label>
             <label class="chk"><input type="checkbox" v-model="pF.is_active"><span class="chk-lbl">List as active</span></label>
@@ -2044,7 +2231,7 @@ input, select, textarea { font-family: var(--font-body); }
           <div class="fg">
             <label class="label req">Platform</label>
             <select v-model="rF.platform_type" class="sel">
-              <option value="techmedix">TechMedixLink — Medical Equipment</option>
+              <option value="techmedixlink">TechMedixLink — Medical Equipment</option>
               <option value="globaldoor">Global Door — International Sourcing</option>
             </select>
           </div>
@@ -2110,16 +2297,14 @@ input, select, textarea { font-family: var(--font-body); }
           <button @click="viewedProduct=null" class="modal-x"><i class="fas fa-times"></i></button>
         </div>
         <div class="modal-body">
-          <!-- Badges -->
           <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:var(--s4);">
-            <span class="badge" :class="viewedProduct.platform_type==='techmedix'?'b-tm':'b-gd'">{{ viewedProduct.platform_type==='techmedix'?'TechMedix':'Global Door' }}</span>
+            <span class="badge" :class="viewedProduct.platform_type==='techmedixlink'?'b-tm':'b-gd'">{{ viewedProduct.platform_type==='techmedixlink'?'TechMedixLink':'Global Door' }}</span>
             <span class="badge" :class="viewedProduct.location_type==='tanzania'?'b-accent':'b-muted'">
               <i class="fas fa-location-dot" style="font-size:7px;"></i>
               {{ viewedProduct.country||'Tanzania' }}{{ viewedProduct.city?', '+viewedProduct.city:'' }}
             </span>
           </div>
 
-          <!-- Cert block — expanded view -->
           <div v-if="viewedProduct.tmda_certified" class="cert-block">
             <div class="cert-block-title">
               <i class="fas fa-certificate"></i>Certification Stack
@@ -2178,8 +2363,8 @@ input, select, textarea { font-family: var(--font-body); }
           </div>
         </div>
         <div class="modal-ft">
-          <button @click="quickRequest(viewedProduct);viewedProduct=null" class="btn btn-primary" style="flex:1;justify-content:center;" :disabled="!canBuy">
-            <i class="fas fa-cart-plus"></i> Request This Product
+          <button @click="addToCart(viewedProduct);viewedProduct=null" class="btn btn-primary" style="flex:1;justify-content:center;">
+            <i class="fas fa-cart-plus"></i> {{ profile ? 'Request This Product' : 'Add to Cart' }}
           </button>
           <button @click="viewedProduct=null" class="btn btn-ghost" style="flex:1;justify-content:center;">Close</button>
         </div>
@@ -2194,53 +2379,88 @@ input, select, textarea { font-family: var(--font-body); }
   const SB_URL = 'https://nvmwblzoyewgvawdmkyo.supabase.co';
   const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im52bXdibHpveWV3Z3Zhd2Rta3lvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE4ODQ2NzAsImV4cCI6MjA4NzQ2MDY3MH0.5AcVEcOYqy7784DRr_UGSKsVCpyh2Zvx7zjjLOLur_k';
   const sb = window.supabase.createClient(SB_URL, SB_KEY);
-  const { createApp, ref, reactive, computed, onMounted, nextTick } = Vue;
+  const { createApp, ref, reactive, computed, onMounted, nextTick, watch } = Vue;
 
   createApp({
     setup(){
-      /* ═══ STATE ═══════════════════════════════ */
-      const loading     = ref(false);
-      const loadMsg     = ref('Loading…');
-      const platform    = ref('techmedix');
-      const tab         = ref('home');
+      // State
+      const loading = ref(false);
+      const loadMsg = ref('Loading…');
+      const platform = ref('techmedixlink');
+      const tab = ref('home');
       const sidebarOpen = ref(false);
-      const search      = ref('');
-
+      const globalSearch = ref('');
+      const showNotifications = ref(false);
+      
+      // Data
       const products = ref([]);
       const requests = ref([]);
       const payments = ref([]);
-      const profile  = ref(null);
-      const confirm  = ref(null);
-
-      /* ═══ UI STATE ════════════════════════════ */
+      const profile = ref(null);
+      const confirm = ref(null);
+      const cart = ref([]);
+      const guestEmail = ref('');
+      
+      // UI State
       const showProfileModal = ref(false);
       const showListingModal = ref(false);
-      const showReqModal     = ref(false);
-      const editingProd      = ref(null);
-      const detailReq        = ref(null);
-      const viewedProduct    = ref(null);
-      const trackId          = ref('');
-      const trackedReq       = ref(null);
-      const prodSearch       = ref('');
-      const prodFilter       = ref('all');
-      const locFilter        = ref('all');
-      const sortProd         = ref('newest');
-      const reqSearch        = ref('');
-      const reqFilter        = ref('all');
-      const reqPlatFilter    = ref('all');
-      const openStatusMenu   = ref(null);
-
-      /* ═══ FORM STATE ══════════════════════════ */
+      const showReqModal = ref(false);
+      const editingProd = ref(null);
+      const detailReq = ref(null);
+      const viewedProduct = ref(null);
+      const trackId = ref('');
+      const trackedReq = ref(null);
+      const prodSearch = ref('');
+      const prodFilter = ref('all');
+      const locFilter = ref('all');
+      const sortProd = ref('newest');
+      const reqSearch = ref('');
+      const reqFilter = ref('all');
+      const reqPlatFilter = ref('all');
+      const openStatusMenu = ref(null);
+      
+      // Admin state
+      const adminSubTab = ref('users');
+      const adminUsers = ref([]);
+      const adminReqSearch = ref('');
+      const adminReqFilter = ref('all');
+      const adminReqPlatFilter = ref('all');
+      const userStats = ref({});
+      
+      // Notifications
+      const notifications = ref([]);
+      
+      // Form state
       const pF = reactive({
-        platform_type:'techmedix', product_type:'', name:'', description:'',
+        platform_type:'techmedixlink', product_type:'', name:'', description:'',
         manufacturer:'', base_price_usd:null, estimated_weight_kg:null,
         stock_quantity:null, warranty_months:12, import_duty_percent:0,
         tmda_certified:false, requires_installation:false, requires_training:false,
         location_type:'tanzania', country:'Tanzania', city:'', is_active:true
       });
-      const rF = reactive({ platform_type:'techmedix', product_id:'', quantity:1, urgency:'normal', notes:'' });
-      const uF = reactive({ full_name:'', email:'', phone:'', user_type:'individual', user_role:'buyer', company_name:'' });
+      
+      const rF = reactive({ platform_type:'techmedixlink', product_id:'', quantity:1, urgency:'normal', notes:'' });
+      
+      const uF = reactive({ full_name:'', email:'', phone:'', user_type:'individual', user_role:'buyer', company_name:'', is_active:true });
 
+      // Load cart from localStorage
+      const loadCart = () => {
+        const saved = localStorage.getItem('techmedixlink_cart');
+        if (saved) {
+          try {
+            cart.value = JSON.parse(saved);
+          } catch (e) {
+            cart.value = [];
+          }
+        }
+      };
+      
+      // Save cart to localStorage
+      const saveCart = () => {
+        localStorage.setItem('techmedixlink_cart', JSON.stringify(cart.value));
+      };
+
+      // Reset forms
       const resetPF = () => Object.assign(pF, {
         platform_type:platform.value, product_type:'', name:'', description:'',
         manufacturer:'', base_price_usd:null, estimated_weight_kg:null,
@@ -2248,9 +2468,10 @@ input, select, textarea { font-family: var(--font-body); }
         tmda_certified:false, requires_installation:false, requires_training:false,
         location_type:'tanzania', country:'Tanzania', city:'', is_active:true
       });
+      
       const resetRF = () => Object.assign(rF, { platform_type:platform.value, product_id:'', quantity:1, urgency:'normal', notes:'' });
 
-      /* ═══ TOASTS ══════════════════════════════ */
+      // Toasts
       const toasts = ref([]);
       let tid = 0;
       function toast(type, title, msg=''){
@@ -2260,31 +2481,50 @@ input, select, textarea { font-family: var(--font-body); }
       }
       function killToast(id){ toasts.value = toasts.value.filter(t => t.id !== id); }
 
-      /* ═══ ROLE HELPERS ═══════════════════════ */
-      const canBuy  = computed(() => !profile.value || ['buyer','both'].includes(profile.value.user_role));
-      const canSell = computed(() => profile.value && ['seller','both'].includes(profile.value.user_role));
+      // Role helpers
+      const isAdmin = computed(() => profile.value?.user_role === 'admin');
+      const canBuy = computed(() => !profile.value || ['buyer','both','admin'].includes(profile.value.user_role));
+      const canSell = computed(() => profile.value && ['seller','both','admin'].includes(profile.value.user_role));
 
-      function roleLabel(r){ return {buyer:'Buyer',seller:'Seller',both:'Buyer & Seller'}[r]||r; }
-      function roleIcon(r){ return {buyer:'fa-cart-shopping',seller:'fa-store',both:'fa-arrows-left-right'}[r]||'fa-user'; }
+      function roleLabel(r){ 
+        return {buyer:'Buyer',seller:'Seller',both:'Buyer & Seller',admin:'Admin'}[r]||r; 
+      }
+      function roleIcon(r){ 
+        return {buyer:'fa-cart-shopping',seller:'fa-store',both:'fa-arrows-left-right',admin:'fa-shield-halved'}[r]||'fa-user'; 
+      }
 
-      /* ═══ COMPUTED ════════════════════════════ */
+      // Computed
       const pageTitle = computed(() => ({
         home:'Home', browse:'Browse Products', 'my-listings':'My Listings',
         inquiries:'Inquiries', 'my-requests':'My Requests',
-        tracking:'Tracking', payments:'Payments'
+        tracking:'Tracking', payments:'Payments', cart:'Cart', admin:'Admin'
       }[tab.value]||'Home'));
 
       const primaryLabel = computed(() => {
-        if(tab.value==='my-listings'||!canBuy.value) return 'Add Listing';
+        if (tab.value === 'admin') return 'Add User';
+        if (tab.value === 'my-listings' || !canBuy.value) return 'Add Listing';
+        if (!profile.value) return 'Browse';
         return 'New Request';
       });
 
       const userInitial = computed(() => profile.value?.full_name?.charAt(0)?.toUpperCase()||'?');
       const today = computed(() => new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'}));
 
+      const notificationCount = computed(() => notifications.value.filter(n => !n.read).length);
+
+      const uniqueCategories = computed(() => {
+        const cats = new Set(products.value.map(p => p.product_type).filter(Boolean));
+        return cats.size;
+      });
+
+      const uniqueSellers = computed(() => {
+        const sellers = new Set(products.value.map(p => p.seller_name).filter(Boolean));
+        return sellers.size;
+      });
+
       const filteredProds = computed(() => {
         let a = [...products.value];
-        if(prodFilter.value==='techmedix')   a = a.filter(p=>p.platform_type==='techmedix');
+        if(prodFilter.value==='techmedixlink')   a = a.filter(p=>p.platform_type==='techmedixlink');
         else if(prodFilter.value==='globaldoor') a = a.filter(p=>p.platform_type==='globaldoor');
         else if(prodFilter.value==='tmda')   a = a.filter(p=>p.tmda_certified);
         if(locFilter.value==='tz')   a = a.filter(p=>p.location_type==='tanzania'||!p.country||p.country.toLowerCase().includes('tanzania'));
@@ -2298,52 +2538,78 @@ input, select, textarea { font-family: var(--font-body); }
         return a;
       });
 
-      const myListings   = computed(() => !profile.value?[]:products.value.filter(p=>p.user_id===profile.value.id));
-      const myRequests   = computed(() => !profile.value?[]:requests.value.filter(r=>r.user_id===profile.value.id));
+      const myListings = computed(() => !profile.value?[]:products.value.filter(p=>p.user_id===profile.value.id));
+      const myRequests = computed(() => !profile.value?[]:requests.value.filter(r=>r.user_id===profile.value.id));
       const incomingReqs = computed(() => {
         if(!profile.value) return [];
         const ids = new Set(myListings.value.map(p=>p.id));
         return requests.value.filter(r=>r.items?.some(it=>ids.has(it.product_id)));
       });
-      const myActiveReqs  = computed(() => myRequests.value.filter(r=>!['delivered','completed','cancelled'].includes(r.status)));
-      const myDoneReqs    = computed(() => myRequests.value.filter(r=>['delivered','completed'].includes(r.status)));
-      const myTotalSpent  = computed(() => myRequests.value.reduce((s,r)=>s+(r.deposit_paid||0),0));
-      const myBalanceDue  = computed(() => myRequests.value.reduce((s,r)=>s+(r.balance_due||0),0));
+      const myActiveReqs = computed(() => myRequests.value.filter(r=>!['delivered','completed','cancelled'].includes(r.status)));
+      const myDoneReqs = computed(() => myRequests.value.filter(r=>['delivered','completed'].includes(r.status)));
+      const myTotalSpent = computed(() => myRequests.value.reduce((s,r)=>s+(r.deposit_paid||0),0));
+      const myBalanceDue = computed(() => myRequests.value.reduce((s,r)=>s+(r.balance_due||0),0));
       const pendingPayCount = computed(() => myRequests.value.filter(r=>(r.balance_due||0)>0).length);
       const avgListingPrice = computed(() => !myListings.value.length?0:myListings.value.reduce((s,p)=>s+(p.base_price_usd||0),0)/myListings.value.length);
-      const filteredMyReqs  = computed(() => {
+      
+      const filteredMyReqs = computed(() => {
         let a = myRequests.value;
         if(reqFilter.value!=='all')     a = a.filter(r=>r.status===reqFilter.value);
         if(reqPlatFilter.value!=='all') a = a.filter(r=>r.platform_type===reqPlatFilter.value);
         if(reqSearch.value){ const q=reqSearch.value.toLowerCase(); a=a.filter(r=>r.request_number?.toLowerCase().includes(q)); }
         return a;
       });
-      const recentActivity = computed(() =>
-        [...myRequests.value].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,5).map(r=>({
+
+      const recentActivity = computed(() => {
+        if (!profile.value) {
+          return products.value.slice(0,5).map(p => ({
+            id: p.id,
+            title: p.name,
+            sub: 'New product available',
+            status: 'active',
+            icon: p.platform_type === 'techmedixlink' ? 'fas fa-heart-pulse' : 'fas fa-globe',
+            ico: p.platform_type === 'techmedixlink' ? 'tm' : 'gd'
+          }));
+        }
+        return [...myRequests.value].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,5).map(r=>({
           id:r.id, title:'#'+r.request_number, sub:fDate(r.created_at), status:r.status,
-          icon:r.platform_type==='techmedix'?'fas fa-heart-pulse':'fas fa-globe',
-          ico:r.platform_type==='techmedix'?'tm':'gd'
-        }))
-      );
+          icon:r.platform_type==='techmedixlink'?'fas fa-heart-pulse':'fas fa-globe',
+          ico:r.platform_type==='techmedixlink'?'tm':'gd'
+        }));
+      });
+
       const pStats = computed(() => {
         const t = products.value.length;
         if(!t) return {tm:0,gd:0};
-        const tm = products.value.filter(p=>p.platform_type==='techmedix').length;
+        const tm = products.value.filter(p=>p.platform_type==='techmedixlink').length;
         return {tm:Math.round(tm/t*100),gd:100-Math.round(tm/t*100)};
       });
 
-      /* Request cost calc */
-      const selProd   = computed(() => products.value.find(p=>p.id===rF.product_id));
-      const calcItem  = computed(() => selProd.value?(selProd.value.base_price_usd*2500)*(rF.quantity||1):0);
-      const calcShip  = computed(() => rF.platform_type==='techmedix'?calcItem.value*0.15:85000*(rF.quantity||1));
-      const calcFee   = computed(() => calcItem.value*0.1);
-      const calcDuty  = computed(() => rF.platform_type==='globaldoor'&&selProd.value?calcItem.value*((selProd.value.import_duty_percent||20)/100):0);
+      // Cart calculations
+      const cartTotal = computed(() => {
+        return cart.value.reduce((sum, item) => sum + (item.price * 2500 * item.quantity), 0);
+      });
+
+      const calcCartShipping = computed(() => {
+        return cart.value.reduce((sum, item) => {
+          return sum + (item.platform_type === 'techmedixlink' ? item.price * 2500 * 0.15 : 85000);
+        }, 0);
+      });
+
+      const calcCartFee = computed(() => cartTotal.value * 0.1);
+
+      // Request cost calc
+      const selProd = computed(() => products.value.find(p=>p.id===rF.product_id));
+      const calcItem = computed(() => selProd.value?(selProd.value.base_price_usd*2500)*(rF.quantity||1):0);
+      const calcShip = computed(() => rF.platform_type==='techmedixlink'?calcItem.value*0.15:85000*(rF.quantity||1));
+      const calcFee = computed(() => calcItem.value*0.1);
+      const calcDuty = computed(() => rF.platform_type==='globaldoor'&&selProd.value?calcItem.value*((selProd.value.import_duty_percent||20)/100):0);
       const calcTotal = computed(() => calcItem.value+calcShip.value+calcFee.value+calcDuty.value);
 
-      /* Stepper */
-      const stepLabels   = ['Placed','Paid','Sourcing','Shipping','Delivered'];
+      // Stepper
+      const stepLabels = ['Placed','Paid','Sourcing','Shipping','Delivered'];
       const STATUS_ORDER = ['pending','processing','sourcing','shipping','delivered'];
-      const statusList   = [
+      const statusList = [
         {val:'pending',label:'Pending',color:'#e8a53c'},
         {val:'processing',label:'Processing',color:'#6a9de8'},
         {val:'sourcing',label:'Sourcing',color:'#6a9de8'},
@@ -2364,69 +2630,199 @@ input, select, textarea { font-family: var(--font-body); }
         return '';
       }
 
-      /* ═══ DATA LOADING ═══════════════════════ */
+      // Data loading
       async function loadAll(){
         loading.value=true; loadMsg.value='Loading…';
-        const r = await Promise.allSettled([loadProds(),loadReqs(),loadPayments(),loadProfile()]);
+        const r = await Promise.allSettled([loadProds(),loadReqs(),loadPayments(),loadProfile(),loadAdminData()]);
         r.forEach(x=>{ if(x.status==='rejected') console.warn('Load err:',x.reason); });
         loading.value=false;
       }
+      
       async function loadProds(){
-        const {data,error}=await sb.from('products').select('*').eq('is_active',true).order('created_at',{ascending:false});
+        const {data,error}=await sb.from('products').select('*').order('created_at',{ascending:false});
         if(error) throw error;
         products.value=data||[];
       }
+      
       async function loadReqs(){
         const {data,error}=await sb.from('requests').select('*,items:request_items(*)').order('created_at',{ascending:false});
         if(error) throw error;
         requests.value=data||[];
       }
+      
       async function loadPayments(){
         const {data,error}=await sb.from('payments').select('*').order('payment_date',{ascending:false});
         if(error) throw error;
         payments.value=(data||[]).map(pay=>({...pay,_reqNum:requests.value.find(r=>r.id===pay.request_id)?.request_number||null}));
       }
+      
       async function loadProfile(){
         const {data,error}=await sb.from('users').select('*').limit(1);
         if(error) throw error;
-        if(data?.length){ profile.value=data[0]; Object.assign(uF,data[0]); }
+        if(data?.length){ 
+          profile.value=data[0]; 
+          Object.assign(uF,data[0]);
+          // If user has profile, clear guest cart and migrate if needed
+          if (cart.value.length > 0) {
+            toast('info', 'Welcome back!', 'Your cart has been saved');
+          }
+        }
       }
 
-      /* ═══ PLATFORM SWITCH ═══════════════════ */
+      async function loadAdminData() {
+        if (!profile.value?.user_role === 'admin') return;
+        const { data: users } = await sb.from('users').select('*').order('created_at', { ascending: false });
+        adminUsers.value = users || [];
+        
+        const stats = {};
+        requests.value.forEach(req => {
+          if (!stats[req.user_id]) {
+            stats[req.user_id] = { requestCount: 0, totalSpent: 0 };
+          }
+          stats[req.user_id].requestCount++;
+          stats[req.user_id].totalSpent += req.deposit_paid || 0;
+        });
+        userStats.value = stats;
+      }
+
+      // Admin computed
+      const adminStats = computed(() => {
+        const users = adminUsers.value.length;
+        const totalReqs = requests.value.length;
+        const pendingReqs = requests.value.filter(r => r.status === 'pending').length;
+        const activeProds = products.value.filter(p => p.is_active).length;
+        const monthlyRevenue = requests.value
+          .filter(r => new Date(r.created_at) > new Date(Date.now() - 30*24*60*60*1000))
+          .reduce((s, r) => s + (r.deposit_paid || 0), 0);
+        
+        const tmRequests = requests.value.filter(r => r.platform_type === 'techmedixlink').length;
+        const gdRequests = requests.value.filter(r => r.platform_type === 'globaldoor').length;
+        const totalPaid = requests.value.reduce((s, r) => s + (r.deposit_paid || 0), 0);
+        
+        return {
+          totalUsers: users,
+          newUsersThisMonth: adminUsers.value.filter(u => 
+            new Date(u.created_at) > new Date(Date.now() - 30*24*60*60*1000)).length,
+          totalRequests: totalReqs,
+          pendingRequests: pendingReqs,
+          activeProducts: activeProds,
+          totalProducts: products.value.length,
+          monthlyRevenue,
+          revenueGrowth: 12,
+          tmRequests,
+          gdRequests,
+          tmPercentage: totalReqs ? (tmRequests / totalReqs * 100).toFixed(1) : 0,
+          gdPercentage: totalReqs ? (gdRequests / totalReqs * 100).toFixed(1) : 0,
+          avgOrderValue: totalPaid / (totalReqs || 1),
+          conversionRate: 68
+        };
+      });
+
+      const filteredAdminReqs = computed(() => {
+        let a = [...requests.value];
+        if (adminReqFilter.value !== 'all') a = a.filter(r => r.status === adminReqFilter.value);
+        if (adminReqPlatFilter.value !== 'all') a = a.filter(r => r.platform_type === adminReqPlatFilter.value);
+        if (adminReqSearch.value) {
+          const q = adminReqSearch.value.toLowerCase();
+          a = a.filter(r => 
+            r.request_number?.toLowerCase().includes(q) ||
+            getUserName(r.user_id)?.toLowerCase().includes(q)
+          );
+        }
+        return a.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+      });
+
+      const revenueChartData = computed(() => {
+        const days = [];
+        for (let i = 6; i >= 0; i--) {
+          const d = new Date();
+          d.setDate(d.getDate() - i);
+          const dayReqs = requests.value.filter(r => 
+            new Date(r.created_at).toDateString() === d.toDateString()
+          );
+          const total = dayReqs.reduce((s, r) => s + (r.deposit_paid || 0), 0);
+          days.push({
+            label: d.toLocaleDateString('en-GB', { weekday: 'short' }),
+            value: total,
+            height: Math.min(150, total / 10000)
+          });
+        }
+        return days;
+      });
+
+      // Platform switch
       function setPlatform(p){
-        platform.value=p; pF.platform_type=p; rF.platform_type=p;
-        document.documentElement.setAttribute('data-platform',p);
-        toast('info',p==='techmedix'?'TechMedixLink':'Global Door','Platform switched');
+        platform.value=p; 
+        pF.platform_type=p; 
+        rF.platform_type=p;
+        document.documentElement.setAttribute('data-platform',p==='techmedixlink'?'techmedixlink':'globaldoor');
+        toast('info',p==='techmedixlink'?'TechMedixLink':'Global Door','Platform switched');
       }
 
-      /* ═══ NAV ════════════════════════════════ */
-      function goTab(t){ tab.value=t; sidebarOpen.value=false; }
+      // Navigation
+      function goTab(t){ 
+        tab.value=t; 
+        sidebarOpen.value=false; 
+        if (t === 'cart' && !profile.value) {
+          loadCart();
+        }
+      }
+      
       function primaryAction(){
-        if(tab.value==='my-listings'||!canBuy.value) showListingModal.value=true;
-        else showReqModal.value=true;
+        if (tab.value === 'admin' && isAdmin.value) {
+          showProfileModal.value = true;
+        } else if(tab.value==='my-listings'||!canBuy.value) {
+          if (!profile.value) {
+            showProfileModal.value = true;
+            toast('info', 'Create account', 'Sign up to start selling');
+          } else {
+            showListingModal.value=true;
+          }
+        } else if (!profile.value) {
+          goTab('browse');
+        } else {
+          showReqModal.value=true;
+        }
       }
 
-      /* ═══ PROFILE ════════════════════════════ */
+      function performSearch() {
+        if (globalSearch.value) {
+          prodSearch.value = globalSearch.value;
+          goTab('browse');
+        }
+      }
+
+      // Profile
       async function saveProfile(){
         if(!uF.full_name||!uF.email){ toast('err','Validation','Name and email required.'); return; }
         loading.value=true; loadMsg.value='Saving…';
         try {
           let error;
-          if(profile.value?.id){ ({error}=await sb.from('users').update({...uF}).eq('id',profile.value.id)); }
-          else { ({error}=await sb.from('users').insert([{...uF}])); }
+          if(profile.value?.id){ 
+            ({error}=await sb.from('users').update({...uF}).eq('id',profile.value.id)); 
+          } else { 
+            ({error}=await sb.from('users').insert([{...uF}])); 
+            // If there was a guest cart, associate it
+            if (cart.value.length > 0) {
+              toast('info', 'Cart saved', 'Your items have been linked to your account');
+            }
+          }
           if(error) throw error;
-          toast('ok','Profile Saved'); showProfileModal.value=false; await loadProfile();
+          toast('ok','Profile Saved'); 
+          showProfileModal.value=false; 
+          await loadProfile();
         } catch(e){ toast('err','Error',e.message); }
         finally { loading.value=false; }
       }
 
-      /* ═══ LISTINGS ════════════════════════════ */
+      // Listings
       function editListing(p){
         editingProd.value=p;
         const fields=['platform_type','product_type','name','description','manufacturer','base_price_usd','estimated_weight_kg','stock_quantity','warranty_months','import_duty_percent','tmda_certified','requires_installation','requires_training','location_type','country','city','is_active'];
         fields.forEach(k=>{ if(k in p) pF[k]=p[k]; });
         showListingModal.value=true;
       }
+      
       function closeListing(){ showListingModal.value=false; editingProd.value=null; resetPF(); }
 
       async function saveListing(){
@@ -2475,6 +2871,7 @@ input, select, textarea { font-family: var(--font-body); }
           okLabel:'Delete', ok:()=>deleteProduct(id)
         };
       }
+      
       async function deleteProduct(id){
         loading.value=true;
         try {
@@ -2484,10 +2881,61 @@ input, select, textarea { font-family: var(--font-body); }
         finally { loading.value=false; }
       }
 
-      function quickRequest(p){ rF.platform_type=p.platform_type; rF.product_id=p.id; showReqModal.value=true; }
-      function viewProduct(p){ viewedProduct.value=p; }
+      // Cart functions
+      function addToCart(p){
+        const existing = cart.value.find(item => item.id === p.id);
+        if (existing) {
+          existing.quantity += 1;
+        } else {
+          cart.value.push({
+            id: p.id,
+            name: p.name,
+            price: p.base_price_usd,
+            platform_type: p.platform_type,
+            quantity: 1
+          });
+        }
+        saveCart();
+        toast('ok', 'Added to cart', p.name);
+        
+        if (!profile.value) {
+          notifications.value.push({
+            id: Date.now(),
+            title: 'Item added to cart',
+            time: 'Just now',
+            read: false
+          });
+        }
+      }
 
-      /* ═══ REQUESTS ════════════════════════════ */
+      function removeFromCart(index) {
+        cart.value.splice(index, 1);
+        saveCart();
+        toast('info', 'Removed from cart');
+      }
+
+      async function checkout() {
+        if (!profile.value) {
+          // Save cart and prompt for profile
+          saveCart();
+          showProfileModal.value = true;
+          toast('info', 'Complete your profile', 'Your items are saved');
+        } else {
+          // Proceed to request creation
+          if (cart.value.length > 0) {
+            // For now, just create request from first item
+            const item = cart.value[0];
+            rF.platform_type = item.platform_type;
+            rF.product_id = item.id;
+            rF.quantity = item.quantity;
+            showReqModal.value = true;
+            cart.value = [];
+            saveCart();
+          }
+        }
+      }
+
+      // Requests
       async function saveReq(){
         if(!rF.product_id){ toast('err','Validation','Select a product.'); return; }
         if(!rF.quantity||rF.quantity<1){ toast('err','Validation','Qty must be ≥ 1.'); return; }
@@ -2495,7 +2943,7 @@ input, select, textarea { font-family: var(--font-body); }
         loading.value=true; loadMsg.value='Creating request…';
         try {
           const prod=products.value.find(p=>p.id===rF.product_id);
-          const prefix=rF.platform_type==='techmedix'?'TML':'GDR';
+          const prefix=rF.platform_type==='techmedixlink'?'TML':'GDR';
           const suffix=Date.now().toString(36).toUpperCase().slice(-6);
           const num=`${prefix}-${new Date().getFullYear()}-${suffix}`;
           const {data:req,error:e1}=await sb.from('requests').insert([{
@@ -2522,7 +2970,7 @@ input, select, textarea { font-family: var(--font-body); }
         finally { loading.value=false; }
       }
 
-      /* ═══ STATUS ══════════════════════════════ */
+      // Status
       function toggleStatusMenu(id){ openStatusMenu.value=openStatusMenu.value===id?null:id; }
       function closeAllMenus(){ openStatusMenu.value=null; }
 
@@ -2543,7 +2991,7 @@ input, select, textarea { font-family: var(--font-body); }
         finally { loading.value=false; }
       }
 
-      /* ═══ TRACKING ════════════════════════════ */
+      // Tracking
       async function fetchTracking(){
         if(!trackId.value.trim()){ toast('warn','Required','Enter a request number.'); return; }
         loading.value=true;
@@ -2554,9 +3002,32 @@ input, select, textarea { font-family: var(--font-body); }
         } catch(e){ toast('err','Not Found','No request with that number.'); trackedReq.value=null; }
         finally { loading.value=false; }
       }
+
+      async function fetchGuestTracking() {
+        if (!guestEmail.value.trim()) { toast('warn', 'Required', 'Enter your email'); return; }
+        loading.value = true;
+        try {
+          const { data, error } = await sb.from('requests')
+            .select('*,tracking_events(*)')
+            .eq('guest_email', guestEmail.value)
+            .order('created_at', { ascending: false });
+          if (error) throw error;
+          if (data?.length) {
+            trackedReq.value = data[0];
+            toast('ok', 'Found', `Latest request for ${guestEmail.value}`);
+          } else {
+            toast('err', 'Not Found', 'No requests with that email');
+          }
+        } catch (e) {
+          toast('err', 'Error', e.message);
+        } finally {
+          loading.value = false;
+        }
+      }
+
       function doTrack(num){ tab.value='tracking'; trackId.value=num; trackedReq.value=null; nextTick(fetchTracking); }
 
-      /* ═══ PAYMENT ════════════════════════════ */
+      // Payment
       function askPayment(r){
         confirm.value={
           title:'Confirm Payment', tone:'ok', icon:'fas fa-credit-card',
@@ -2564,6 +3035,7 @@ input, select, textarea { font-family: var(--font-body); }
           okLabel:'Confirm Payment', ok:()=>doPayment(r)
         };
       }
+      
       async function doPayment(r){
         loading.value=true; loadMsg.value='Recording…';
         try {
@@ -2590,37 +3062,78 @@ input, select, textarea { font-family: var(--font-body); }
         finally { loading.value=false; }
       }
 
-      /* ═══ HELPERS ════════════════════════════ */
+      // Admin functions
+      function getUserName(userId) {
+        return adminUsers.value.find(u => u.id === userId)?.full_name || 'Unknown';
+      }
+      
+      function getUserEmail(userId) {
+        return adminUsers.value.find(u => u.id === userId)?.email || '';
+      }
+
+      async function toggleUserStatus(user) {
+        confirm.value = {
+          title: user.is_active ? 'Suspend User?' : 'Activate User?',
+          msg: `Are you sure you want to ${user.is_active ? 'suspend' : 'activate'} ${user.full_name}?`,
+          ok: async () => {
+            await sb.from('users').update({ is_active: !user.is_active }).eq('id', user.id);
+            await loadAdminData();
+            toast('ok', `User ${user.is_active ? 'suspended' : 'activated'}`);
+          }
+        };
+      }
+
+      function viewUserRequests(user) {
+        reqSearch.value = user.email;
+        goTab('my-requests');
+      }
+
+      function editUser(user) {
+        Object.assign(uF, user);
+        showProfileModal.value = true;
+      }
+
+      function markAllRead() {
+        notifications.value.forEach(n => n.read = true);
+      }
+
+      // Helpers
       function sBadge(s){
         return {completed:'b-ok',delivered:'b-ok',pending:'b-warn',processing:'b-info',sourcing:'b-info',shipping:'b-accent',cancelled:'b-err'}[s]||'b-muted';
       }
+      
       function stockLabel(n){
         if(n==null||n==='') return 'Unknown';
         if(n===0) return 'Out of Stock';
         if(n<=5)  return `Low (${n})`;
         return `In Stock (${n})`;
       }
+      
       function stockClass(n){
         if(n==null||n==='') return '';
         if(n===0) return 'out-stock';
         if(n<=5)  return 'low-stock';
         return 'in-stock';
       }
+      
       function fNum(n){ if(n==null) return '0'; return Math.round(n).toLocaleString(); }
       function tzs(n){ return 'TZS '+fNum(n); }
+      
       function fDate(d){
         if(!d) return '—';
         const dt=new Date(d); if(isNaN(dt)) return '—';
         return dt.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
       }
+      
       function fDateTime(d){
         if(!d) return '—';
         const dt=new Date(d); if(isNaN(dt)) return '—';
         return dt.toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
       }
+      
       function fEvent(t){ if(!t) return '—'; return t.split('_').map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' '); }
 
-      /* ═══ KEYBOARD ════════════════════════════ */
+      // Keyboard handler
       function handleKey(e){
         if(e.key==='Escape'){
           if(confirm.value)          { confirm.value=null; return; }
@@ -2631,34 +3144,62 @@ input, select, textarea { font-family: var(--font-body); }
           if(showProfileModal.value) { showProfileModal.value=false; return; }
           if(sidebarOpen.value)      { sidebarOpen.value=false; return; }
           if(openStatusMenu.value)   { openStatusMenu.value=null; return; }
+          if(showNotifications.value){ showNotifications.value=false; return; }
         }
       }
 
+      // Watch for profile changes
+      watch(profile, (newProfile) => {
+        if (newProfile) {
+          // If user just signed up and had cart, maybe auto-create request?
+          if (cart.value.length > 0) {
+            // Optionally offer to convert cart to request
+            toast('info', 'Your cart is ready', 'You can now create requests');
+          }
+        }
+      });
+
       onMounted(async () => {
         document.addEventListener('keydown', handleKey);
+        loadCart();
         await loadAll();
+        // Add sample notification
+        if (!profile.value) {
+          notifications.value.push({
+            id: 1,
+            title: 'Welcome to TechMedixLink!',
+            time: 'Just now',
+            read: false
+          });
+        }
       });
 
       return {
-        loading, loadMsg, platform, tab, sidebarOpen, search,
-        products, requests, payments, profile, confirm,
+        loading, loadMsg, platform, tab, sidebarOpen, globalSearch, showNotifications,
+        products, requests, payments, profile, confirm, cart, guestEmail,
         showProfileModal, showListingModal, showReqModal,
         editingProd, detailReq, viewedProduct, trackId, trackedReq,
         prodSearch, prodFilter, locFilter, sortProd,
         reqSearch, reqFilter, reqPlatFilter, openStatusMenu,
         toasts, pF, rF, uF,
+        isAdmin, adminSubTab, adminUsers, adminReqSearch, adminReqFilter, adminReqPlatFilter,
+        userStats, notifications,
         pageTitle, primaryLabel, userInitial, today,
-        canBuy, canSell,
+        canBuy, canSell, notificationCount,
+        uniqueCategories, uniqueSellers,
         filteredProds, myListings, myRequests, filteredMyReqs,
         incomingReqs, myActiveReqs, myDoneReqs, recentActivity,
         myTotalSpent, myBalanceDue, pendingPayCount, avgListingPrice, pStats,
+        cartTotal, calcCartShipping, calcCartFee,
         calcItem, calcShip, calcFee, calcDuty, calcTotal,
         stepLabels, statusList, sellerStatusList,
-        setPlatform, goTab, primaryAction, closeAllMenus,
+        adminStats, filteredAdminReqs, revenueChartData,
+        setPlatform, goTab, primaryAction, closeAllMenus, performSearch,
         editListing, closeListing, saveListing, toggleListingStatus,
-        askDeleteProduct, quickRequest, viewProduct,
-        saveReq, fetchTracking, doTrack, askPayment,
+        askDeleteProduct, addToCart, removeFromCart, checkout,
+        saveReq, fetchTracking, fetchGuestTracking, doTrack, askPayment,
         saveProfile, toggleStatusMenu, updateStatus,
+        getUserName, getUserEmail, toggleUserStatus, viewUserRequests, editUser, markAllRead,
         roleLabel, roleIcon,
         sBadge, stepCls, stockLabel, stockClass,
         fNum, tzs, fDate, fDateTime, fEvent, killToast
@@ -2668,4 +3209,4 @@ input, select, textarea { font-family: var(--font-body); }
 })();
 </script>
 </body>
-           </html>
+</html>
