@@ -123,7 +123,7 @@ input,select,textarea{font-family:var(--fb)}
 
 /* Rate bar — Siemens style: subtle info strip */
 .rate-bar{height:var(--rh);background:var(--sidebar);border-bottom:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;padding:0 var(--s6);gap:0;font-size:10px;flex-shrink:0;font-family:var(--fm)}
-.rate-item{display:flex;align-items:center;gap:5px;padding:0 var(--s3);border-right:1px solid rgba(255,255,255,0.07)}
+.rate-item{display:flex;align-items:center;gap:5px;padding:0 var(--s3);border-right:1px solid rgba(255,255,255,0.14)}
 .rate-item:first-child{padding-left:0}
 .rate-lbl{font-family:var(--fb);font-weight:700;letter-spacing:0.05em;text-transform:uppercase;font-size:9px;color:rgba(255,255,255,0.30)}
 .rate-val{color:#4dc8d0;font-weight:600;font-size:10px} /* Siemens teal for live data */
@@ -138,8 +138,8 @@ input,select,textarea{font-family:var(--fb)}
 .topbar{height:var(--th);background:white;border-bottom:2px solid var(--philips);display:flex;align-items:center;justify-content:space-between;padding:0 var(--s6);position:sticky;top:0;z-index:100;flex-shrink:0;box-shadow:var(--sh1)}
 .tb-l{display:flex;align-items:center;gap:var(--s3)}
 .mob-btn{display:none;width:32px;height:32px;border-radius:var(--r2);background:var(--bg-1);border:1px solid var(--ln-1);color:var(--tx-2);align-items:center;justify-content:center;font-size:12px;transition:all var(--fast);border:none}
-.page-ttl{font-family:var(--fd);font-size:20px;font-weight:700;color:var(--tx-1);letter-spacing:-0.02em}
-.plat-tag{display:flex;align-items:center;gap:4px;padding:3px 10px;border-radius:var(--rp);background:var(--a-s);border:1px solid var(--a-b);font-size:9px;font-weight:700;color:var(--a);letter-spacing:0.04em;text-transform:uppercase;transition:all var(--fast)}
+.page-ttl{font-family:var(--fd);font-size:20px;font-weight:400;color:white;letter-spacing:0}
+.plat-tag{display:flex;align-items:center;gap:4px;padding:3px 10px;border-radius:var(--rp);background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.20);font-size:9px;font-weight:700;color:rgba(255,255,255,0.85);letter-spacing:0.04em;text-transform:uppercase;transition:all var(--fast)}
 .tb-r{display:flex;align-items:center;gap:7px}
 /* Search — Philips style: clean rounded, blue focus ring */
 .srch-w{display:flex;align-items:center;gap:var(--s2);background:var(--bg-1);border:1px solid var(--ln-2);border-radius:var(--rp);padding:7px var(--s4);width:220px;transition:all var(--fast)}
@@ -147,10 +147,10 @@ input,select,textarea{font-family:var(--fb)}
 .srch-w input{background:none;border:none;outline:none;color:var(--tx-1);font-size:var(--tsm);width:100%;font-family:var(--fb)}
 .srch-w input::placeholder{color:var(--tx-4)}
 .srch-w i{color:var(--tx-4);font-size:11px;flex-shrink:0}
-.tb-ico{width:34px;height:34px;border-radius:var(--r2);background:var(--bg-1);border:1px solid var(--ln-1);color:var(--tx-3);display:flex;align-items:center;justify-content:center;font-size:12px;transition:all var(--fast);position:relative;cursor:pointer}
-.tb-ico:hover{border-color:var(--philips);color:var(--philips);background:var(--philips-l)}
-.tb-ico.au{background:var(--philips-l);border-color:var(--tm-b);color:var(--philips)}
-.ndot{position:absolute;top:-4px;right:-4px;background:var(--err);color:white;border-radius:50%;width:16px;height:16px;font-size:8px;display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-weight:700;border:2px solid white}
+.tb-ico{width:34px;height:34px;border-radius:var(--r2);background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.14);color:rgba(255,255,255,0.75);display:flex;align-items:center;justify-content:center;font-size:12px;transition:all var(--fast);position:relative;cursor:pointer}
+.tb-ico:hover{border-color:rgba(255,255,255,0.35);color:white;background:rgba(255,255,255,0.15)}
+.tb-ico.au{background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.30);color:white}
+.ndot{position:absolute;top:-4px;right:-4px;background:var(--err);color:white;border-radius:50%;width:16px;height:16px;font-size:8px;display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-weight:700;border:2px solid var(--sidebar)}
 .content{flex:1;padding:var(--s6) var(--s6);overflow-y:auto}
 
 /* ══ BUTTONS — Philips: primary blue, secondary white, rounded ══ */
@@ -164,7 +164,7 @@ input,select,textarea{font-family:var(--fb)}
 .btn-g{background:transparent;color:var(--tx-2);border-color:var(--ln-2)}
 .btn-g.btn-w{border-color:transparent;color:var(--philips);justify-content:flex-start;padding-left:var(--s2)}
 .btn-g.btn-w:hover{background:var(--philips-l);color:var(--philips-d);border-color:transparent}
-.btn-g:hover{background:var(--bg-1);color:var(--tx-1);border-color:var(--ln-3)}
+.btn-g:hover{background:var(--philips-l);color:var(--philips);border-color:var(--tm-b)}
 .btn-d{background:transparent;color:var(--err);border-color:var(--err-bd)}
 .btn-d:hover{background:var(--err-bg)}
 .btn-ok{background:var(--ok);color:white;border-color:var(--ok)}
@@ -259,7 +259,7 @@ input,select,textarea{font-family:var(--fb)}
 .prod-grid{display:flex;flex-wrap:wrap;gap:var(--s5)}.prod-grid>.prod-card{flex:1 1 210px;max-width:290px}
 .prod-card{background:white;border:1px solid var(--ln-1);border-radius:var(--r3);display:flex;flex-direction:column;transition:all var(--fast);position:relative;overflow:hidden;box-shadow:var(--sh1)}
 .prod-card:hover{box-shadow:var(--sh3);border-color:var(--philips);transform:translateY(-2px)}
-.pc-img{width:100%;height:155px;position:relative;overflow:hidden;background:white;flex-shrink:0;display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--ln-0)}
+.pc-img{width:100%;height:165px;position:relative;overflow:hidden;background:var(--bg-1);flex-shrink:0;display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--ln-1)}
 .pc-img img{width:100%;height:100%;object-fit:contain;padding:var(--s2);transition:transform var(--slow)}
 .prod-card:hover .pc-img img{transform:scale(1.04)}
 .pc-img-ph{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:var(--bg-1)}
@@ -403,7 +403,7 @@ input,select,textarea{font-family:var(--fb)}
 .info-strip.wn{background:var(--warn-bg);border:1px solid var(--warn-bd)}
 .info-strip.er{background:var(--err-bg);border:1px solid var(--err-bd)}
 .info-strip.in{background:var(--siemens-l);border:1px solid var(--gd-b)}
-.empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:var(--s8) var(--s6)}
+.empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:var(--s6) var(--s5)}
 .empty-ico{width:56px;height:56px;border-radius:var(--r3);background:var(--philips-l);display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--philips);margin-bottom:var(--s4)}
 .empty-ttl{font-family:var(--fd);font-size:24px;color:var(--tx-1);margin-bottom:var(--s2)}
 .empty-sub{font-size:var(--tsm);color:var(--tx-3);max-width:280px;line-height:1.7;margin-bottom:var(--s5)}
@@ -454,6 +454,8 @@ input,select,textarea{font-family:var(--fb)}
 .slide-leave-to{opacity:0;transform:translateY(-3px)}
 @media(max-width:1100px){.plat-tag{display:none}}
 @media(max-width:860px){
+  .btn-p .btn-label{display:none}
+  .btn-p.btn-sm{padding:8px 12px}
   .sidebar{transform:translateX(-100%)}
   .sidebar.open{transform:translateX(0);box-shadow:var(--sh3)}
   .sb-backdrop.show{display:block}
@@ -464,8 +466,8 @@ input,select,textarea{font-family:var(--fb)}
   .g2,.g3{flex-direction:column;gap:var(--s4)}
   .content{padding:var(--s4) var(--s4)}
   .topbar,.rate-bar{padding:0 var(--s4)}
-  .srch-w{width:160px}
-  .srch-w:focus-within{width:200px}
+  .srch-w{display:none}
+  .mob-search-btn{display:flex}
   .dd-ov{right:var(--s2);width:calc(100vw - var(--s4))}
 }
 @media(max-width:520px){
@@ -480,6 +482,20 @@ input,select,textarea{font-family:var(--fb)}
 @supports(padding-bottom:env(safe-area-inset-bottom)){
   .sb-user{padding-bottom:calc(var(--s3) + env(safe-area-inset-bottom))}
 }
+
+/* ── Light dropdown nav items (for white panels) ── */
+.dd-ov .nav-item{color:var(--tx-2);border-left-color:transparent;padding:9px var(--s3)}
+.dd-ov .nav-item:hover{background:var(--philips-l);color:var(--philips)}
+.dd-ov .nav-item.active{background:var(--philips-l);color:var(--philips);border-left-color:var(--philips)}
+.dd-ov .nav-item .ni{color:var(--tx-3)}
+.dd-ov .nav-item:hover .ni{color:var(--philips)}
+
+/* ── Mobile search expand ── */
+.mob-search-btn{display:none;width:32px;height:32px;border-radius:var(--r2);background:rgba(255,255,255,0.10);border:1px solid rgba(255,255,255,0.18);color:rgba(255,255,255,0.85);align-items:center;justify-content:center;font-size:12px;transition:all var(--fast);cursor:pointer}
+.mob-search-bar{display:none;position:absolute;top:calc(var(--th) + var(--rh));left:0;right:0;padding:var(--s3) var(--s4);background:white;border-bottom:2px solid var(--philips);box-shadow:var(--sh2);z-index:99}
+.mob-search-bar.open{display:flex;gap:var(--s2)}
+.mob-search-bar input{flex:1;background:var(--bg-1);border:1px solid var(--ln-2);border-radius:var(--rp);padding:9px var(--s4);font-size:var(--tsm);color:var(--tx-1);outline:none;font-family:var(--fb)}
+.mob-search-bar input:focus{border-color:var(--philips);box-shadow:0 0 0 3px rgba(0,102,161,0.12)}
 </style>
 </head>
 <!-- ═══════════════════════════════
@@ -512,7 +528,7 @@ input,select,textarea{font-family:var(--fb)}
 <transition name="modal">
   <div v-if="confirm" class="modal-bg" @click.self="confirm=null">
     <div class="modal modal-sm">
-      <div class="modal-body" style="text-align:center;padding:var(--s7) var(--s6)">
+      <div class="modal-body" style="text-align:center;padding:var(--s5) var(--s5) var(--s6)">
         <div class="cfm-ico" :class="confirm.tone||'wn'" style="margin:0 auto var(--s4)"><i :class="confirm.icon||'fas fa-triangle-exclamation'"></i></div>
         <div style="font-family:var(--fd);font-size:23px;font-weight:500;color:var(--tx-1);margin-bottom:var(--s2)">{{ confirm.title }}</div>
         <div style="font-size:var(--tsm);color:var(--tx-2);max-width:280px;margin:0 auto var(--s6);line-height:1.6">{{ confirm.msg }}</div>
@@ -658,6 +674,7 @@ input,select,textarea{font-family:var(--fb)}
     <header class="topbar">
       <div class="tb-l">
         <button class="mob-btn" @click="sidebarOpen=!sidebarOpen"><i class="fas fa-bars"></i></button>
+        <button class="mob-search-btn" @click.stop="$event.target.closest('.main').querySelector('.mob-search-bar').classList.toggle('open')"><i class="fas fa-search"></i></button>
         <div class="page-ttl">{{ pageTitle }}</div>
         <div class="plat-tag"><i :class="platform==='techmedix'?'fas fa-heart-pulse':'fas fa-globe'"></i>{{ platform==='techmedix'?'TechMedixLink':'Global Door' }}</div>
       </div>
@@ -667,11 +684,17 @@ input,select,textarea{font-family:var(--fb)}
           <i class="fas fa-bell"></i>
           <div v-if="unreadCount>0" class="ndot">{{ unreadCount>9?'9+':unreadCount }}</div>
         </div>
-        <div v-if="profile" class="tb-ico au" @click.stop="togglePanel('user')"><i class="fas fa-user"></i><span style="position:absolute;bottom:-2px;right:-2px;background:var(--ok);border-radius:50%;width:7px;height:7px;border:1.5px solid var(--bg-1)"></span></div>
+        <div v-if="profile" class="tb-ico au" @click.stop="togglePanel('user')"><i class="fas fa-user"></i><span style="position:absolute;top:5px;right:5px;background:var(--ok);border-radius:50%;width:7px;height:7px;border:1.5px solid white;pointer-events:none"></span></div>
         <div v-else class="tb-ico" @click="showAuth=true"><i class="fas fa-sign-in-alt"></i></div>
-        <button @click="primaryAction" class="btn btn-p btn-sm"><i class="fas fa-plus"></i><span>{{ primaryLabel }}</span></button>
+        <button @click="primaryAction" class="btn btn-p btn-sm"><i class="fas fa-plus"></i><span class="btn-label">{{ primaryLabel }}</span></button>
       </div>
     </header>
+
+    <!-- Mobile search bar -->
+    <div class="mob-search-bar">
+      <input type="text" v-model="globalSearch" placeholder="Search products…" @keydown.enter="performSearch();$el.closest('.mob-search-bar').classList.remove('open')">
+      <button class="btn btn-p btn-sm" @click="performSearch()"><i class="fas fa-search"></i></button>
+    </div>
 
     <!-- NOTIFICATION PANEL -->
     <transition name="slide">
