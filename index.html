@@ -240,7 +240,7 @@ input,select,textarea{font-family:var(--fb)}
 .img-up{border:2px dashed var(--ln-2);border-radius:var(--r3);padding:var(--s6) var(--s5);text-align:center;cursor:pointer;transition:all var(--fast);position:relative;overflow:hidden;background:var(--bg-1)}
 .img-up:hover{border-color:var(--philips);background:var(--philips-l)}
 .img-up input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
-.img-preview{width:100%;height:150px;object-fit:cover;border-radius:var(--r2);margin-top:var(--s3);display:block}
+.img-preview{width:100%;height:160px;object-fit:cover;border-radius:var(--r2);margin-top:var(--s3);display:block;image-rendering:-webkit-optimize-contrast}
 
 /* ══ TABLES — Amazon zebra + Siemens precision headers ══ */
 .tbl-w{background:white;border:1px solid var(--ln-1);border-radius:var(--r3);overflow-x:auto;box-shadow:var(--sh1)}
@@ -257,12 +257,12 @@ input,select,textarea{font-family:var(--fb)}
 
 /* ══ PRODUCT CARDS — Amazon layout + Philips imagery ══ */
 .prod-grid{display:flex;flex-wrap:wrap;gap:var(--s5)}.prod-grid>.prod-card{flex:1 1 210px;max-width:290px}
-.prod-card{background:white;border:1px solid var(--ln-1);border-radius:var(--r3);display:flex;flex-direction:column;transition:all var(--fast);position:relative;overflow:hidden;box-shadow:var(--sh1)}
+.prod-card{background:white;border:1px solid var(--ln-1);border-radius:var(--r3);display:flex;flex-direction:column;transition:box-shadow var(--fast),border-color var(--fast),transform var(--fast);position:relative;overflow:hidden;box-shadow:var(--sh1)}
 .prod-card:hover{box-shadow:var(--sh3);border-color:var(--philips);transform:translateY(-2px)}
-.pc-img{width:100%;height:165px;position:relative;overflow:hidden;background:var(--bg-1);flex-shrink:0;display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--ln-1)}
-.pc-img img{width:100%;height:100%;object-fit:contain;padding:var(--s2);transition:transform var(--slow)}
-.prod-card:hover .pc-img img{transform:scale(1.04)}
-.pc-img-ph{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:var(--bg-1)}
+.pc-img{width:100%;height:180px;position:relative;overflow:hidden;background:#ffffff;flex-shrink:0;display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--ln-0)}
+.pc-img img{width:100%;height:100%;object-fit:cover;display:block;transition:transform var(--slow);-webkit-backface-visibility:hidden;backface-visibility:hidden;transform:translateZ(0)}
+.prod-card:hover .pc-img img{transform:scale(1.03)}
+.pc-img-ph{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:var(--bg-1)}
 .pc-img-ph i{font-size:28px;color:var(--bg-5)}
 .pc-img-ph span{font-size:9px;color:var(--tx-4);font-weight:600;letter-spacing:0.08em;text-transform:uppercase}
 .pc-img-badges{position:absolute;top:var(--s2);left:var(--s2);display:flex;flex-direction:column;gap:3px;align-items:flex-start}
