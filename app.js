@@ -34,7 +34,7 @@
 // ── 2. STATE ────────────────────────────────────────────────────
   const { createApp, ref, reactive, computed, onMounted, nextTick, watch } = Vue;
 
-  createApp({
+  const app = createApp({
     setup() {
       // ── Core state ──
       const loading        = ref(false);
@@ -267,6 +267,20 @@
 
       // ── 3. COMPUTED ──────────────────────────────────────────────
       // ── Profile completeness ──
+      const adminTriage = computed(() => {
+        const reqs = allRequests.value;
+        return {
+          pendingPayments:   reqs.filter(r => r.payment_status==='pending' && r.total_cost>0 && r.status!=='cancelled'),
+          awaitingQuote:     reqs.filter(r => ['pending','submitted'].includes(r.status)),
+          verifyRequests:    (adminUsers.value||[]).filter(u => u.company_name?.startsWith('[VERIFY_REQUESTED]')),
+          stalled:           reqs.filter(r => {
+            if (['completed','cancelled','delivered'].includes(r.status)) return false;
+            const age = (Date.now()-new Date(r.updated_at||r.created_at))/86400000;
+            return age > 3;
+          }),
+        };
+      });
+
       const profileCompletion = computed(() => {
         if (!profile.value) return { pct:0, unlocks:[], next:null };
         const p = profile.value;
@@ -296,14 +310,14 @@
 
       // ── Computed roles ──
       const isAdmin = computed(() => profile.value?.user_role === 'admin');
-      const canBuy  = computed(() => !profile.value || ['buyer','both','admin'].includes(profile.value?.user_role));
-      const canSell = computed(() => !!profile.value && ['seller','both','admin'].includes(profile.value?.user_role));
+      const canBuy  = computed(() => !profile.value || ['buyer','both'].includes(profile.value?.user_role));
+      const canSell = computed(() => !!profile.value && ['seller','both'].includes(profile.value?.user_role));
       function roleLabel(r) { return { buyer:'Buyer', seller:'Seller', both:'Buyer & Seller', admin:'Admin' }[r] || r; }
       function roleIcon(r)  { return { buyer:'fa-cart-shopping', seller:'fa-store', both:'fa-arrows-left-right', admin:'fa-shield-halved' }[r] || 'fa-user'; }
 
       // ── Computed UI ──
       const pageTitle = computed(() => ({ home:'Dashboard', browse:'Browse Products', 'my-requests':'My Requests', 'my-listings':'My Listings', inquiries:'Inquiries', tracking:'Tracking', payments:'Payments', admin:'Admin Panel', analytics:'Analytics', shoppers:'Shoppers' })[tab.value] || 'TechMedixLink');
-      const primaryLabel = computed(() => { if (!profile.value) return 'Sign In'; if (canBuy.value) return 'Request'; if (canSell.value) return 'List Product'; return 'Browse'; });
+      const primaryLabel = computed(() => { if (!profile.value) return 'Sign In'; if (isAdmin.value) return 'Admin'; if (canBuy.value) return 'Request'; if (canSell.value) return 'List Product'; return 'Browse'; });
       const userInitial  = computed(() => profile.value?.full_name?.charAt(0)?.toUpperCase() || '?');
       const today        = computed(() => new Date().toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long', year:'numeric' }));
       const unreadCount  = computed(() => notifications.value.filter(n => !n.is_read).length);
@@ -966,7 +980,7 @@
 
       async function obSaveRoleDetail() {
         const p = profile.value;
-        const isSeller = ['seller','both','admin'].includes(p?.user_role);
+        const isSeller = ['seller','both'].includes(p?.user_role);
         const update = { updated_at: new Date().toISOString() };
         if (isSeller) {
           // Store seller details in company_name field (prefixed) + verification notes
@@ -1392,13 +1406,15 @@
             .limit(1);
           if (assignments?.length) {
             const asgn = assignments[0];
-            req.shopper_name = asgn.shopper?.full_name || '';
-            req.shopper_phone = asgn.shopper?.phone || '';
+            req.shopper_name   = asgn.shopper?.full_name || '';
+            req.shopper_avatar = asgn.shopper?.user_id ? (await sb.from('users').select('avatar_url').eq('id', asgn.shopper.user_id).single()).data?.avatar_url || null : null;
+            req.shopper_phone  = asgn.shopper?.phone || '';
             req.shopper_city = asgn.shopper?.city || '';
             req.shopper_type = asgn.shopper?.shopper_type || '';
             req.shopper_rating = asgn.shopper?.rating || 0;
             req.assignment_type = asgn.assignment_type || '';
             req.assignment_status = asgn.status || '';
+            req.shopper_assignment_id = asgn.id || null;
           }
         } catch(e) { console.error('shopper fetch:', e); }
         detailReq.value = req;
@@ -1686,6 +1702,19 @@
         toast('ok', editingShopper.value?'Shopper updated':'Shopper added');
       }
 
+      async function updateShopperStatus(r, newStatus) {
+        if (!r.shopper_assignment_id) return;
+        const { error } = await sb.from('shopper_assignments').update({
+          status: newStatus,
+          ...(newStatus==='accepted' ? {accepted_at: new Date().toISOString()} : {}),
+          ...(newStatus==='completed' ? {completed_at: new Date().toISOString()} : {}),
+        }).eq('id', r.shopper_assignment_id);
+        if (!error) {
+          await loadReqs();
+          toast('ok','Shopper status updated', newStatus);
+        }
+      }
+
       async function assignShopper(r) {
         if (!assignShopperId.value) return;
         const sh = shoppers.value.find(s => s.id === assignShopperId.value);
@@ -1706,6 +1735,26 @@
         }
         inquiryReq.value = req;
         showInquiryDetail.value = true;
+      }
+
+      async function acceptInquiry(r) {
+        const { error } = await sb.from('requests').update({
+          status: 'submitted',   // submitted = seller acknowledged
+          updated_at: new Date().toISOString()
+        }).eq('id', r.id);
+        if (error) { toast('err','Error',error.message); return; }
+        await sb.from('tracking_events').insert({
+          request_id: r.id, event_type: 'processing', event_status: 'completed',
+          description: 'Inquiry accepted by seller. Quote will be provided shortly.',
+          event_time: new Date().toISOString(), created_at: new Date().toISOString()
+        });
+        // Notify buyer
+        if (r.user_id) await createNotification(r.user_id,'status_update',
+          'Inquiry Accepted',
+          'Your inquiry '+r.request_number+' has been accepted. A quote is being prepared.',
+          r.id, 'in_app');
+        await loadReqs();
+        toast('ok','Inquiry accepted', 'Buyer notified. Please send a quote.');
       }
 
       async function acknowledgeInquiry(r) {
@@ -2019,5 +2068,10 @@
         fNum, tzs, fDate, fDateTime, fEvent, stockLabel, stockClass, fCountdown,
       };
     }
-  }).mount('#app');
+  });
+
+  // Tell Vue that model-viewer is a native web component, not a Vue component
+  app.config.compilerOptions.isCustomElement = tag => tag === 'model-viewer';
+
+  app.mount('#app');
 })();
