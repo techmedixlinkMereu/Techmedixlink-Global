@@ -224,6 +224,131 @@
   </div>
 </transition>
 
+
+<!-- ══════════════════════════════════════════════════════════════
+     ONBOARDING OVERLAY
+══════════════════════════════════════════════════════════════ -->
+<transition name="fade">
+<div v-if="showOnboarding" class="ob-shell">
+
+  <!-- Progress dots -->
+  <div class="ob-dots">
+    <div v-for="s in 4" :key="s" class="ob-dot" :class="{active:onboardStep===s,done:onboardStep>s}"></div>
+  </div>
+
+  <!-- ── STEP 1: Role ── -->
+  <div v-if="onboardStep===1" class="ob-card">
+    <div class="ob-icon"><i class="fas fa-heart-pulse"></i></div>
+    <div class="ob-ttl">Welcome to TechMedixLink</div>
+    <div class="ob-sub">Tanzania's medical equipment marketplace. How will you use the platform?</div>
+    <div class="ob-role-grid">
+      <button @click="obSetRole('buyer')" class="ob-role-btn">
+        <i class="fas fa-cart-shopping"></i>
+        <div class="ob-role-lbl">I want to buy</div>
+        <div class="ob-role-sub">Source medical equipment for my facility</div>
+      </button>
+      <button @click="obSetRole('seller')" class="ob-role-btn">
+        <i class="fas fa-store"></i>
+        <div class="ob-role-lbl">I want to sell</div>
+        <div class="ob-role-sub">List and sell medical equipment</div>
+      </button>
+      <button @click="obSetRole('both')" class="ob-role-btn ob-role-both">
+        <i class="fas fa-arrows-left-right"></i>
+        <div class="ob-role-lbl">Buy & Sell</div>
+        <div class="ob-role-sub">I do both — full access</div>
+      </button>
+    </div>
+    <button @click="obSkip" class="ob-skip">Skip for now</button>
+  </div>
+
+  <!-- ── STEP 2: Account type ── -->
+  <div v-if="onboardStep===2" class="ob-card">
+    <div class="ob-icon ob-icon-b"><i class="fas fa-building-columns"></i></div>
+    <div class="ob-ttl">What describes you best?</div>
+    <div class="ob-sub">This helps us show you the right products and documentation requirements.</div>
+    <div class="ob-type-grid">
+      <button v-for="t in [{v:'individual',i:'fa-user',l:'Individual'},{v:'hospital',i:'fa-hospital',l:'Hospital'},{v:'clinic',i:'fa-stethoscope',l:'Clinic'},{v:'lab',i:'fa-flask',l:'Laboratory'},{v:'business',i:'fa-building',l:'Business'},{v:'ngo',i:'fa-heart',l:'NGO'}]"
+        :key="t.v" @click="obSetType(t.v)" class="ob-type-btn">
+        <i class="fas" :class="t.i"></i>
+        <span>{{ t.l }}</span>
+      </button>
+    </div>
+    <button @click="onboardStep=1" class="ob-back"><i class="fas fa-arrow-left"></i> Back</button>
+  </div>
+
+  <!-- ── STEP 3: Core profile + avatar ── -->
+  <div v-if="onboardStep===3" class="ob-card ob-card-wide">
+    <div class="ob-ttl">Build your profile</div>
+    <div class="ob-sub">A complete profile builds trust with buyers and sellers.</div>
+
+    <!-- Avatar upload -->
+    <div class="ob-av-wrap">
+      <div class="ob-av-ring" @click="$refs.obAvInput.click()">
+        <img v-if="obF.avatar_preview" :src="obF.avatar_preview" class="ob-av-img">
+        <div v-else class="ob-av-ph"><i class="fas fa-camera"></i></div>
+        <div class="ob-av-badge"><i class="fas fa-plus" style="font-size:9px"></i></div>
+      </div>
+      <input ref="obAvInput" type="file" accept="image/jpeg,image/jpg,image/png,image/webp" @change="obHandleAvatar" style="display:none">
+      <div style="font-size:var(--txs);color:var(--tx-3);margin-top:var(--s2)">Passport-style photo · Max 3MB</div>
+    </div>
+
+    <!-- Fields -->
+    <div class="fr2" style="width:100%;margin-top:var(--s4)">
+      <div class="fg"><label class="lbl req">Full Name</label><input type="text" v-model="obF.full_name" class="inp" placeholder="Your full legal name" autocomplete="name"></div>
+      <div class="fg"><label class="lbl">Phone</label><input type="tel" v-model="obF.phone" class="inp" placeholder="+255 7XX XXX XXX"></div>
+    </div>
+
+    <!-- Completion preview -->
+    <div class="ob-pct-bar">
+      <div class="ob-pct-fill" :style="{width: (obF.full_name?(obF.avatar_preview?55:35):15)+'%'}"></div>
+    </div>
+    <div style="font-size:var(--txs);color:var(--tx-3);margin-top:var(--s2)">
+      Profile {{ obF.full_name?(obF.avatar_preview?'55':'35'):'15' }}% complete after this step
+    </div>
+
+    <div style="display:flex;gap:var(--s3);margin-top:var(--s5);width:100%;justify-content:center">
+      <button @click="onboardStep=2" class="btn btn-g"><i class="fas fa-arrow-left"></i>Back</button>
+      <button @click="obSaveProfile" class="btn btn-p" :disabled="!obF.full_name||obF.avatar_uploading">
+        <span v-if="obF.avatar_uploading"><div class="spinner" style="width:14px;height:14px;margin:0 4px 0 0;border-width:1.5px;display:inline-block;vertical-align:middle"></div>Uploading…</span>
+        <span v-else><i class="fas fa-arrow-right"></i>Continue</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ── STEP 4: Role-specific detail ── -->
+  <div v-if="onboardStep===4" class="ob-card ob-card-wide">
+    <div class="ob-ttl">Almost done!</div>
+    <!-- Buyer detail -->
+    <template v-if="profile&&['buyer','both'].includes(profile.user_role)">
+      <div class="ob-sub">Tell us about your facility so we can show you the right products.</div>
+      <div class="fr2" style="width:100%;margin-top:var(--s4)">
+        <div class="fg"><label class="lbl">Facility / Organisation</label><input type="text" v-model="obF.facility_type" class="inp" placeholder="e.g. Muhimbili Hospital"></div>
+        <div class="fg"><label class="lbl">Region</label>
+          <select v-model="obF.supply_region" class="sel">
+            <option>Dar es Salaam</option><option>Arusha</option><option>Mwanza</option><option>Dodoma</option><option>Zanzibar</option><option>Mbeya</option><option>Morogoro</option><option>Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg" style="width:100%"><label class="lbl">Bed count (if hospital/clinic)</label><input type="number" v-model="obF.bed_count" class="inp" placeholder="e.g. 250" style="max-width:200px"></div>
+    </template>
+    <!-- Seller detail -->
+    <template v-if="profile&&['seller'].includes(profile.user_role)">
+      <div class="ob-sub">Verify your business to earn the seller trust badge on all your listings.</div>
+      <div class="fr2" style="width:100%;margin-top:var(--s4)">
+        <div class="fg"><label class="lbl">Business Registration No.</label><input type="text" v-model="obF.business_reg" class="inp" placeholder="e.g. 123456789"></div>
+        <div class="fg"><label class="lbl">TMDA License No. (optional)</label><input type="text" v-model="obF.tmda_license" class="inp" placeholder="For medical devices"></div>
+      </div>
+    </template>
+    <div style="display:flex;gap:var(--s3);margin-top:var(--s5);width:100%;justify-content:center">
+      <button @click="onboardStep=3" class="btn btn-g"><i class="fas fa-arrow-left"></i>Back</button>
+      <button @click="obSaveRoleDetail" class="btn btn-p"><i class="fas fa-check"></i>Complete Profile</button>
+    </div>
+    <button @click="obSkip" class="ob-skip" style="margin-top:var(--s3)">Skip — I'll do this later</button>
+  </div>
+
+</div>
+</transition>
+
 <div class="shell">
   <div class="sb-backdrop" :class="{show:sidebarOpen}" @click="sidebarOpen=false"></div>
 
@@ -267,14 +392,36 @@
       </template>
     </nav>
     <div class="sb-user">
-      <div v-if="profile" class="user-row" @click="showProfileModal=true">
-        <div class="user-av">{{ userInitial }}</div>
-        <div style="flex:1;overflow:hidden">
-          <div class="user-name">{{ profile.full_name }}</div>
-          <div class="user-role-tag">{{ profile.email }}</div>
+      <!-- Signed in: avatar + ring + completion -->
+      <div v-if="profile" class="sb-profile-card" @click="showProfileModal=true">
+        <div class="sb-av-wrap">
+          <!-- SVG ring -->
+          <svg class="sb-av-ring-svg" viewBox="0 0 52 52">
+            <circle cx="26" cy="26" r="23" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="2.5"/>
+            <circle cx="26" cy="26" r="23" fill="none" stroke="#4dc8d0" stroke-width="2.5"
+              stroke-dasharray="144.5"
+              :stroke-dashoffset="144.5 - (144.5 * profileCompletion.pct / 100)"
+              stroke-linecap="round" transform="rotate(-90 26 26)"
+              style="transition:stroke-dashoffset 0.8s ease"/>
+          </svg>
+          <!-- Avatar or initials -->
+          <div class="sb-av-inner">
+            <img v-if="profile.avatar_url" :src="profile.avatar_url" class="sb-av-photo">
+            <span v-else class="sb-av-init">{{ userInitial }}</span>
+          </div>
+          <!-- Pct label -->
+          <div class="sb-av-pct">{{ profileCompletion.pct }}%</div>
         </div>
-        <i class="fas fa-pen" style="color:var(--tx-3);font-size:9px;flex-shrink:0"></i>
+        <div style="flex:1;overflow:hidden;min-width:0">
+          <div class="user-name">{{ profile.full_name }}</div>
+          <div class="user-role-tag" style="color:rgba(255,255,255,0.45)">{{ roleLabel(profile.user_role) }}</div>
+          <div v-if="profileCompletion.pct<100&&profileCompletion.next" class="sb-next-step">
+            <i class="fas fa-circle-arrow-right" style="font-size:9px"></i> {{ profileCompletion.next.label }}
+          </div>
+        </div>
+        <i class="fas fa-pen" style="color:rgba(255,255,255,0.3);font-size:9px;flex-shrink:0"></i>
       </div>
+      <!-- Signed out -->
       <div v-else class="user-row" @click="showAuth=true">
         <div class="user-av" style="background:var(--bg-5);color:var(--tx-3);box-shadow:none"><i class="fas fa-user" style="font-size:11px"></i></div>
         <div style="flex:1"><div class="user-name" style="color:var(--tx-3)">Not signed in</div><div class="user-role-tag">Tap to sign in</div></div>
@@ -375,6 +522,34 @@
       <!-- ── HOME ── -->
       <div v-if="tab==='home'">
         <div v-if="!profile" class="info-strip ac fu"><i class="fas fa-circle-info" style="color:var(--a);font-size:15px;flex-shrink:0"></i><div style="flex:1"><div style="font-size:var(--tsm);font-weight:600;color:var(--a)">Sign in to unlock all features</div><div style="font-size:var(--txs);color:var(--tx-3);margin-top:2px">Track orders, submit requests, manage listings</div></div><button @click="showAuth=true" class="btn btn-p btn-sm">Sign In</button></div>
+        <!-- Profile completeness gamification (shown if incomplete) -->
+        <div v-if="profile && profileCompletion.pct < 100" class="ob-progress-card fu">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--s3)">
+            <div>
+              <div style="font-family:var(--fd);font-size:17px;color:var(--tx-1)">Complete your profile</div>
+              <div style="font-size:var(--txs);color:var(--tx-3);margin-top:2px">Unlock more features as you go</div>
+            </div>
+            <div style="font-family:var(--fm);font-size:28px;font-weight:700;color:var(--philips)">{{ profileCompletion.pct }}%</div>
+          </div>
+          <div class="ob-track">
+            <div class="ob-fill" :style="{width:profileCompletion.pct+'%'}"></div>
+          </div>
+          <!-- Unlock milestones -->
+          <div class="ob-unlocks">
+            <div v-for="u in profileCompletion.unlocks" :key="u.at" class="ob-unlock" :class="{done:u.done}">
+              <div class="ob-unlock-icon"><i class="fas" :class="u.icon"></i></div>
+              <div class="ob-unlock-lbl">{{ u.label }}</div>
+              <div class="ob-unlock-at">{{ u.at }}%</div>
+            </div>
+          </div>
+          <!-- Next action CTA -->
+          <div v-if="profileCompletion.next" class="ob-cta">
+            <i class="fas fa-circle-arrow-right"></i>
+            <span>{{ profileCompletion.next.label }}</span>
+            <button @click="showProfileModal=true" class="btn btn-p btn-sm" style="margin-left:auto">Do it now</button>
+          </div>
+        </div>
+
         <div style="margin-bottom:var(--s6)" class="fu">
           <div style="font-family:var(--fd);font-size:48px;font-family:var(--fd);color:var(--tx-1);line-height:1.15">
             {{ profile?'Welcome back,':'Welcome to' }}<br><span style="color:var(--a)">{{ profile?.full_name?.split(' ')[0]||'TechMedixLink' }}</span>
@@ -830,6 +1005,32 @@
 <transition name="modal">
   <div v-if="showProfileModal && profile" class="modal-bg" @click.self="showProfileModal=false">
     <div class="modal">
+      <div class="modal-hd" style="padding-bottom:0;border-bottom:none">
+        <!-- Avatar section -->
+        <div style="width:100%;text-align:center;padding:var(--s5) var(--s4) var(--s3)">
+          <div class="prof-av-wrap" @click="$refs.profAvInput.click()">
+            <img v-if="profile.avatar_url" :src="profile.avatar_url" class="prof-av-img">
+            <div v-else class="prof-av-ph">{{ userInitial }}</div>
+            <div class="prof-av-edit"><i class="fas fa-camera" style="font-size:10px"></i></div>
+          </div>
+          <input ref="profAvInput" type="file" accept="image/jpeg,image/jpg,image/png,image/webp" @change="handleAvatarChange" style="display:none">
+          <div style="margin-top:var(--s2);font-family:var(--fd);font-size:20px;color:var(--tx-1)">{{ profile.full_name }}</div>
+          <div style="font-size:var(--txs);color:var(--tx-3)">{{ profile.email }}</div>
+          <!-- Completeness bar in modal -->
+          <div style="max-width:280px;margin:var(--s3) auto 0">
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+              <span style="font-size:var(--txs);color:var(--tx-3)">Profile complete</span>
+              <span style="font-size:var(--txs);font-family:var(--fm);color:var(--philips);font-weight:600">{{ profileCompletion.pct }}%</span>
+            </div>
+            <div style="height:6px;background:var(--bg-3);border-radius:3px;overflow:hidden">
+              <div :style="{width:profileCompletion.pct+'%',background:'var(--philips)',height:'100%',borderRadius:'3px',transition:'width 0.6s ease'}"></div>
+            </div>
+            <div v-if="profileCompletion.next" style="font-size:10px;color:var(--tx-3);margin-top:4px;text-align:left">
+              <i class="fas fa-arrow-right" style="color:var(--philips)"></i> Next: {{ profileCompletion.next.label }}
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="modal-hd"><div><div class="modal-ttl">Edit Profile</div><div style="display:flex;align-items:center;gap:var(--s2);margin-top:4px"><div class="modal-sub">{{ profile.email }}</div><span v-if="profile.company_name?.startsWith('[VERIFY_REQUESTED]')" class="badge b-wn"><i class="fas fa-clock"></i>Verification Pending</span><span v-else-if="!profile.company_name?.startsWith('[VERIFY_REQUESTED]')" class="badge b-mu">Not Verified</span></div></div><button class="modal-x" @click="showProfileModal=false"><i class="fas fa-times"></i></button></div>
       <div class="modal-body">
         <div class="fr2">
