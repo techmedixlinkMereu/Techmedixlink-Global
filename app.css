@@ -1,7 +1,7 @@
 /* ─────────────────────────────────────────────────────────────────
    TechMedixLink · app.css
    ─────────────────────────────────────────────────────────────────
-   TABLE OF CONTENTS 
+   TABLE OF CONTENTS
     1.  Design tokens  (CSS variables: colours, spacing, typography)
     2.  Reset & base   (*, html, body, scrollbar, links)
     3.  Layout         (.shell, .sidebar, .main)
@@ -695,3 +695,11 @@ input,select,textarea{font-family:var(--fb)}
 /* ── Clear filters chip ── */
 .filter-clear-btn{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:var(--rp);background:var(--philips);color:white;font-size:var(--txs);font-weight:600;border:none;cursor:pointer;font-family:var(--fb);transition:all var(--fast)}
 .filter-clear-btn:hover{background:var(--philips-d);transform:translateY(-1px)}
+
+/* ── Payment summary card ── */
+.pmt-summary{background:var(--bg-1);border:1px solid var(--ln-1);border-radius:var(--r2);padding:var(--s3) var(--s4);margin-bottom:var(--s4);display:flex;flex-direction:column;gap:6px}
+.pmt-summary-row{display:flex;justify-content:space-between;align-items:center;font-size:var(--tsm);color:var(--tx-2)}
+.pmt-summary-row span:first-child{color:var(--tx-3)}
+.pmt-summary-due{padding-top:8px;border-top:1px solid var(--ln-1);margin-top:2px;font-weight:700}
+.pmt-summary-due span:first-child{color:var(--tx-1)}
+.pmt-summary-due .mono{color:var(--warn);font-size:16px}
