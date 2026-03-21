@@ -795,7 +795,7 @@
         <div class="sect-hd fu"><div><div class="sect-ttl">Browse Products</div><div class="sect-sub">{{  browseSubtitle  }}</div></div></div>
         <!-- Filters -->
         <div class="card fu fu-1" style="margin-bottom:var(--s3)">
-          <div style="display:flex;gap:var(--s2);flex-wrap:wrap;margin-bottom:var(--s3)}">
+          <div style="display:flex;gap:var(--s2);flex-wrap:wrap;margin-bottom:var(--s3)">
             <div style="flex:1;min-width:180px;position:relative"><i class="fas fa-search" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--tx-3);font-size:10px;pointer-events:none"></i><input type="text" v-model="prodSearch" placeholder="Search name, brand, location…" class="inp" style="padding-left:34px;border-radius:var(--rp)"></div>
             <select v-model="prodFilter" class="sel" :class="prodFilter!=='all'?'sel-active':''" style="width:148px;border-radius:var(--rp)"><option value="all">All Platforms</option><option value="techmedix">TechMedixLink</option><option value="globaldoor">GlobalDoor</option><option value="tmda">TMDA Certified</option><option value="local">Tanzania Stock</option><option value="international">International</option></select>
             <select v-model="prodTypeFilter" class="sel" :class="prodTypeFilter!=='all'?'sel-active':''" style="width:148px;border-radius:var(--rp)"><option value="all">All Types</option><option value="medical_device">Medical Device</option><option value="medical_supply">Medical Supply</option><option value="electronics">Electronics</option><option value="lab_equipment">Lab Equipment</option><option value="other">Other</option></select>
