@@ -1,24 +1,4 @@
 <!DOCTYPE html>
-<!-- ─────────────────────────────────────────────────────────────────
-     TechMedixLink · index.html
-     Tanzania Medical Equipment Platform
-
-     DEPLOYMENT: Upload index.html, app.css, app.js, config.js,
-     manifest.json and favicon.svg to any static host.
-
-     FILES:
-       index.html   — HTML structure & Vue template
-       app.css      — All styles (508 lines, 23 sections)
-       app.js       — Vue app logic (20 sections) 
-       config.js    — Supabase credentials (add to .gitignore!)
-       manifest.json — PWA manifest
-       favicon.svg  — App icon
-
-     SUPABASE SETUP:
-       1. Enable RLS on all tables
-       2. Set email templates (see email-templates.html)
-       3. Set redirect URL: Authentication → URL Configuration
-     ───────────────────────────────────────────────────────────────── -->
 <html lang="en" data-platform="techmedix">
 <head>
 <meta charset="UTF-8">
@@ -1036,7 +1016,7 @@
 
 
       <!-- ── ADMIN LISTINGS ── -->
-      <div v-if=\"tab==='admin-listings' && isAdmin">
+      <div v-if="tab==='admin-listings' && isAdmin">
         <div class="sect-hd fu">
           <div><div class="sect-ttl">All Listings</div><div class="sect-sub">{{  products.length  }} products on platform</div></div>
           <div style="display:flex;gap:var(--s2)">
@@ -2473,6 +2453,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
 <script src="https://unpkg.com/vue@3.4.21/dist/vue.global.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="config.js"></script>
 <script src="app.js"></script>
 <script src="config.js"></script>
 <script src="app.js"></script>
