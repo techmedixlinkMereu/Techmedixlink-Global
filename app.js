@@ -1974,88 +1974,80 @@
       watch(authTab, () => { authErr.value = ''; magicSent.value = false; aF.password = ''; });
 
       // ── MOUNT ──
-      onMounted(async () => {
+      onMounted(() => {
         document.addEventListener('keydown', handleKey);
 
-        // ── E: URL-based auth token detection ──
-        // Supabase redirects back with hash or query params after magic link / reset
-        const hash   = window.location.hash;
-        const search = window.location.search;
-        const params = new URLSearchParams(hash.startsWith('#') ? hash.slice(1) : search.slice(1));
-        const urlType        = params.get('type');
-        const urlAccessToken = params.get('access_token');
-        const urlError       = params.get('error_description');
+        // Handle URL tokens (magic link / password reset callbacks)
+        const params = new URLSearchParams(
+          window.location.hash.startsWith('#')
+            ? window.location.hash.slice(1)
+            : window.location.search.slice(1)
+        );
+        const urlError = params.get('error_description');
+        const urlType  = params.get('type');
+        const urlToken = params.get('access_token');
 
         if (urlError) {
-          // Link expired or already used
-          authLanding.value = false;
           showAuth.value = true;
           authErr.value = decodeURIComponent(urlError).replace(/\+/g,' ');
-          // Clean URL
-          history.replaceState(null, '', window.location.pathname);
-        } else if (urlAccessToken || urlType === 'recovery' || urlType === 'magiclink' || urlType === 'signup') {
-          // Show branded landing screen while Supabase processes the session
+          history.replaceState(null,'',window.location.pathname);
+        } else if (urlToken || urlType === 'recovery' || urlType === 'magiclink' || urlType === 'signup') {
           authLanding.value = true;
-          if (urlType === 'recovery') {
-            authLandingMsg.value = 'Verifying your reset link…';
-          } else {
-            authLandingMsg.value = 'Signing you in securely…';
-          }
-          // Clean URL immediately so token is not visible
-          history.replaceState(null, '', window.location.pathname);
-          // Let Supabase's onAuthStateChange handle session establishment
-          // It will fire automatically once the hash is processed
-        } else {
-          loading.value = true; loadMsg.value = 'Initialising…';
+          authLandingMsg.value = urlType === 'recovery' ? 'Verifying your reset link…' : 'Signing you in securely…';
+          history.replaceState(null,'',window.location.pathname);
+        }
+
+        // Single auth listener — drives ALL data loading
+        // Fires immediately with current session state on page load
+        loading.value = true;
+        loadMsg.value = 'Loading…';
+
+        sb.auth.onAuthStateChange(async (event, session) => {
           try {
-            const { data: { session } } = await sb.auth.getSession();
-            if (session?.user) {
+            if (event === 'PASSWORD_RECOVERY') {
+              authLanding.value = false;
+              showPasswordUpdate.value = true;
+              await loadAll();
+
+            } else if (event === 'SIGNED_IN' && session) {
+              authLanding.value = false;
+              showPasswordUpdate.value = false;
+              showAuth.value = false;
+              magicSent.value = false;
               await loadUserProfile(session.user.id);
               await loadAll();
               await loadNotifications();
               if (isAdmin.value) { await loadAdminUsers(); await loadShoppers(); }
               await loadAddresses();
-            } else {
-              await loadAll();
-            }
-          } catch(e) { console.error('onMounted load:', e); }
-          finally { loading.value = false; }
-        }
-
-        // Auth state listener — handles both normal sign-in and URL token exchange
-        sb.auth.onAuthStateChange(async (event, session) => {
-          if (event === 'PASSWORD_RECOVERY') {
-            // User clicked reset link — show password update form
-            authLanding.value = false;
-            showPasswordUpdate.value = true;
-            // Still load data in background
-            await loadAll();
-          } else if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session) {
-            authLanding.value = false;
-            showPasswordUpdate.value = false;
-            await loadUserProfile(session.user.id);
-            showAuth.value = false;
-            magicSent.value = false;
-            if (!loading.value) {
+              // Welcome / onboarding
               const isNewish = !profile.value?.avatar_url && !profile.value?.phone;
-              if (isNewish) {
-                startOnboarding();
-              } else {
-                toast('ok', 'Welcome back!', profile.value?.full_name || session.user.email || '');
-              }
-            }
-            loading.value = true; loadMsg.value = 'Loading your dashboard…';
-            try {
+              if (isNewish) startOnboarding();
+              else toast('ok','Welcome back!', profile.value?.full_name || session.user.email || '');
+
+            } else if (event === 'TOKEN_REFRESHED' && session) {
+              // Silent token refresh — just reload data quietly
+              if (!profile.value) await loadUserProfile(session.user.id);
               await loadAll();
-              await loadNotifications();
-              if (isAdmin.value) { await loadAdminUsers(); await loadShoppers(); }
-              await loadAddresses();
-            } catch(e) { console.error('SIGNED_IN load:', e); }
-            finally { loading.value = false; }
-          } else if (event === 'SIGNED_OUT') {
-            profile.value = null;
-            notifications.value = [];
-            addresses.value = [];
+
+            } else if (event === 'SIGNED_OUT') {
+              profile.value = null;
+              notifications.value = [];
+              addresses.value = [];
+              allRequests.value = [];
+              payments.value = [];
+              tab.value = 'home';
+
+            } else if (event === 'INITIAL_SESSION') {
+              // Page load with no session — just load public data
+              if (!session) {
+                await loadAll();
+              }
+              // If session exists, SIGNED_IN fires separately
+            }
+          } catch(e) {
+            console.error('[TML auth]', event, e);
+          } finally {
+            loading.value = false;
           }
         });
       });
@@ -2100,6 +2092,14 @@
       };
     }
   });
+
+  // Global error handler - catch any Vue errors
+  app.config.errorHandler = (err, instance, info) => {
+    console.error('[Vue Error]', err, info);
+  };
+  app.config.warnHandler = (msg, instance, trace) => {
+    console.warn('[Vue Warn]', msg);
+  };
 
   // Tell Vue that model-viewer is a native web component, not a Vue component
   app.config.compilerOptions.isCustomElement = tag => tag === 'model-viewer';
