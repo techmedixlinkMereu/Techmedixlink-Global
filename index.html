@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ─────────────────────────────────────────────────────────────────
-     TechMedixLink · index.html 
+     TechMedixLink · index.html
      Tanzania Medical Equipment Platform
 
      DEPLOYMENT: Upload index.html, app.css, app.js, config.js,
@@ -375,7 +375,11 @@
     <button class="sb-close" @click="sidebarOpen=false"><i class="fas fa-times"></i></button>
     <div class="sb-top">
       <div class="logo">
-        <div class="logo-mark"><i :class="platform==='techmedix'?'fas fa-heart-pulse':'fas fa-globe'"></i></div>
+        <!-- Logo image from Supabase config — falls back to icon mark -->
+        <div class="logo-mark" :class="appLogoUrl?'logo-mark-img':''">
+          <img v-if="appLogoUrl" :src="appLogoUrl" alt="Logo" class="logo-img">
+          <i v-else :class="platform==='techmedix'?'fas fa-heart-pulse':'fas fa-globe'"></i>
+        </div>
         <div>
           <div class="logo-name">Tech<em>Medix</em>Link</div>
           <div class="logo-sub">{{ platform==='techmedix'?'Medical Platform':'Global Sourcing' }}</div>
@@ -402,11 +406,12 @@
         <div class="nav-item" :class="{active:tab==='my-listings'}" @click="goTab('my-listings')"><i class="ni fas fa-store"></i>My Listings<span v-if="myListings.length" class="nav-chip">{{ myListings.length }}</span></div>
         <div class="nav-item" :class="{active:tab==='inquiries'}" @click="goTab('inquiries')"><i class="ni fas fa-inbox"></i>Inquiries<span v-if="incomingReqs.length" class="nav-chip">{{ incomingReqs.length }}</span></div>
         <div class="nav-item" :class="{active:tab==='seller-analytics'}" @click="goTab('seller-analytics')"><i class="ni fas fa-chart-bar"></i>My Analytics</div>
-        <div class="nav-item" :class="{active:tab==='seller-analytics'}" @click="goTab('seller-analytics')"><i class="ni fas fa-chart-bar"></i>My Analytics</div>
       </template>
       <template v-if="isAdmin">
         <div class="nav-sect">Administration</div>
-        <div class="nav-item" :class="{active:tab==='admin'}" @click="goTab('admin')"><i class="ni fas fa-shield-halved"></i>Admin Panel<span v-if="pendingAdminCount>0" class="nav-dot"></span></div>
+        <div class="nav-item" :class="{active:tab==='admin'}" @click="goTab('admin')"><i class="ni fas fa-shield-halved"></i>Dashboard<span v-if="pendingAdminCount>0" class="nav-dot"></span></div>
+        <div class="nav-item" :class="{active:tab==='admin-users'}" @click="goTab('admin-users')"><i class="ni fas fa-users"></i>All Users<span v-if="adminUsers.length" class="nav-chip">{{ adminUsers.length }}</span></div>
+        <div class="nav-item" :class="{active:tab==='admin-listings'}" @click="goTab('admin-listings')"><i class="ni fas fa-boxes-stacked"></i>All Listings<span v-if="products.length" class="nav-chip">{{ products.length }}</span></div>
         <div class="nav-item" :class="{active:tab==='analytics'}" @click="goTab('analytics')"><i class="ni fas fa-chart-line"></i>Analytics</div>
         <div class="nav-item" :class="{active:tab==='shoppers'}" @click="goTab('shoppers')"><i class="ni fas fa-people-carry-box"></i>Shoppers</div>
       </template>
@@ -1055,6 +1060,141 @@
         </div>
       </div>
       <!-- /PAYMENTS -->
+
+
+
+      <!-- ── ADMIN LISTINGS ── -->
+      <div v-if="tab='admin-listings' && isAdmin">
+        <div class="sect-hd fu">
+          <div><div class="sect-ttl">All Listings</div><div class="sect-sub">{{ products.length }} products on platform</div></div>
+          <div style="display:flex;gap:var(--s2)">
+            <input type="text" v-model="prodSearch" placeholder="Search products…" class="inp" style="width:200px;border-radius:var(--rp)">
+            <select v-model="prodFilter" class="sel" style="width:130px;border-radius:var(--rp)">
+              <option value="all">All Platforms</option>
+              <option value="techmedix">TechMedixLink</option>
+              <option value="globaldoor">GlobalDoor</option>
+            </select>
+            <button @click="openListingModal()" class="btn btn-p btn-sm"><i class="fas fa-plus"></i>Add Product</button>
+          </div>
+        </div>
+        <div class="tbl-w fu fu-1">
+          <table class="tbl">
+            <thead><tr><th>Product</th><th>Seller</th><th>Platform</th><th>Price</th><th>Stock</th><th>TMDA</th><th>3D</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody>
+              <tr v-for="p in filteredProds" :key="p.id">
+                <td>
+                  <div style="display:flex;align-items:center;gap:var(--s2)">
+                    <div style="width:36px;height:36px;border-radius:var(--r2);overflow:hidden;flex-shrink:0;background:var(--bg-2);display:flex;align-items:center;justify-content:center">
+                      <img v-if="p.image_url" :src="p.image_url" style="width:100%;height:100%;object-fit:cover">
+                      <i v-else class="fas fa-stethoscope" style="font-size:12px;color:var(--tx-4)"></i>
+                    </div>
+                    <div>
+                      <div style="font-size:var(--tsm);font-weight:600;color:var(--tx-1)">{{ p.name }}</div>
+                      <div style="font-size:10px;color:var(--tx-3)">{{ p.manufacturer||'—' }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div style="font-size:var(--tsm);color:var(--tx-1)">{{ p.seller_name||'—' }}</div>
+                  <div style="font-size:10px;color:var(--tx-3)">{{ adminUsers.find(u=>u.id===p.user_id)?.email||'—' }}</div>
+                </td>
+                <td><span class="badge" :class="p.platform_type==='techmedix'?'b-tm':'b-gd'" style="font-size:9px">{{ p.platform_type==='techmedix'?'TML':'GD' }}</span></td>
+                <td><span style="font-family:var(--fm);font-size:11px">${{ fNum(p.base_price_usd) }}</span><div style="font-size:9px;color:var(--tx-3)">{{ tzs(p.base_price_usd*usdToTzs) }}</div></td>
+                <td><span :class="['pc-stock',stockClass(p.stock_quantity)]">{{ p.stock_quantity||0 }}</span></td>
+                <td><i :class="p.tmda_certified?'fas fa-certificate':'fas fa-minus'" :style="p.tmda_certified?'color:var(--ok)':'color:var(--tx-4)'"></i></td>
+                <td><i :class="p.model_url?'fas fa-cube':'fas fa-minus'" :style="p.model_url?'color:#4dc8d0':'color:var(--tx-4)'"></i></td>
+                <td><span class="badge" :class="p.is_active?'b-ok':'b-mu'" style="font-size:9px">{{ p.is_active?'Live':'Draft' }}</span></td>
+                <td>
+                  <div style="display:flex;gap:3px">
+                    <button @click="openProductDetail(p)" class="btn btn-g btn-xs btn-sq" title="Preview"><i class="fas fa-eye" style="font-size:9px"></i></button>
+                    <button @click="openListingModal(p)" class="btn btn-s btn-xs btn-sq" title="Edit"><i class="fas fa-pen" style="font-size:9px"></i></button>
+                    <button @click="toggleListingStatus(p)" class="btn btn-g btn-xs btn-sq" :title="p.is_active?'Deactivate':'Activate'"><i :class="p.is_active?'fas fa-eye-slash':'fas fa-eye'" style="font-size:9px"></i></button>
+                    <button @click="askDeleteProduct(p)" class="btn btn-d btn-xs btn-sq" title="Delete"><i class="fas fa-trash" style="font-size:9px"></i></button>
+                  </div>
+                </td>
+              </tr>
+              <tr v-if="!filteredProds.length"><td colspan="9" style="text-align:center;padding:var(--s5);color:var(--tx-3)">No products found</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <!-- /ADMIN LISTINGS -->
+
+      <!-- ── ADMIN USERS ── -->
+      <div v-if="tab==='admin-users' && isAdmin">
+        <div class="sect-hd fu">
+          <div><div class="sect-ttl">All Users</div><div class="sect-sub">{{ adminUsers.length }} registered users</div></div>
+          <div style="display:flex;gap:var(--s2)">
+            <input type="text" v-model="adminUserSearch" placeholder="Search name, email, phone…" class="inp" style="width:220px;border-radius:var(--rp)">
+            <select v-model="adminUserRoleFilter" class="sel" style="width:130px;border-radius:var(--rp)">
+              <option value="all">All Roles</option>
+              <option value="buyer">Buyers</option>
+              <option value="seller">Sellers</option>
+              <option value="both">Both</option>
+              <option value="admin">Admins</option>
+            </select>
+          </div>
+        </div>
+        <!-- User cards grid -->
+        <div class="admin-user-grid fu fu-1">
+          <div v-for="u in filteredAdminUsers" :key="u.id"
+            class="admin-user-card"
+            @click="adminEditUser(u)">
+            <!-- Avatar -->
+            <div class="auc-av">
+              <img v-if="u.avatar_url" :src="u.avatar_url" class="auc-av-img">
+              <span v-else>{{ u.full_name?.charAt(0)||'?' }}</span>
+              <!-- Online indicator placeholder -->
+              <div class="auc-status" :class="u.is_active?'active':'inactive'"></div>
+            </div>
+            <!-- Info -->
+            <div class="auc-info">
+              <div class="auc-name">{{ u.full_name||'Unnamed' }}</div>
+              <div class="auc-email">{{ u.email }}</div>
+              <div v-if="u.phone" class="auc-phone"><i class="fas fa-phone" style="font-size:8px"></i> {{ u.phone }}</div>
+            </div>
+            <!-- Badges -->
+            <div class="auc-badges">
+              <span class="badge b-ac" style="font-size:8px">{{ u.user_role }}</span>
+              <span class="badge b-mu" style="font-size:8px;text-transform:capitalize">{{ u.user_type||'individual' }}</span>
+              <span v-if="userVerifyStatus(u)==='verified'" class="badge b-ok" style="font-size:8px"><i class="fas fa-check-circle" style="font-size:7px"></i>Verified</span>
+              <span v-if="userVerifyStatus(u)==='pending'" class="badge b-wn" style="font-size:8px"><i class="fas fa-clock" style="font-size:7px"></i>Pending</span>
+            </div>
+            <!-- Stats -->
+            <div class="auc-stats">
+              <div class="auc-stat">
+                <div class="auc-stat-val">{{ allRequests.filter(r=>r.user_id===u.id).length }}</div>
+                <div class="auc-stat-lbl">requests</div>
+              </div>
+              <div class="auc-stat">
+                <div class="auc-stat-val">{{ products.filter(p=>p.user_id===u.id).length }}</div>
+                <div class="auc-stat-lbl">listings</div>
+              </div>
+              <div class="auc-stat">
+                <div class="auc-stat-val">{{ fDate(u.created_at) }}</div>
+                <div class="auc-stat-lbl">joined</div>
+              </div>
+            </div>
+            <!-- Quick actions -->
+            <div class="auc-actions" @click.stop>
+              <button @click="adminEditUser(u)" class="btn btn-g btn-xs" title="View profile"><i class="fas fa-eye" style="font-size:9px"></i> View</button>
+              <button @click="toggleVerified(u)" class="btn btn-xs"
+                :class="userVerifyStatus(u)==='verified'?'btn-d':'btn-ok'"
+                title="Toggle verification">
+                <i :class="userVerifyStatus(u)==='verified'?'fas fa-times':'fas fa-check'" style="font-size:9px"></i>
+                {{ userVerifyStatus(u)==='verified'?'Revoke':'Verify' }}
+              </button>
+            </div>
+          </div>
+        </div>
+        <!-- Pagination -->
+        <div v-if="userTotal > USER_PER_PAGE" class="pgn fu fu-2">
+          <button class="pgn-btn" @click="loadAdminUsers(userPage-1)" :disabled="userPage===0"><i class="fas fa-chevron-left"></i>Prev</button>
+          <span class="pgn-info">Page {{ userPage+1 }} of {{ Math.ceil(userTotal/USER_PER_PAGE) }} · {{ userTotal }} users</span>
+          <button class="pgn-btn" @click="loadAdminUsers(userPage+1)" :disabled="(userPage+1)*USER_PER_PAGE>=userTotal">Next<i class="fas fa-chevron-right"></i></button>
+        </div>
+      </div>
+      <!-- /ADMIN USERS -->
 
       <!-- ── ADMIN PANEL ── -->
       <div v-if="tab==='admin' && isAdmin">
