@@ -309,6 +309,44 @@
         return reqs.map(r => ({ id:r.id, title:r.request_number, sub:fDate(r.created_at), status:r.status, ico:r.platform_type==='techmedix'?'tm':'gd', icon:r.platform_type==='techmedix'?'fas fa-heart-pulse':'fas fa-globe' }));
       });
 
+      const browseSubtitle = computed(() => {
+        const total = products.value.filter(p => p.is_active).length;
+        const shown = filteredProds.value.length;
+        const parts = [];
+        if (prodFilter.value === 'techmedix')     parts.push('TechMedixLink');
+        if (prodFilter.value === 'globaldoor')    parts.push('GlobalDoor');
+        if (prodFilter.value === 'tmda')          parts.push('TMDA certified');
+        if (prodFilter.value === 'local')         parts.push('Tanzania stock');
+        if (prodFilter.value === 'international') parts.push('International');
+        if (prodTypeFilter.value !== 'all')       parts.push(prodTypeFilter.value.replace(/_/g,' '));
+        if (filterTmda.value)                     parts.push('TMDA only');
+        if (filterInStock.value)                  parts.push('in stock');
+        if (prodSearch.value)                     parts.push('"' + prodSearch.value + '"');
+        const label = parts.length ? parts.join(' · ') : 'all platforms';
+        return shown === total
+          ? total + ' products · ' + label
+          : shown + ' of ' + total + ' · ' + label;
+      });
+
+      const activeFilterCount = computed(() => {
+        let n = 0;
+        if (prodFilter.value !== 'all')     n++;
+        if (prodTypeFilter.value !== 'all') n++;
+        if (filterTmda.value)               n++;
+        if (filterInStock.value)            n++;
+        if (prodSearch.value)               n++;
+        return n;
+      });
+
+      function clearAllFilters() {
+        prodSearch.value = '';
+        prodFilter.value = 'all';
+        prodTypeFilter.value = 'all';
+        sortProd.value = 'newest';
+        filterTmda.value = false;
+        filterInStock.value = false;
+      }
+
       const pStats = computed(() => {
         const total = products.value.length || 1;
         const tm = products.value.filter(p => p.platform_type === 'techmedix').length;
@@ -1629,7 +1667,7 @@
         myRequests, myListings, incomingReqs, myActiveReqs, myDoneReqs,
         myTotalSpent, myBalanceDue, pendingPayCount, pendingAdminCount, avgListingPrice,
         selectedProduct, reqCostEstimate,
-        filteredProds, filteredMyReqs, filteredAdminReqs, recentActivity, pStats,
+        filteredProds, filteredMyReqs, filteredAdminReqs, recentActivity, pStats, browseSubtitle, activeFilterCount, clearAllFilters,
         killToast, toast, createNotification,
         stepCls, fStatus, sBadge,
         loadAll, loadAnalytics,
