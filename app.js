@@ -103,8 +103,21 @@
       const assignShopperId  = ref('');
       const addingAddress    = ref(false);
 
+      // ── Onboarding state ──
+      const onboardStep   = ref(0);   // 0=off 1=role 2=type 3=profile 4=role-detail
+      const showOnboarding = ref(false);
+      const obF = reactive({
+        // step 3 — core profile
+        full_name:'', phone:'', avatar_file:null, avatar_preview:'', avatar_uploading:false,
+        // step 4 buyer extras
+        facility_type:'', bed_count:'', supply_region:'Dar es Salaam', equipment_categories:[],
+        // step 4 seller extras
+        business_reg:'', tmda_license:'', supply_countries:['Tanzania'], product_categories:[],
+      });
+
       // ── Auth form ──
       const authTab      = ref('login');
+      const onboardingDone = ref(false);
       const rateLimitUntil = ref(0);   // timestamp when rate limit expires
       const rateLimitSecs  = ref(0);   // reactive countdown seconds
       const tcAccepted = ref(false);
@@ -179,6 +192,34 @@
       }
 
       // ── 3. COMPUTED ──────────────────────────────────────────────
+      // ── Profile completeness ──
+      const profileCompletion = computed(() => {
+        if (!profile.value) return { pct:0, unlocks:[], next:null };
+        const p = profile.value;
+        const checks = [
+          { key:'name',     done: !!p.full_name,                          pts:15, label:'Add your full name' },
+          { key:'phone',    done: !!p.phone,                              pts:10, label:'Add phone number' },
+          { key:'avatar',   done: !!p.avatar_url,                         pts:20, label:'Upload profile photo' },
+          { key:'type',     done: !!p.user_type && p.user_type!=='individual' || p.user_type==='individual', pts:5, label:'Set account type' },
+          { key:'address',  done: addresses.value.length > 0,             pts:15, label:'Add delivery address' },
+          { key:'company',  done: !!p.company_name?.replace(/^\[.*?\]/,'').trim(), pts:5, label:'Add organisation name' },
+          { key:'verified', done: p.company_name?.startsWith('[VERIFIED]'), pts:15, label:'Get seller verified' },
+          { key:'request',  done: allRequests.value.filter(r=>r.user_id===p.id).length > 0, pts:10, label:'Submit your first request' },
+          { key:'review',   done: false,                                   pts:5, label:'Receive your first review' },
+        ];
+        const total = checks.reduce((s,c) => s + c.pts, 0);
+        const earned = checks.filter(c => c.done).reduce((s,c) => s + c.pts, 0);
+        const pct = Math.round((earned / total) * 100);
+        const unlocks = [
+          { at:25, label:'Browse & request products',      icon:'fa-magnifying-glass', done: pct>=25 },
+          { at:50, label:'Order tracking unlocked',        icon:'fa-location-dot',     done: pct>=50 },
+          { at:75, label:'Priority support access',        icon:'fa-headset',          done: pct>=75 },
+          { at:100,label:'Featured listing / buyer badge', icon:'fa-star',             done: pct>=100 },
+        ];
+        const next = checks.find(c => !c.done);
+        return { pct, unlocks, next, checks };
+      });
+
       // ── Computed roles ──
       const isAdmin = computed(() => profile.value?.user_role === 'admin');
       const canBuy  = computed(() => !profile.value || ['buyer','both','admin'].includes(profile.value?.user_role));
@@ -644,10 +685,11 @@
           await sb.from('users').insert({ id: data.user.id, email: aF.email, full_name: aF.full_name, phone: aF.phone||null, user_role: aF.user_role, user_type: aF.user_type, company_name: aF.company_name||null, created_at: new Date().toISOString() });
           await loadUserProfile(data.user.id);
           showAuth.value = false;
-          toast('ok', 'Account created', `Welcome, ${aF.full_name}!`);
           await loadAll();
           await loadNotifications();
           if (isAdmin.value) { await loadAdminUsers(); await loadShoppers(); }
+          // Start onboarding for new users
+          startOnboarding();
         }
         loading.value = false;
       }
@@ -668,6 +710,116 @@
       }
 
       // ── 8. PROFILE & ADDRESSES ────────────────────────────────────
+      // ── ONBOARDING ──
+
+      function startOnboarding() {
+        // Pre-fill what we know
+        if (profile.value?.full_name) obF.full_name = profile.value.full_name;
+        if (profile.value?.phone) obF.phone = profile.value.phone;
+        onboardStep.value = 1;
+        showOnboarding.value = true;
+      }
+
+      async function obSetRole(role) {
+        await sb.from('users').update({ user_role: role, updated_at: new Date().toISOString() }).eq('id', profile.value.id);
+        await loadUserProfile(profile.value.id);
+        onboardStep.value = 2;
+      }
+
+      async function obSetType(type) {
+        await sb.from('users').update({ user_type: type, updated_at: new Date().toISOString() }).eq('id', profile.value.id);
+        await loadUserProfile(profile.value.id);
+        onboardStep.value = 3;
+      }
+
+      function obHandleAvatar(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const allowed = ['image/jpeg','image/jpg','image/png','image/webp'];
+        if (!allowed.includes(file.type)) { toast('err','Invalid type','Please upload a JPG or PNG'); return; }
+        if (file.size > 3 * 1024 * 1024) { toast('err','Too large','Profile photo must be under 3MB'); return; }
+        obF.avatar_file = file;
+        const reader = new FileReader();
+        reader.onload = ev => { obF.avatar_preview = ev.target.result; };
+        reader.readAsDataURL(file);
+      }
+
+      async function obUploadAvatar() {
+        if (!obF.avatar_file) return profile.value?.avatar_url || null;
+        obF.avatar_uploading = true;
+        try {
+          const ext  = obF.avatar_file.name.split('.').pop();
+          const path = `avatars/${profile.value.id}.${ext}`;
+          await sb.storage.from('avatars').upload(path, obF.avatar_file, { upsert: true, cacheControl:'3600' });
+          const { data } = sb.storage.from('avatars').getPublicUrl(path);
+          obF.avatar_uploading = false;
+          return data.publicUrl;
+        } catch(e) { obF.avatar_uploading = false; console.error('Avatar upload:', e); return null; }
+      }
+
+      async function obSaveProfile() {
+        if (!obF.full_name) return;
+        const avatarUrl = await obUploadAvatar();
+        const update = {
+          full_name:  sanitize(obF.full_name, 100),
+          phone:      obF.phone || null,
+          updated_at: new Date().toISOString(),
+        };
+        if (avatarUrl) update.avatar_url = avatarUrl;
+        await sb.from('users').update(update).eq('id', profile.value.id);
+        await loadUserProfile(profile.value.id);
+        onboardStep.value = 4;
+      }
+
+      async function obSaveRoleDetail() {
+        const p = profile.value;
+        const isSeller = ['seller','both','admin'].includes(p?.user_role);
+        const update = { updated_at: new Date().toISOString() };
+        if (isSeller) {
+          // Store seller details in company_name field (prefixed) + verification notes
+          const existing = p.company_name?.replace(/^\[.*?\]/,'') || '';
+          update.company_name = existing; // keep any existing verification prefix
+        } else {
+          // Buyer: store facility info in company_name
+          if (obF.facility_type) update.company_name = obF.facility_type + (obF.bed_count ? ` (${obF.bed_count} beds)` : '');
+        }
+        await sb.from('users').update(update).eq('id', profile.value.id);
+        await loadUserProfile(profile.value.id);
+        showOnboarding.value = false;
+        onboardStep.value = 0;
+        onboardingDone.value = true;
+        toast('ok', 'Profile complete!', 'Welcome to TechMedixLink');
+        await loadAll();
+        await loadNotifications();
+        if (isAdmin.value) { await loadAdminUsers(); await loadShoppers(); }
+        await loadAddresses();
+      }
+
+      function obSkip() {
+        showOnboarding.value = false;
+        onboardStep.value = 0;
+      }
+
+      // ── AVATAR upload for existing profile (not onboarding) ──
+      async function handleAvatarChange(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const allowed = ['image/jpeg','image/jpg','image/png','image/webp'];
+        if (!allowed.includes(file.type)) { toast('err','Invalid type','Please upload a JPG or PNG'); return; }
+        if (file.size > 3 * 1024 * 1024) { toast('err','Too large','Profile photo must be under 3MB'); return; }
+        loading.value = true; loadMsg.value = 'Uploading photo…';
+        try {
+          const ext  = file.name.split('.').pop();
+          const path = `avatars/${profile.value.id}.${ext}`;
+          await sb.storage.from('avatars').upload(path, file, { upsert:true, cacheControl:'3600' });
+          const { data } = sb.storage.from('avatars').getPublicUrl(path);
+          await sb.from('users').update({ avatar_url: data.publicUrl, updated_at: new Date().toISOString() }).eq('id', profile.value.id);
+          await loadUserProfile(profile.value.id);
+          toast('ok', 'Photo updated');
+        } catch(e) { toast('err','Upload failed', e.message); }
+        loading.value = false;
+      }
+
       // ── PROFILE ──
       async function saveProfile() {
         if (!profile.value) return;
@@ -1416,7 +1568,12 @@
             showAuth.value = false;
             magicSent.value = false;
             if (!loading.value) {
-              toast('ok', 'Welcome back!', session.user.email || '');
+              const isNewish = !profile.value?.avatar_url && !profile.value?.phone;
+              if (isNewish) {
+                startOnboarding();
+              } else {
+                toast('ok', 'Welcome back!', profile.value?.full_name || session.user.email || '');
+              }
             }
             loading.value = true; loadMsg.value = 'Loading your dashboard…';
             await loadAll();
@@ -1434,6 +1591,7 @@
 
       return {
         loading, loadMsg, authLanding, authLandingMsg, showPasswordUpdate, newPassword, newPasswordErr, platform, tab, sidebarOpen, globalSearch,
+        showOnboarding, onboardStep, onboardingDone, obF, profileCompletion,
         products, allRequests, payments, profile, notifications, adminUsers, shoppers, addresses, analyticsData, productReviews,
         usdToTzs, rateSource, rateUpdatedAt, rateAge,
         showAuth, showProfileModal, showListingModal, showReqModal, showNotifPanel, showUserPanel,
@@ -1457,6 +1615,7 @@
         loadAll, loadAnalytics,
         doLogin, doMagicLink, doPasswordReset, updatePassword, doSignup, doLogout, loadUserProfile,
         saveProfile, markAllRead, clickNotification, saveAddress, deleteAddress,
+        startOnboarding, obSetRole, obSetType, obHandleAvatar, obSaveProfile, obSaveRoleDetail, obSkip, handleAvatarChange,
         setPlatform, goTab, primaryAction, performSearch, closeAllMenus, togglePanel,
         openListingModal, closeListing, handleImageChange, saveListing, toggleListingStatus, askDeleteProduct, loadProductReviews,
         quickRequest, saveReq, askCancelRequest, doCancel, toggleStatusMenu, updateStatus, fetchTracking, doTrack, openDetailModal,
