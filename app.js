@@ -813,7 +813,15 @@
         }
         const { error } = await sb.auth.signInWithPassword({ email, password: aF.password });
         loading.value = false;
-        if (error) { authErr.value = error.message; return; }
+        if (error) {
+          const msg = error.message || '';
+          if (msg.includes('Invalid login') || msg.includes('400')) {
+            authErr.value = 'Incorrect email or password. If you signed up recently, check your email for a confirmation link first.';
+          } else {
+            authErr.value = msg;
+          }
+          return;
+        }
         showAuth.value = false; aF.password = ''; aF.loginId = '';
       }
 
@@ -1642,25 +1650,43 @@
         pdReviews.value = [];
         pdLoading.value = true;
         try {
-          const { data } = await sb.from('reviews')
-            .select('*, user:user_id(full_name, avatar_url)')
+          const { data: rvData } = await sb.from('reviews')
+            .select('*')
             .eq('reviewed_entity_type', 'product')
             .eq('reviewed_entity_id', p.id)
             .order('created_at', { ascending: false })
             .limit(10);
-          pdReviews.value = data || [];
+          if (rvData?.length) {
+            const userIds = [...new Set(rvData.map(r => r.user_id).filter(Boolean))];
+            const { data: usersData } = await sb.from('users')
+              .select('id, full_name, avatar_url')
+              .in('id', userIds);
+            const userMap = Object.fromEntries((usersData||[]).map(u => [u.id, u]));
+            pdReviews.value = rvData.map(r => ({ ...r, user: userMap[r.user_id] || null }));
+          } else {
+            pdReviews.value = [];
+          }
         } catch(e) { console.error('pdReviews:', e); }
         pdLoading.value = false;
       }
 
       async function loadProductReviews(productId) {
         try {
-          const { data } = await sb.from('reviews')
-            .select('*, user:user_id(full_name)')
+          const { data: rvData } = await sb.from('reviews')
+            .select('*')
             .eq('reviewed_entity_type', 'product')
             .eq('reviewed_entity_id', productId)
             .order('created_at', { ascending: false });
-          productReviews.value = data || [];
+          if (rvData?.length) {
+            const userIds = [...new Set(rvData.map(r => r.user_id).filter(Boolean))];
+            const { data: usersData } = await sb.from('users')
+              .select('id, full_name, avatar_url')
+              .in('id', userIds);
+            const userMap = Object.fromEntries((usersData||[]).map(u => [u.id, u]));
+            productReviews.value = rvData.map(r => ({ ...r, user: userMap[r.user_id] || null }));
+          } else {
+            productReviews.value = [];
+          }
         } catch(e) { console.error('loadProductReviews:', e); }
       }
 
