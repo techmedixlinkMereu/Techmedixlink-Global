@@ -717,3 +717,32 @@ input,select,textarea{font-family:var(--fb)}
 .pct-pill i{font-size:9px}
 .pct-next{display:flex;align-items:center;gap:6px;font-size:var(--txs);color:var(--tx-3);padding-top:4px;border-top:1px solid var(--ln-0)}
 .pct-next strong{color:var(--philips);font-weight:600}
+
+/* ── Mobile: filter selects stack ── */
+@media(max-width:640px){
+  .card .fr2{flex-direction:column}
+  .browse-filters{padding:var(--s2) var(--s2)}
+  .browse-filters .sel{width:100%!important;max-width:none!important}
+  .rate-bar{flex-wrap:wrap;height:auto;padding:4px var(--s3);gap:0}
+  .rate-item{border-right:none;padding:2px var(--s2)}
+  .rate-ticker{display:none}
+}
+/* ── Mobile: stepper compact ── */
+@media(max-width:520px){
+  .stepper{gap:0}
+  .step-dot{width:18px;height:18px;font-size:7px}
+  .step-lbl{font-size:8px;max-width:40px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .step::after{height:1px}
+  .req-fin{flex-wrap:wrap}
+  .req-fin>.fin-c{flex:1 1 calc(50% - var(--s2))}
+  .pct-milestones{gap:4px}
+  .pct-pill span{display:none}
+  .tbl{min-width:480px}
+  .modal-ft{flex-wrap:wrap;gap:var(--s2)}
+  .modal-ft .btn{flex:1 1 auto}
+}
+/* ── Mobile: request source type buttons stack ── */
+@media(max-width:480px){
+  .modal-body .fr2{flex-direction:column}
+  div[style*="display:flex;gap:var(--s2)"] > button.btn-sm[style*="flex:1"]{flex:1 1 100%}
+}
