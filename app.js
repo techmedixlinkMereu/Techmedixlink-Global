@@ -2,7 +2,7 @@
 // TechMedixLink · app.js  (requires config.js loaded first)
 // ─────────────────────────────────────────────────────────────────
 // SECTIONS:
-//   1.  Supabase client init 
+//   1.  Supabase client init
 //   2.  State — core, data, exchange rate, modals, auth, filters
 //   3.  Computed — roles, UI labels, request aggregates, filters
 //   4.  Status config — statusList, stepperStages, helpers
@@ -95,6 +95,9 @@
       const quoteReq         = ref(null);
       const reviewReq        = ref(null);
       const viewedProduct    = ref(null);
+      const showProductDetail = ref(false);
+      const pdReviews        = ref([]);
+      const pdLoading        = ref(false);
       const productReviews   = ref([]);
       const trackId          = ref('');
       const trackedReq       = ref(null);
@@ -1313,6 +1316,23 @@
       // ── REVIEWS ──
       function openReviewModal(r) { reviewReq.value = r; reviewF.rating = 0; reviewF.title = ''; reviewF.body = ''; showReviewModal.value = true; }
 
+      async function openProductDetail(p) {
+        viewedProduct.value = p;
+        showProductDetail.value = true;
+        pdReviews.value = [];
+        pdLoading.value = true;
+        try {
+          const { data } = await sb.from('reviews')
+            .select('*, user:user_id(full_name, avatar_url)')
+            .eq('reviewed_entity_type', 'product')
+            .eq('reviewed_entity_id', p.id)
+            .order('created_at', { ascending: false })
+            .limit(10);
+          pdReviews.value = data || [];
+        } catch(e) { console.error('pdReviews:', e); }
+        pdLoading.value = false;
+      }
+
       async function loadProductReviews(productId) {
         try {
           const { data } = await sb.from('reviews')
@@ -1597,7 +1617,7 @@
         showAuth, showProfileModal, showListingModal, showReqModal, showNotifPanel, showUserPanel,
         showQuoteModal, showReviewModal, showShopperModal, showTcModal, showVerifyModal, verifyDocs, showCancelModal, cancelReq, cancelReason, showInquiryDetail, inquiryReq,
         editingProd, editingShopper, detailReq, paymentReq, quoteReq, reviewReq,
-        viewedProduct, trackId, trackedReq, confirm, openStatusMenu, assignShopperId, addingAddress,
+        viewedProduct, showProductDetail, pdReviews, pdLoading, trackId, trackedReq, confirm, openStatusMenu, assignShopperId, addingAddress,
         authTab, authErr, magicSent, tcAccepted, rateLimitUntil, rateLimitSecs,
         aF, pF, rF, uF, pmtF, qF, reviewF, shF, addrF,
         adminSubTab, adminReqSearch, adminReqFilter, adminPlatFilter,
@@ -1617,7 +1637,7 @@
         saveProfile, markAllRead, clickNotification, saveAddress, deleteAddress,
         startOnboarding, obSetRole, obSetType, obHandleAvatar, obSaveProfile, obSaveRoleDetail, obSkip, handleAvatarChange,
         setPlatform, goTab, primaryAction, performSearch, closeAllMenus, togglePanel,
-        openListingModal, closeListing, handleImageChange, saveListing, toggleListingStatus, askDeleteProduct, loadProductReviews,
+        openListingModal, closeListing, handleImageChange, saveListing, toggleListingStatus, askDeleteProduct, loadProductReviews, openProductDetail,
         quickRequest, saveReq, askCancelRequest, doCancel, toggleStatusMenu, updateStatus, fetchTracking, doTrack, openDetailModal,
         askPayment, doPayment,
         openQuoteModal, sendQuote, acceptQuote, declineQuote,
