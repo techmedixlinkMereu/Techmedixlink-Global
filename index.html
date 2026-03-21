@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!-- ─────────────────────────────────────────────────────────────────
      TechMedixLink · index.html
-     Tanzania Medical Equipment Platform  
+     Tanzania Medical Equipment Platform
 
      DEPLOYMENT: Upload index.html, app.css, app.js, config.js,
      manifest.json and favicon.svg to any static host.
@@ -1360,20 +1360,114 @@
 <!-- PAYMENT MODAL -->
 <transition name="modal">
   <div v-if="paymentReq" class="modal-bg" @click.self="paymentReq=null">
-    <div class="modal modal-sm">
-      <div class="modal-hd"><div><div class="modal-ttl">Record Payment</div><div class="modal-sub">{{ paymentReq.request_number }}</div></div><button class="modal-x" @click="paymentReq=null"><i class="fas fa-times"></i></button></div>
-      <div class="modal-body">
-        <div class="info-strip wn"><i class="fas fa-clock" style="color:var(--warn);flex-shrink:0"></i><div><div style="font-size:var(--tsm);font-weight:600;color:var(--warn)">Balance Due: {{ tzs(paymentReq.balance_due) }}</div><div style="font-size:var(--txs);color:var(--tx-2);margin-top:2px">Total: {{ tzs(paymentReq.total_cost) }}</div></div></div>
-        <div class="fg"><label class="lbl req">Payment Amount (TZS)</label><input type="number" v-model.number="pmtF.amount" min="0" class="inp" :placeholder="paymentReq.balance_due"></div>
-        <div class="fr2">
-          <div class="fg"><label class="lbl req">Method</label><select v-model="pmtF.method" class="sel"><option value="mpesa">M-Pesa</option><option value="bank_transfer">Bank Transfer</option><option value="cash">Cash</option></select></div>
-          <div class="fg"><label class="lbl req">Type</label><select v-model="pmtF.type" class="sel"><option value="deposit">Deposit</option><option value="balance">Balance Payment</option><option value="full">Full Payment</option></select></div>
+    <div class="modal">
+      <div class="modal-hd">
+        <div>
+          <div class="modal-ttl">{{ isAdmin ? 'Record Payment' : 'Pay Balance' }}</div>
+          <div class="modal-sub">{{ paymentReq.request_number }}</div>
         </div>
-        <div class="fg"><label class="lbl">Reference / Transaction ID</label><input type="text" v-model="pmtF.reference" class="inp" placeholder="e.g. QC234567YX"></div>
-        <div class="fg"><label class="lbl">Notes</label><textarea v-model="pmtF.notes" class="tex" style="min-height:60px" placeholder="Optional payment notes…"></textarea></div>
+        <button class="modal-x" @click="paymentReq=null"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+
+        <!-- Buyer: verification notice -->
+        <div v-if="!isAdmin" class="info-strip wn" style="margin-bottom:var(--s4)">
+          <i class="fas fa-shield-halved" style="color:var(--warn);flex-shrink:0"></i>
+          <div style="font-size:var(--txs);color:var(--warn);line-height:1.5">
+            <strong>Secure payment.</strong> Enter your M-Pesa reference after completing payment on your phone. Our team verifies within 24 hours.
+          </div>
+        </div>
+
+        <!-- Payment summary card -->
+        <div class="pmt-summary">
+          <div class="pmt-summary-row">
+            <span>Order total</span>
+            <span class="mono">{{ tzs(paymentReq.total_cost||0) }}</span>
+          </div>
+          <div class="pmt-summary-row">
+            <span>Already paid</span>
+            <span class="mono" style="color:var(--ok)">{{ tzs(paymentReq.deposit_paid||0) }}</span>
+          </div>
+          <div class="pmt-summary-row pmt-summary-due">
+            <span>Balance due</span>
+            <span class="mono">{{ tzs(paymentReq.balance_due||0) }}</span>
+          </div>
+        </div>
+
+        <!-- Amount -->
+        <div class="fg">
+          <label class="lbl req">Payment amount (TZS)</label>
+          <input type="number" v-model.number="pmtF.amount" min="0"
+            :max="paymentReq.balance_due||undefined" class="inp"
+            style="font-size:18px;font-weight:700;font-family:var(--fm)"
+            :placeholder="paymentReq.balance_due">
+          <!-- Remaining after this payment -->
+          <div v-if="pmtF.amount>0" class="hint" :class="Math.max(0,(paymentReq.balance_due||0)-pmtF.amount)===0?'':' wn'">
+            <i class="fas fa-info-circle"></i>
+            Remaining after payment:
+            <strong>{{ tzs(Math.max(0,(paymentReq.balance_due||0)-(pmtF.amount||0))) }}</strong>
+            <span v-if="Math.max(0,(paymentReq.balance_due||0)-pmtF.amount)===0"
+              style="color:var(--ok);font-weight:600"> · Fully settled ✓</span>
+          </div>
+        </div>
+
+        <!-- Method + Type -->
+        <div class="fr2">
+          <div class="fg">
+            <label class="lbl req">Payment method</label>
+            <select v-model="pmtF.method" class="sel">
+              <option value="mpesa">M-Pesa</option>
+              <option value="tigo_pesa">Tigo Pesa</option>
+              <option value="airtel_money">Airtel Money</option>
+              <option value="bank_transfer">Bank Transfer</option>
+              <option value="card">Card</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label class="lbl req">Payment type</label>
+            <select v-model="pmtF.type" class="sel">
+              <option value="deposit">Deposit (50%)</option>
+              <option value="balance">Balance payment</option>
+              <option value="full">Full payment</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Phone (mobile money only) -->
+        <div class="fg" v-if="['mpesa','tigo_pesa','airtel_money'].includes(pmtF.method)">
+          <label class="lbl req">Mobile number used for payment</label>
+          <input type="tel" v-model="pmtF.phone" class="inp" placeholder="+255 7XX XXX XXX">
+          <div class="hint">The number you sent the payment from</div>
+        </div>
+
+        <!-- Reference -->
+        <div class="fg">
+          <label class="lbl" :class="['mpesa','tigo_pesa','airtel_money'].includes(pmtF.method)?'req':''">
+            Transaction reference
+          </label>
+          <input type="text" v-model="pmtF.reference" class="inp"
+            placeholder="e.g. QC234567YX"
+            style="text-transform:uppercase;font-family:var(--fm);letter-spacing:0.04em">
+          <div class="hint" v-if="['mpesa','tigo_pesa','airtel_money'].includes(pmtF.method)">
+            <i class="fas fa-mobile-alt"></i>
+            Find this in the SMS confirmation from {{ pmtF.method==='mpesa'?'M-Pesa':pmtF.method==='tigo_pesa'?'Tigo Pesa':'Airtel Money' }}
+          </div>
+        </div>
+
+        <!-- Notes (admin only, or optional for buyer) -->
+        <div class="fg">
+          <label class="lbl">Additional notes <span style="font-weight:400;color:var(--tx-3)">(optional)</span></label>
+          <textarea v-model="pmtF.notes" class="tex" style="min-height:52px"
+            placeholder="Any additional details about this payment…"></textarea>
+        </div>
+
       </div>
       <div class="modal-ft">
-        <button @click="doPayment(paymentReq)" class="btn btn-p" :disabled="!pmtF.amount||pmtF.amount<=0"><i class="fas fa-credit-card"></i>Record Payment</button>
+        <button @click="doPayment(paymentReq)" class="btn btn-p"
+          :disabled="!pmtF.amount||pmtF.amount<=0">
+          <i class="fas fa-check-circle"></i>
+          {{ isAdmin ? 'Confirm Payment' : 'Submit Payment' }}
+        </button>
         <button @click="paymentReq=null" class="btn btn-g">Cancel</button>
       </div>
     </div>
