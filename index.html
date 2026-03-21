@@ -3,7 +3,7 @@
      TechMedixLink · index.html
      Tanzania Medical Equipment Platform
 
-     DEPLOYMENT: Upload index.html, app.css, app.js, config.js, 
+     DEPLOYMENT: Upload index.html, app.css, app.js, config.js,
      manifest.json and favicon.svg to any static host.
 
      FILES:
@@ -627,8 +627,8 @@
         </div>
         <!-- Product grid -->
         <div v-if="filteredProds.length" class="prod-grid fu fu-2">
-          <div v-for="p in filteredProds" :key="p.id" class="prod-card">
-            <div class="pc-img">
+          <div v-for="p in filteredProds" :key="p.id" class="prod-card" @click.self="openProductDetail(p)">
+            <div class="pc-img" @click="openProductDetail(p)" style="cursor:pointer">
               <img v-if="p.image_url" :src="p.image_url" :alt="p.name" loading="lazy">
               <div v-else class="pc-img-ph"><i :class="p.product_type==='medical_device'?'fas fa-stethoscope':p.product_type==='electronics'?'fas fa-microchip':'fas fa-box-archive'"></i><span>{{ p.product_type?.replace(/_/g,' ')||'Product' }}</span></div>
               <div class="pc-img-badges">
@@ -638,7 +638,7 @@
               </div>
             </div>
             <div class="pc-body">
-              <div class="pc-name">{{ p.name }}</div>
+              <div class="pc-name" @click="openProductDetail(p)" style="cursor:pointer">{{ p.name }}</div>
               <div class="pc-seller"><i class="fas fa-store" style="font-size:8px"></i>{{ p.seller_name||'TechMedixLink' }}<span v-if="p.seller_verified || adminUsers.find(u=>u.id===p.user_id)?.company_name?.startsWith('[VERIFIED]')" class="vbadge"><i class="fas fa-check-circle"></i></span></div>
               <div class="pc-loc"><i class="fas fa-location-dot" style="font-size:8px"></i>{{ p.country||'Tanzania' }}</div>
               <div class="pc-stars">
@@ -656,6 +656,7 @@
                 <div><span :class="['pc-stock',stockClass(p.stock_quantity)]">{{ stockLabel(p.stock_quantity) }}</span></div>
               </div>
               <div class="pc-actions">
+                <button @click="openProductDetail(p)" class="btn btn-g btn-xs btn-sq" title="View details"><i class="fas fa-expand" style="font-size:10px"></i></button>
                 <button v-if="canBuy" @click="quickRequest(p)" class="btn btn-p btn-sm" style="flex:1" :disabled="!p.is_active"><i class="fas fa-cart-plus"></i>Request</button>
                 <button v-if="canSell&&p.user_id===profile?.id" @click="openListingModal(p)" class="btn btn-g btn-xs btn-sq"><i class="fas fa-pen" style="font-size:10px"></i></button>
                 <button v-if="!profile" @click="showAuth=true" class="btn btn-g btn-sm" style="flex:1"><i class="fas fa-sign-in-alt"></i>Sign in</button>
@@ -727,7 +728,7 @@
         <div v-if="!myListings.length" class="empty fu fu-1"><div class="empty-ico"><i class="fas fa-store"></i></div><div class="empty-ttl">No listings yet</div><div class="empty-sub">Add your first product to start receiving requests from buyers.</div><button @click="openListingModal()" class="btn btn-p">Add First Product</button></div>
         <div class="prod-grid fu fu-1">
           <div v-for="p in myListings" :key="p.id" class="prod-card" style="opacity:1" :style="!p.is_active?'opacity:0.6':''">
-            <div class="pc-img">
+            <div class="pc-img" @click="openProductDetail(p)" style="cursor:pointer">
               <img v-if="p.image_url" :src="p.image_url" :alt="p.name" loading="lazy">
               <div v-else class="pc-img-ph"><i class="fas fa-image" style="color:var(--tx-3)"></i><span>No image</span></div>
               <div class="pc-img-badges">
@@ -735,7 +736,7 @@
               </div>
             </div>
             <div class="pc-body">
-              <div class="pc-name">{{ p.name }}</div>
+              <div class="pc-name" @click="openProductDetail(p)" style="cursor:pointer">{{ p.name }}</div>
               <div class="pc-loc"><i class="fas fa-location-dot" style="font-size:8px"></i>{{ p.country||'Tanzania' }}</div>
               <div class="pc-pr-row">
                 <div><div class="pc-price">${{ fNum(p.base_price_usd) }}</div><div class="pc-price-sub">Stock: {{ p.stock_quantity||0 }} units</div></div>
@@ -1561,6 +1562,149 @@
       <div class="modal-ft">
         <button @click="tcAccepted=true;showTcModal=false" class="btn btn-p"><i class="fas fa-check"></i>I Accept</button>
         <button @click="showTcModal=false" class="btn btn-g">Close</button>
+      </div>
+    </div>
+  </div>
+</transition>
+
+
+<!-- PRODUCT DETAIL MODAL -->
+<transition name="modal">
+  <div v-if="showProductDetail && viewedProduct" class="modal-bg" @click.self="showProductDetail=false">
+    <div class="modal modal-xl pd-modal">
+
+      <!-- Hero image strip -->
+      <div class="pd-hero">
+        <img v-if="viewedProduct.image_url" :src="viewedProduct.image_url" :alt="viewedProduct.name" class="pd-hero-img">
+        <div v-else class="pd-hero-ph">
+          <i :class="viewedProduct.product_type==='medical_device'?'fas fa-stethoscope':viewedProduct.product_type==='electronics'?'fas fa-microchip':'fas fa-boxes-stacked'" style="font-size:48px;color:rgba(255,255,255,0.3)"></i>
+        </div>
+        <!-- Floating badges on image -->
+        <div class="pd-hero-badges">
+          <span v-if="viewedProduct.tmda_certified" class="badge b-ok pd-hbadge"><i class="fas fa-certificate" style="font-size:9px"></i>TMDA Certified</span>
+          <span class="badge pd-hbadge" :class="viewedProduct.platform_type==='techmedix'?'b-tm':'b-gd'">{{ viewedProduct.platform_type==='techmedix'?'TechMedixLink':'GlobalDoor' }}</span>
+          <span :class="['pc-stock pd-hbadge',stockClass(viewedProduct.stock_quantity)]" style="border-radius:var(--rp);padding:3px 10px;font-size:9px;font-weight:600">{{ stockLabel(viewedProduct.stock_quantity) }}</span>
+        </div>
+        <button class="pd-close" @click="showProductDetail=false"><i class="fas fa-times"></i></button>
+      </div>
+
+      <!-- Content split: left info, right action panel -->
+      <div class="pd-body">
+
+        <!-- LEFT: product info -->
+        <div class="pd-info">
+          <!-- Name + seller -->
+          <div class="pd-name">{{ viewedProduct.name }}</div>
+          <div class="pd-seller">
+            <div class="pd-seller-av">{{ viewedProduct.seller_name?.charAt(0)||'T' }}</div>
+            <div>
+              <div style="font-size:var(--tsm);font-weight:600;color:var(--tx-1)">{{ viewedProduct.seller_name||'TechMedixLink' }}</div>
+              <div style="font-size:var(--txs);color:var(--tx-3)"><i class="fas fa-location-dot" style="font-size:8px"></i> {{ viewedProduct.country||'Tanzania' }}</div>
+            </div>
+            <span v-if="adminUsers.find(u=>u.id===viewedProduct.user_id)?.company_name?.startsWith('[VERIFIED]')" class="badge b-ok" style="margin-left:auto;font-size:9px"><i class="fas fa-check-circle"></i>Verified</span>
+          </div>
+
+          <!-- Stars -->
+          <div style="display:flex;align-items:center;gap:var(--s2);margin-bottom:var(--s4)">
+            <div style="display:flex;gap:2px">
+              <i v-for="s in 5" :key="s" class="rv-star fas fa-star" :class="{on:s<=(viewedProduct.avg_rating||0)}" style="font-size:13px"></i>
+            </div>
+            <span style="font-size:var(--tsm);color:var(--tx-2);font-weight:600">{{ viewedProduct.avg_rating ? viewedProduct.avg_rating.toFixed(1) : 'No ratings' }}</span>
+            <span style="font-size:var(--txs);color:var(--tx-3)">({{ pdReviews.length }} review{{ pdReviews.length!==1?'s':'' }})</span>
+          </div>
+
+          <!-- Description -->
+          <div class="pd-section-ttl">About this product</div>
+          <div class="pd-desc">{{ viewedProduct.description||'High quality medical equipment. Contact us for full specifications and compliance documentation.' }}</div>
+
+          <!-- Specs grid -->
+          <div class="pd-section-ttl">Specifications</div>
+          <div class="pd-specs">
+            <div class="pd-spec" v-if="viewedProduct.manufacturer"><div class="pd-spec-l">Manufacturer</div><div class="pd-spec-v">{{ viewedProduct.manufacturer }}</div></div>
+            <div class="pd-spec" v-if="viewedProduct.model_number"><div class="pd-spec-l">Model</div><div class="pd-spec-v">{{ viewedProduct.model_number }}</div></div>
+            <div class="pd-spec" v-if="viewedProduct.warranty_months"><div class="pd-spec-l">Warranty</div><div class="pd-spec-v">{{ viewedProduct.warranty_months }} months</div></div>
+            <div class="pd-spec" v-if="viewedProduct.estimated_weight_kg"><div class="pd-spec-l">Weight</div><div class="pd-spec-v">{{ viewedProduct.estimated_weight_kg }} kg</div></div>
+            <div class="pd-spec"><div class="pd-spec-l">Product type</div><div class="pd-spec-v" style="text-transform:capitalize">{{ viewedProduct.product_type?.replace(/_/g,' ')||'—' }}</div></div>
+            <div class="pd-spec"><div class="pd-spec-l">Location</div><div class="pd-spec-v">{{ viewedProduct.country||'Tanzania' }}</div></div>
+            <div class="pd-spec" v-if="viewedProduct.import_duty_percent"><div class="pd-spec-l">Import duty (est.)</div><div class="pd-spec-v">{{ viewedProduct.import_duty_percent }}%</div></div>
+          </div>
+
+          <!-- Service flags -->
+          <div style="display:flex;gap:var(--s2);flex-wrap:wrap;margin-top:var(--s4)">
+            <div v-if="viewedProduct.requires_installation" class="pd-flag"><i class="fas fa-screwdriver-wrench"></i>Requires installation</div>
+            <div v-if="viewedProduct.requires_training" class="pd-flag"><i class="fas fa-chalkboard-user"></i>Training provided</div>
+            <div v-if="viewedProduct.tmda_certified" class="pd-flag pd-flag-ok"><i class="fas fa-certificate"></i>TMDA certified</div>
+            <div v-if="viewedProduct.is_available_locally" class="pd-flag pd-flag-ok"><i class="fas fa-shop"></i>Available locally</div>
+          </div>
+
+          <!-- Reviews section -->
+          <div class="pd-section-ttl" style="margin-top:var(--s5)">Customer reviews</div>
+          <div v-if="pdLoading" style="display:flex;align-items:center;gap:var(--s2);padding:var(--s4);color:var(--tx-3);font-size:var(--tsm)">
+            <div class="spinner" style="width:16px;height:16px;border-width:1.5px;margin:0"></div>Loading reviews…
+          </div>
+          <div v-else-if="!pdReviews.length" style="padding:var(--s4);background:var(--bg-1);border-radius:var(--r2);text-align:center;color:var(--tx-3);font-size:var(--tsm)">
+            No reviews yet. Be the first to review after your order!
+          </div>
+          <div v-else style="display:flex;flex-direction:column;gap:var(--s3)">
+            <div v-for="rv in pdReviews" :key="rv.id" class="pd-review">
+              <div style="display:flex;align-items:center;gap:var(--s2);margin-bottom:var(--s2)">
+                <div class="pd-rv-av">{{ rv.user?.full_name?.charAt(0)||'?' }}</div>
+                <div style="flex:1">
+                  <div style="font-size:var(--tsm);font-weight:600;color:var(--tx-1)">{{ rv.user?.full_name||'Customer' }}</div>
+                  <div style="font-size:9px;color:var(--tx-4);font-family:var(--fm)">{{ fDate(rv.created_at) }}</div>
+                </div>
+                <div style="display:flex;gap:1px">
+                  <i v-for="s in 5" :key="s" class="rv-star fas fa-star" :class="{on:s<=rv.rating}"></i>
+                </div>
+              </div>
+              <div style="font-size:var(--tsm);color:var(--tx-2);line-height:1.65">{{ rv.review_text }}</div>
+              <div v-if="rv.is_verified_purchase" style="margin-top:var(--s1)"><span class="badge b-ok" style="font-size:8px"><i class="fas fa-check" style="font-size:7px"></i>Verified purchase</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: action panel (sticky) -->
+        <div class="pd-panel">
+          <!-- Price block -->
+          <div class="pd-price-block">
+            <div class="pd-price-usd">${{ fNum(viewedProduct.base_price_usd) }} <span style="font-size:13px;font-weight:400;color:var(--tx-3)">USD</span></div>
+            <div class="pd-price-tzs">≈ {{ tzs(Math.round(viewedProduct.base_price_usd * usdToTzs)) }}</div>
+            <div v-if="viewedProduct.base_price_eur" style="font-size:var(--txs);color:var(--tx-3);margin-top:2px">€{{ fNum(viewedProduct.base_price_eur) }} EUR</div>
+          </div>
+
+          <!-- Stock + platform -->
+          <div style="display:flex;gap:var(--s2);margin-bottom:var(--s4)">
+            <span :class="['pc-stock',stockClass(viewedProduct.stock_quantity)]" style="font-size:var(--tsm)">{{ stockLabel(viewedProduct.stock_quantity) }}</span>
+            <span class="badge" :class="viewedProduct.platform_type==='techmedix'?'b-tm':'b-gd'">{{ viewedProduct.platform_type==='techmedix'?'TechMedixLink':' GlobalDoor' }}</span>
+          </div>
+
+          <!-- CTA buttons -->
+          <button v-if="canBuy" @click="quickRequest(viewedProduct);showProductDetail=false" class="btn btn-p" style="width:100%;margin-bottom:var(--s2)" :disabled="!viewedProduct.is_active||!(viewedProduct.stock_quantity>0)">
+            <i class="fas fa-cart-plus"></i>Request This Product
+          </button>
+          <button v-if="!profile" @click="showAuth=true;showProductDetail=false" class="btn btn-p" style="width:100%;margin-bottom:var(--s2)">
+            <i class="fas fa-sign-in-alt"></i>Sign in to Request
+          </button>
+          <button v-if="canSell&&viewedProduct.user_id===profile?.id" @click="openListingModal(viewedProduct);showProductDetail=false" class="btn btn-s" style="width:100%;margin-bottom:var(--s2)">
+            <i class="fas fa-pen"></i>Edit My Listing
+          </button>
+
+          <!-- Delivery info box -->
+          <div class="pd-info-box">
+            <div class="pd-info-row"><i class="fas fa-truck"></i><span>Delivery to all Tanzania regions</span></div>
+            <div class="pd-info-row" v-if="viewedProduct.platform_type==='globaldoor'"><i class="fas fa-globe"></i><span>International sourcing via GlobalDoor</span></div>
+            <div class="pd-info-row" v-if="viewedProduct.requires_installation"><i class="fas fa-screwdriver-wrench"></i><span>Professional installation included</span></div>
+            <div class="pd-info-row" v-if="viewedProduct.requires_training"><i class="fas fa-chalkboard-user"></i><span>Operator training provided</span></div>
+            <div class="pd-info-row" v-if="viewedProduct.warranty_months"><i class="fas fa-shield-halved"></i><span>{{ viewedProduct.warranty_months }}-month warranty</span></div>
+          </div>
+
+          <!-- Share / track -->
+          <div style="display:flex;gap:var(--s2);margin-top:var(--s3)">
+            <button @click="showProductDetail=false;goTab('browse')" class="btn btn-g btn-sm" style="flex:1"><i class="fas fa-arrow-left"></i>Back</button>
+            <button v-if="canBuy" @click="showReqModal=true;rF.source_type='manual';rF.custom_name=viewedProduct.name;showProductDetail=false" class="btn btn-s btn-sm" style="flex:1" title="Custom request for this product"><i class="fas fa-pen"></i>Custom</button>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
