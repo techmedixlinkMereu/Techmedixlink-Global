@@ -5,7 +5,7 @@
 
      DEPLOYMENT: Upload index.html, app.css, app.js, config.js,
      manifest.json and favicon.svg to any static host.
- 
+
      FILES:
        index.html   — HTML structure & Vue template
        app.css      — All styles (508 lines, 23 sections)
@@ -31,6 +31,7 @@
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0066a1">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="TechMedixLink">
@@ -48,7 +49,7 @@
 <meta name="twitter:description" content="Tanzania's premier medical equipment sourcing and procurement marketplace.">
 <link rel="stylesheet" href="app.css">
   <!-- 3D Model Viewer — Google model-viewer web component -->
-  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
 </head>
 <body>
 <div id="app" v-cloak>
@@ -945,6 +946,7 @@
           <div v-if="r.items?.length" class="req-items"><div v-for="it in r.items" :key="it.id" class="ri-row"><span class="ri-name">{{ it.product_name }}</span><span class="ri-qty">×{{ it.quantity }}</span><span class="ri-price">{{ tzs(it.total_price) }}</span></div></div>
           <div style="display:flex;gap:var(--s2);flex-wrap:wrap">
             <button @click="openInquiryDetail(r)" class="btn btn-s btn-sm"><i class="fas fa-eye"></i>View Inquiry</button>
+            <button v-if="r.status==='pending'" @click="acceptInquiry(r)" class="btn btn-ok btn-sm"><i class="fas fa-check"></i>Accept Inquiry</button>
             <button v-if="['pending','submitted'].includes(r.status)" @click="openQuoteModal(r)" class="btn btn-p btn-sm"><i class="fas fa-file-invoice-dollar"></i>Send Quote</button>
             <button v-if="['pending','submitted'].includes(r.status)" @click="declineInquiry(r)" class="btn btn-d btn-sm"><i class="fas fa-times"></i>Decline</button>
             <button v-if="r.status==='quoted'" @click="openQuoteModal(r)" class="btn btn-info btn-sm"><i class="fas fa-edit"></i>Revise Quote</button>
@@ -952,52 +954,7 @@
         </div>
       </div>
       <!-- /INQUIRIES -->
-      <!-- ── SELLER ANALYTICS ── -->
-      <div v-if="tab==='seller-analytics' && profile && canSell">
-        <div class="sect-hd fu"><div><div class="sect-ttl">Store Analytics</div><div class="sect-sub">Your performance overview</div></div></div>
-        <template v-if="sellerAnalytics">
-          <div class="kpi-grid fu fu-1">
-            <div class="kpi"><div class="kpi-ico"><i class="fas fa-store"></i></div><div class="kpi-lbl">Live Listings</div><div class="kpi-val">{{ sellerAnalytics.myProds.filter(p=>p.is_active).length }}</div><div class="kpi-sub">{{ sellerAnalytics.myProds.length }} total</div></div>
-            <div class="kpi"><div class="kpi-ico"><i class="fas fa-inbox"></i></div><div class="kpi-lbl">Total Inquiries</div><div class="kpi-val">{{ sellerAnalytics.totalInqs }}</div><div class="kpi-sub up" v-if="sellerAnalytics.totalInqs">All time</div></div>
-            <div class="kpi"><div class="kpi-ico"><i class="fas fa-percent"></i></div><div class="kpi-lbl">Conversion</div><div class="kpi-val sm" :class="sellerAnalytics.conversion>30?'ok':'wn'">{{ sellerAnalytics.conversion }}%</div><div class="kpi-sub">Inquiries → orders</div></div>
-            <div class="kpi"><div class="kpi-ico"><i class="fas fa-coins"></i></div><div class="kpi-lbl">Revenue</div><div class="kpi-val xs ac">{{ tzs(sellerAnalytics.revenue) }}</div><div class="kpi-sub">Completed orders</div></div>
-          </div>
-          <!-- Top product -->
-          <div v-if="sellerAnalytics.topProd" class="card fu fu-2" style="margin-bottom:var(--s4)">
-            <div style="font-size:10px;font-weight:700;color:var(--tx-4);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:var(--s3)">Top performing product</div>
-            <div style="display:flex;align-items:center;gap:var(--s3)">
-              <div style="width:52px;height:52px;border-radius:var(--r2);overflow:hidden;background:var(--bg-2);flex-shrink:0;display:flex;align-items:center;justify-content:center">
-                <img v-if="sellerAnalytics.topProd.image_url" :src="sellerAnalytics.topProd.image_url" style="width:100%;height:100%;object-fit:cover">
-                <i v-else class="fas fa-box" style="color:var(--tx-4)"></i>
-              </div>
-              <div style="flex:1">
-                <div style="font-size:var(--tsm);font-weight:600;color:var(--tx-1)">{{ sellerAnalytics.topProd.name }}</div>
-                <div style="font-size:var(--txs);color:var(--tx-3)">${{ fNum(sellerAnalytics.topProd.base_price_usd) }} · {{ stockLabel(sellerAnalytics.topProd.stock_quantity) }}</div>
-              </div>
-              <button @click="openListingModal(sellerAnalytics.topProd)" class="btn btn-s btn-sm"><i class="fas fa-pen"></i>Edit</button>
-            </div>
-          </div>
-          <!-- Listing performance table -->
-          <div class="tbl-w fu fu-3">
-            <table class="tbl">
-              <thead><tr><th>Product</th><th>Price</th><th>Stock</th><th>Status</th><th>Actions</th></tr></thead>
-              <tbody>
-                <tr v-for="p in sellerAnalytics.myProds" :key="p.id">
-                  <td><div style="font-size:var(--tsm);font-weight:600;color:var(--tx-1)">{{ p.name }}</div><div style="font-size:10px;color:var(--tx-3)">{{ p.manufacturer||'—' }}</div></td>
-                  <td><span style="font-family:var(--fm);font-size:11px">${{ fNum(p.base_price_usd) }}</span></td>
-                  <td><span :class="['pc-stock',stockClass(p.stock_quantity)]">{{ p.stock_quantity||0 }}</span></td>
-                  <td><span class="badge" :class="p.is_active?'b-ok':'b-mu'">{{ p.is_active?'Live':'Hidden' }}</span></td>
-                  <td><div style="display:flex;gap:3px">
-                    <button @click="openListingModal(p)" class="btn btn-g btn-xs btn-sq"><i class="fas fa-pen" style="font-size:9px"></i></button>
-                    <button @click="openProductDetail(p)" class="btn btn-s btn-xs btn-sq"><i class="fas fa-eye" style="font-size:9px"></i></button>
-                  </div></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </template>
-      </div>
-      <!-- /SELLER ANALYTICS -->
+
 
 
 
@@ -1199,6 +1156,38 @@
       <!-- ── ADMIN PANEL ── -->
       <div v-if="tab==='admin' && isAdmin">
         <div class="sect-hd fu"><div><div class="sect-ttl">Admin Panel</div><div class="sect-sub">Platform management</div></div></div>
+        <!-- ── TRIAGE PANEL ── -->
+        <div v-if="adminTriage.pendingPayments.length||adminTriage.awaitingQuote.length||adminTriage.verifyRequests.length||adminTriage.stalled.length"
+          class="triage-panel fu">
+          <div class="triage-hd"><i class="fas fa-bell" style="color:var(--warn)"></i> Needs your attention</div>
+          <div class="triage-items">
+            <div v-if="adminTriage.pendingPayments.length" class="triage-item ti-warn"
+              @click="adminSubTab='requests';adminReqFilter='pending'">
+              <i class="fas fa-credit-card"></i>
+              <div><strong>{{ adminTriage.pendingPayments.length }}</strong> payment{{ adminTriage.pendingPayments.length>1?'s':'' }} to verify</div>
+              <i class="fas fa-chevron-right" style="margin-left:auto;font-size:9px;opacity:0.5"></i>
+            </div>
+            <div v-if="adminTriage.awaitingQuote.length" class="triage-item ti-info"
+              @click="adminSubTab='requests';adminReqFilter='pending'">
+              <i class="fas fa-file-invoice-dollar"></i>
+              <div><strong>{{ adminTriage.awaitingQuote.length }}</strong> request{{ adminTriage.awaitingQuote.length>1?'s':'' }} awaiting quote</div>
+              <i class="fas fa-chevron-right" style="margin-left:auto;font-size:9px;opacity:0.5"></i>
+            </div>
+            <div v-if="adminTriage.verifyRequests.length" class="triage-item ti-ok"
+              @click="goTab('admin-users')">
+              <i class="fas fa-shield-halved"></i>
+              <div><strong>{{ adminTriage.verifyRequests.length }}</strong> seller{{ adminTriage.verifyRequests.length>1?'s':'' }} awaiting verification</div>
+              <i class="fas fa-chevron-right" style="margin-left:auto;font-size:9px;opacity:0.5"></i>
+            </div>
+            <div v-if="adminTriage.stalled.length" class="triage-item ti-err"
+              @click="adminSubTab='requests'">
+              <i class="fas fa-triangle-exclamation"></i>
+              <div><strong>{{ adminTriage.stalled.length }}</strong> request{{ adminTriage.stalled.length>1?'s':'' }} stalled 3+ days</div>
+              <i class="fas fa-chevron-right" style="margin-left:auto;font-size:9px;opacity:0.5"></i>
+            </div>
+          </div>
+        </div>
+
         <!-- Admin KPIs -->
         <div class="kpi-grid fu fu-1">
           <div class="kpi"><div class="kpi-ico"><i class="fas fa-users"></i></div><div class="kpi-lbl">Total Users</div><div class="kpi-val">{{ adminUsers.length }}</div><div class="kpi-sub">Registered</div></div>
@@ -1412,7 +1401,10 @@
         <div class="g3 fu fu-1">
           <div v-for="sh in shoppers" :key="sh.id" class="shopper-card">
             <div style="display:flex;align-items:center;gap:var(--s3);margin-bottom:var(--s3)">
-              <div class="sh-av">{{ sh.full_name?.charAt(0)||'?' }}</div>
+              <div class="sh-av">
+                <img v-if="sh.avatar_url" :src="sh.avatar_url" style="width:100%;height:100%;object-fit:cover;border-radius:50%">
+                <span v-else>{{ sh.full_name?.charAt(0)||'?' }}</span>
+              </div>
               <div>
                 <div style="font-size:var(--tsm);font-weight:600;color:var(--tx-1)">{{ sh.full_name }}</div>
                 <div style="font-size:var(--txs);color:var(--tx-3)">{{ sh.city }}, {{ sh.country }}</div>
@@ -1632,7 +1624,10 @@
         <div v-if="detailReq.shopper_name" style="margin-bottom:var(--s4)">
           <div style="font-family:var(--fd);font-size:16px;color:var(--tx-1);margin-bottom:var(--s2)">Your Assigned Agent</div>
           <div class="card-i" style="display:flex;align-items:center;gap:var(--s4);padding:var(--s4)">
-            <div class="shopper-av" style="width:44px;height:44px;font-size:18px;flex-shrink:0">{{ detailReq.shopper_name?.charAt(0)||'?' }}</div>
+            <div class="shopper-av" style="width:44px;height:44px;font-size:18px;flex-shrink:0;overflow:hidden">
+              <img v-if="detailReq.shopper_avatar" :src="detailReq.shopper_avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%">
+              <span v-else>{{ detailReq.shopper_name?.charAt(0)||'?' }}</span>
+            </div>
             <div style="flex:1">
               <div style="font-size:var(--tlg);font-weight:700;color:var(--tx-1)">{{ detailReq.shopper_name }}</div>
               <div style="font-size:var(--txs);color:var(--tx-3);margin-top:2px">{{ detailReq.shopper_city }} · {{ detailReq.assignment_type?.replace('_',' ')||'Agent' }}</div>
@@ -1642,8 +1637,18 @@
             </div>
             <div style="display:flex;flex-direction:column;gap:var(--s2)">
               <span class="badge" :class="detailReq.assignment_status==='accepted'?'b-ok':detailReq.assignment_status==='in_progress'?'b-in':'b-wn'">{{ detailReq.assignment_status?.replace('_',' ')||'Assigned' }}</span>
-              <a v-if="detailReq.shopper_phone" :href="'https://wa.me/'+detailReq.shopper_phone.replace(/[^0-9]/g,'')" target="_blank" class="btn btn-ok btn-sm" style="text-decoration:none"><i class="fab fa-whatsapp"></i>WhatsApp</a>
+                <a v-if="detailReq.shopper_phone" :href="'https://wa.me/'+detailReq.shopper_phone.replace(/[^0-9]/g,'')" target="_blank" class="btn btn-ok btn-sm" style="text-decoration:none"><i class="fab fa-whatsapp"></i>WhatsApp</a>
               <a v-if="detailReq.shopper_phone" :href="'tel:'+detailReq.shopper_phone" class="btn btn-s btn-sm" style="text-decoration:none"><i class="fas fa-phone"></i>Call</a>
+              <!-- Admin: update shopper status -->
+              <template v-if="isAdmin && detailReq.shopper_assignment_id">
+                <select @change="updateShopperStatus(detailReq,$event.target.value)" class="sel" style="font-size:10px;padding:4px 8px;width:auto;margin-top:4px">
+                  <option value="">Update status…</option>
+                  <option value="accepted">Accepted</option>
+                  <option value="in_progress">In progress</option>
+                  <option value="completed">Completed</option>
+                  <option value="failed">Failed</option>
+                </select>
+              </template>
             </div>
           </div>
         </div>
@@ -2194,7 +2199,12 @@
         <div class="pd-info">
           <!-- Seller (name now shown in hero) -->
           <div class="pd-seller">
-            <div class="pd-seller-av">{{ viewedProduct.seller_name?.charAt(0)||'T' }}</div>
+            <div class="pd-seller-av" style="overflow:hidden">
+              <img v-if="adminUsers.find(u=>u.id===viewedProduct.user_id)?.avatar_url"
+                :src="adminUsers.find(u=>u.id===viewedProduct.user_id).avatar_url"
+                style="width:100%;height:100%;object-fit:cover;border-radius:50%">
+              <span v-else>{{ viewedProduct.seller_name?.charAt(0)||'T' }}</span>
+            </div>
             <div>
               <div style="font-size:var(--tsm);font-weight:600;color:var(--tx-1)">{{ viewedProduct.seller_name||'TechMedixLink' }}</div>
               <div style="font-size:var(--txs);color:var(--tx-3)"><i class="fas fa-location-dot" style="font-size:8px"></i> {{ viewedProduct.country||'Tanzania' }}</div>
@@ -2246,7 +2256,10 @@
           <div v-else style="display:flex;flex-direction:column;gap:var(--s3)">
             <div v-for="rv in pdReviews" :key="rv.id" class="pd-review">
               <div style="display:flex;align-items:center;gap:var(--s2);margin-bottom:var(--s2)">
-                <div class="pd-rv-av">{{ rv.user?.full_name?.charAt(0)||'?' }}</div>
+                <div class="pd-rv-av" style="overflow:hidden">
+                  <img v-if="rv.user?.avatar_url" :src="rv.user.avatar_url" style="width:100%;height:100%;object-fit:cover;border-radius:50%">
+                  <span v-else>{{ rv.user?.full_name?.charAt(0)||'?' }}</span>
+                </div>
                 <div style="flex:1">
                   <div style="font-size:var(--tsm);font-weight:600;color:var(--tx-1)">{{ rv.user?.full_name||'Customer' }}</div>
                   <div style="font-size:9px;color:var(--tx-4);font-family:var(--fm)">{{ fDate(rv.created_at) }}</div>
