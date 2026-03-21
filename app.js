@@ -1156,7 +1156,7 @@
         // Validate file size (max 5MB)
         const maxSize = 5 * 1024 * 1024; // 5MB in bytes
         if (file.size > maxSize) {
-          toast('err','File too large',`Image must be under 5MB. Your file is \${(file.size/1024/1024).toFixed(1)}MB.`);
+          toast('err','File too large',`Image must be under 5MB. Your file is ${(file.size/1024/1024).toFixed(1)}MB.`);
           e.target.value = '';
           return;
         }
@@ -1366,8 +1366,8 @@
         // Notify the request owner about status change
         if (r.user_id) {
           await createNotification(r.user_id, 'status_update',
-            `Order Update: \${fStatus(newStatus)}`,
-            `Your request ${r.request_number} has been updated to: \${fStatus(newStatus)}.`,
+            `Order Update: ${fStatus(newStatus)}`,
+            `Your request ${r.request_number} has been updated to: ${fStatus(newStatus)}.`,
             r.id, 'in_app');
         }
         await loadReqs();
@@ -1559,8 +1559,8 @@
         paymentReq.value = null;
         // Send notifications
         const payMsg = isAdmin.value
-          ? `Payment of \${tzs(pmtF.amount)} confirmed for request \${r.request_number}.`
-          : `Your payment of \${tzs(pmtF.amount)} for \${r.request_number} has been received and is pending verification.`;
+          ? `Payment of ${tzs(pmtF.amount)} confirmed for request ${r.request_number}.`
+          : `Your payment of ${tzs(pmtF.amount)} for ${r.request_number} has been received and is pending verification.`;
         await createNotification(r.user_id, 'payment_received', isAdmin.value ? 'Payment Confirmed' : 'Payment Received', payMsg, r.id, 'in_app');
         if (isAdmin.value) {
           toast('ok', 'Payment confirmed', tzs(pmtF.amount));
