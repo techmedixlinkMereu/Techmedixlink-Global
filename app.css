@@ -828,3 +828,18 @@ input,select,textarea{font-family:var(--fb)}
   .sidebar.open{transform:translateX(0)}
   .sb-backdrop.show{display:block}
 }
+
+/* ── Notification row improvements ── */
+.notif-row{padding:8px var(--s2);cursor:pointer;border-radius:var(--r2);margin-bottom:2px;transition:background 0.12s}
+.notif-row:hover{background:var(--bg-1)}
+.notif-unread{background:var(--philips-l)!important}
+.notif-unread:hover{background:rgba(0,102,161,0.10)!important}
+
+/* ── Order detail modal ── */
+.ord-timeline{display:flex;flex-direction:column;gap:var(--s2);margin-bottom:var(--s4)}
+.ord-event{display:flex;gap:var(--s3);align-items:flex-start}
+.ord-event-dot{width:10px;height:10px;border-radius:50%;background:var(--philips);flex-shrink:0;margin-top:3px}
+.ord-event-line{width:2px;background:var(--ln-1);margin:0 4px;flex:1;min-height:20px}
+
+/* ── Price filter inputs ── */
+.price-range-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:var(--s2) 0}
