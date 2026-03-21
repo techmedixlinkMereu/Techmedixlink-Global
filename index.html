@@ -456,7 +456,7 @@
           <div class="user-name">{{ profile.full_name }}</div>
           <div class="user-role-tag" style="color:rgba(255,255,255,0.45)">{{ roleLabel(profile.user_role) }}</div>
           <div v-if="profileCompletion.pct<100&&profileCompletion.next" class="sb-next-step">
-            <i class="fas fa-circle-arrow-right" style="font-size:9px"></i> {{ profileCompletion.next.label }}
+            <i class="fas fa-circle-arrow-right" style="font-size:9px"></i> {{ profileCompletion.next?.label }}
           </div>
         </div>
         <i class="fas fa-pen" style="color:rgba(255,255,255,0.3);font-size:9px;flex-shrink:0"></i>
@@ -718,7 +718,7 @@
           <div v-if="profileCompletion.next"
             style="display:flex;align-items:center;gap:6px;font-size:11px;color:#7a90aa;padding-top:6px;border-top:1px solid rgba(0,30,80,0.05)">
             <i class="fas fa-arrow-right" style="font-size:9px;color:#0066a1"></i>
-            <span>Next: <strong style="color:#0066a1;font-weight:600">{{ profileCompletion.next.label }}</strong></span>
+            <span>Next: <strong style="color:#0066a1;font-weight:600">{{ profileCompletion.next?.label }}</strong></span>
             <button @click="showProfileModal=true" class="btn btn-p" style="margin-left:auto;padding:3px 10px;font-size:10px">Do it now</button>
           </div>
         </div>
@@ -1038,7 +1038,7 @@
 
 
       <!-- ── ADMIN LISTINGS ── -->
-      <div v-if="tab='admin-listings' && isAdmin">
+      <div v-if=\"tab==='admin-listings' && isAdmin">
         <div class="sect-hd fu">
           <div><div class="sect-ttl">All Listings</div><div class="sect-sub">{{ products.length }} products on platform</div></div>
           <div style="display:flex;gap:var(--s2)">
@@ -1470,7 +1470,7 @@
               <div :style="{width:profileCompletion.pct+'%',background:'var(--philips)',height:'100%',borderRadius:'3px',transition:'width 0.6s ease'}"></div>
             </div>
             <div v-if="profileCompletion.next" style="font-size:10px;color:var(--tx-3);margin-top:4px;text-align:left">
-              <i class="fas fa-arrow-right" style="color:var(--philips)"></i> Next: {{ profileCompletion.next.label }}
+              <i class="fas fa-arrow-right" style="color:var(--philips)"></i> Next: {{ profileCompletion.next?.label }}
             </div>
           </div>
         </div>
@@ -2473,9 +2473,16 @@
 
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
-<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script src="https://unpkg.com/vue@3.4.21/dist/vue.global.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="config.js"></script>
 <script src="app.js"></script>
+<!-- DEBUG: Remove after testing -->
+<div id="debug-test" onclick="this.style.background='green';this.textContent='CLICKS WORK!'" 
+  style="position:fixed;bottom:10px;left:50%;transform:translateX(-50%);
+  background:#ff4444;color:white;padding:10px 20px;border-radius:8px;
+  z-index:9999;cursor:pointer;font-weight:bold;font-family:sans-serif">
+  CLICK ME TO TEST
+</div>
 </body>
 </html>
