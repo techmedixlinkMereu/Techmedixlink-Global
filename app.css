@@ -12,7 +12,7 @@
     8.  Cards          (.card, .card-i, .card-sm)
     9.  KPI tiles      (.kpi-grid, .kpi, .kpi-val)
    10.  Section headers (.sect-hd, .sect-ttl)
-   11.  Badges         (.badge, .b-ok, .b-wn, .b-er…) 
+   11.  Badges         (.badge, .b-ok, .b-wn, .b-er…)
    12.  Forms          (.fr2, .fr3, .fg, .lbl, .inp, .sel, .tex…)
    13.  Tables         (.tbl-w, .tbl, zebra rows)
    14.  Product cards  (.prod-grid, .prod-card, .pc-img, .pc-body…)
@@ -533,3 +533,83 @@ input,select,textarea{font-family:var(--fb)}
 /* ── Password Update Screen ── */
 .pw-update-screen{position:fixed;inset:0;background:var(--bg-1);z-index:999;display:flex;align-items:center;justify-content:center;padding:var(--s4)}
 .pw-update-card{background:white;border:1px solid var(--ln-1);border-top:3px solid var(--philips);border-radius:var(--r4);width:100%;max-width:420px;padding:var(--s7) var(--s6);box-shadow:var(--sh3);text-align:center}
+
+
+/* ════════════════════════════════════════════════════════════════
+   ONBOARDING OVERLAY
+════════════════════════════════════════════════════════════════ */
+.ob-shell{position:fixed;inset:0;z-index:1100;background:rgba(10,31,60,0.92);backdrop-filter:blur(8px);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:var(--s4)}
+.ob-dots{display:flex;gap:8px;margin-bottom:var(--s5)}
+.ob-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.2);transition:all 0.3s}
+.ob-dot.active{background:#4dc8d0;width:24px;border-radius:4px}
+.ob-dot.done{background:rgba(77,200,208,0.5)}
+.ob-card{background:white;border-radius:var(--r4);padding:var(--s7) var(--s6);max-width:480px;width:100%;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,0.4)}
+.ob-card-wide{max-width:580px}
+.ob-icon{width:64px;height:64px;background:var(--philips-l);border-radius:50%;margin:0 auto var(--s4);display:flex;align-items:center;justify-content:center;font-size:26px;color:var(--philips)}
+.ob-icon-b{background:#e5f8f0;color:#1a7a4a}
+.ob-ttl{font-family:var(--fd);font-size:26px;color:var(--tx-1);margin-bottom:var(--s2)}
+.ob-sub{font-size:var(--tsm);color:var(--tx-3);line-height:1.65;margin-bottom:var(--s5);max-width:380px;margin-left:auto;margin-right:auto}
+/* Role buttons */
+.ob-role-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--s3);margin-bottom:var(--s4)}
+.ob-role-both{grid-column:1/-1}
+.ob-role-btn{background:var(--bg-1);border:2px solid var(--ln-1);border-radius:var(--r3);padding:var(--s4) var(--s3);cursor:pointer;transition:all 0.2s;text-align:center}
+.ob-role-btn:hover{border-color:var(--philips);background:var(--philips-l)}
+.ob-role-btn i{font-size:22px;color:var(--philips);margin-bottom:var(--s2);display:block}
+.ob-role-lbl{font-family:var(--fd);font-size:17px;color:var(--tx-1);margin-bottom:4px}
+.ob-role-sub{font-size:var(--txs);color:var(--tx-3);line-height:1.4}
+/* Type buttons */
+.ob-type-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s2);margin-bottom:var(--s4)}
+.ob-type-btn{background:var(--bg-1);border:2px solid var(--ln-1);border-radius:var(--r2);padding:var(--s3) var(--s2);cursor:pointer;transition:all 0.2s;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:var(--tsm);color:var(--tx-1);font-family:var(--fb)}
+.ob-type-btn:hover{border-color:var(--philips);background:var(--philips-l)}
+.ob-type-btn i{font-size:18px;color:var(--philips)}
+/* Avatar in onboarding */
+.ob-av-wrap{display:flex;flex-direction:column;align-items:center;margin-bottom:var(--s2)}
+.ob-av-ring{width:96px;height:96px;border-radius:50%;border:3px dashed var(--ln-2);cursor:pointer;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;transition:border-color 0.2s;background:var(--bg-1)}
+.ob-av-ring:hover{border-color:var(--philips)}
+.ob-av-img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.ob-av-ph{font-size:28px;color:var(--tx-3)}
+.ob-av-badge{position:absolute;bottom:4px;right:4px;width:22px;height:22px;background:var(--philips);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;border:2px solid white}
+/* Progress bar in onboarding */
+.ob-pct-bar{height:6px;background:var(--bg-3);border-radius:3px;overflow:hidden;width:100%;margin-top:var(--s4)}
+.ob-pct-fill{height:100%;background:var(--philips);border-radius:3px;transition:width 0.5s ease}
+.ob-skip{background:none;border:none;color:var(--tx-3);font-size:var(--txs);cursor:pointer;margin-top:var(--s3);padding:4px 8px;border-radius:var(--r1)}
+.ob-skip:hover{color:var(--tx-2);background:var(--bg-2)}
+.ob-back{background:none;border:1px solid var(--ln-2);color:var(--tx-2);font-size:var(--tsm);cursor:pointer;padding:8px 16px;border-radius:var(--r2);margin-top:var(--s3)}
+
+/* ════════════════════════════════════════════════════════════════
+   SIDEBAR PROFILE CARD with completeness ring
+════════════════════════════════════════════════════════════════ */
+.sb-profile-card{display:flex;align-items:center;gap:var(--s3);padding:var(--s3) var(--s4);cursor:pointer;border-radius:var(--r2);margin:var(--s2);transition:background 0.15s}
+.sb-profile-card:hover{background:rgba(255,255,255,0.06)}
+.sb-av-wrap{position:relative;width:48px;height:48px;flex-shrink:0}
+.sb-av-ring-svg{position:absolute;inset:0;width:100%;height:100%}
+.sb-av-inner{position:absolute;inset:4px;border-radius:50%;overflow:hidden;background:var(--sidebar-2);display:flex;align-items:center;justify-content:center}
+.sb-av-photo{width:100%;height:100%;object-fit:cover}
+.sb-av-init{font-family:var(--fb);font-size:17px;font-weight:700;color:white}
+.sb-av-pct{position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);background:var(--philips);color:white;font-size:8px;font-family:var(--fm);font-weight:700;padding:1px 5px;border-radius:8px;white-space:nowrap;border:1.5px solid var(--sidebar)}
+.sb-next-step{font-size:10px;color:rgba(77,200,208,0.8);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ════════════════════════════════════════════════════════════════
+   PROFILE MODAL AVATAR
+════════════════════════════════════════════════════════════════ */
+.prof-av-wrap{width:88px;height:88px;border-radius:50%;margin:0 auto;position:relative;cursor:pointer;overflow:hidden;border:3px solid var(--philips-l);transition:border-color 0.2s}
+.prof-av-wrap:hover{border-color:var(--philips)}
+.prof-av-img{width:100%;height:100%;object-fit:cover;display:block}
+.prof-av-ph{width:100%;height:100%;background:var(--philips-l);display:flex;align-items:center;justify-content:center;font-family:var(--fb);font-size:32px;font-weight:700;color:var(--philips)}
+.prof-av-edit{position:absolute;bottom:0;left:0;right:0;background:rgba(0,102,161,0.75);height:26px;display:flex;align-items:center;justify-content:center;color:white;font-size:10px;gap:4px}
+
+/* ════════════════════════════════════════════════════════════════
+   DASHBOARD COMPLETENESS CARD
+════════════════════════════════════════════════════════════════ */
+.ob-progress-card{background:white;border:1px solid var(--ln-1);border-top:3px solid var(--philips);border-radius:var(--r3);padding:var(--s5);margin-bottom:var(--s5);box-shadow:var(--sh1)}
+.ob-track{height:8px;background:var(--bg-3);border-radius:4px;overflow:hidden;margin-bottom:var(--s4)}
+.ob-fill{height:100%;background:linear-gradient(90deg,var(--philips),var(--siemens));border-radius:4px;transition:width 0.8s ease}
+.ob-unlocks{display:flex;gap:var(--s2);flex-wrap:wrap;margin-bottom:var(--s4)}
+.ob-unlock{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;min-width:80px;padding:var(--s3) var(--s2);background:var(--bg-1);border-radius:var(--r2);border:1px solid var(--ln-1);opacity:0.45;transition:opacity 0.3s}
+.ob-unlock.done{opacity:1;border-color:var(--ok);background:#f0faf5}
+.ob-unlock-icon{width:32px;height:32px;border-radius:50%;background:var(--bg-2);display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--tx-3)}
+.ob-unlock.done .ob-unlock-icon{background:#d4f0e4;color:var(--ok)}
+.ob-unlock-lbl{font-size:10px;color:var(--tx-2);text-align:center;line-height:1.3}
+.ob-unlock-at{font-family:var(--fm);font-size:9px;color:var(--tx-4)}
+.ob-cta{display:flex;align-items:center;gap:var(--s2);padding:var(--s3) var(--s4);background:var(--philips-l);border-radius:var(--r2);font-size:var(--tsm);color:var(--philips)}
+.ob-cta i{color:var(--philips)}
