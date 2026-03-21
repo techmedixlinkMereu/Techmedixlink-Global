@@ -5,7 +5,7 @@
 //   echo "config.js" >> .gitignore
 //
 // For production, set these via environment variables or a
-// deployment secrets manager (Netlify env vars, Vercel env vars).
+// deployment secrets manager (Netlify env vars, Vercel env vars). 
 // ─────────────────────────────────────────────────────────────────
 
 const TECHMEDIX_CONFIG = {
