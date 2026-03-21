@@ -3,7 +3,7 @@
 // ─────────────────────────────────────────────────────────────────
 // SECTIONS:
 //   1.  Supabase client init
-//   2.  State -- core, data, exchange rate, modals, auth, filters
+//   2.  State -- core, data, exchange rate, modals, auth, filters 
 //   3.  Computed -- roles, UI labels, request aggregates, filters
 //   4.  Status config -- statusList, stepperStages, helpers
 //   5.  Data loaders -- loadAll, loadProds, loadReqs, loadPayments…
