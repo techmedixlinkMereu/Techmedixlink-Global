@@ -559,9 +559,11 @@
       async function loadPayments() {
         if (!profile.value) return;
         try {
-          const reqIds = allRequests.value.filter(r => r.user_id === profile.value.id).map(r => r.id);
-          if (!reqIds.length) { payments.value = []; return; }
-          const { data, error } = await sb.from('payments').select('*').in('request_id', reqIds).order('created_at', { ascending: false });
+          // Query by user_id directly — avoids .in() with large array causing 400
+          const query = isAdmin.value
+            ? sb.from('payments').select('*').order('payment_date', { ascending: false }).limit(100)
+            : sb.from('payments').select('*').eq('user_id', profile.value.id).order('payment_date', { ascending: false });
+          const { data, error } = await query;
           if (error) throw error;
           payments.value = data || [];
         } catch (e) { console.error('loadPayments:', e); }
@@ -667,8 +669,7 @@
             sb.from('request_items').select('product_id,quantity,total_price,request:request_id(status,created_at)')
               .in('product_id', myProductIds),
             sb.from('request_items').select('product_id,total_price,request:request_id(status,deposit_paid)')
-              .in('product_id', myProductIds)
-              .in('request_id', (await sb.from('requests').select('id').in('status',['deposit_paid','processing','sourcing','shipped','delivered','completed'])).data?.map(r=>r.id)||[]),
+              .in('product_id', myProductIds),
             sb.from('reviews').select('rating,reviewed_entity_id')
               .in('reviewed_entity_id', myProductIds),
           ]);
