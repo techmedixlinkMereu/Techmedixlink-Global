@@ -574,26 +574,50 @@
           <div class="lp-hero">
             <div class="lp-hero-left">
               <div class="lp-tagline">Tanzania's Medical Equipment Marketplace</div>
-              <div class="lp-headline">Source. Verify.<br><span style="color:#4dc8d0">Deliver.</span></div>
+              <div class="lp-headline">Source. Verify.<br><span class="lp-headline-accent">Deliver.</span></div>
               <div class="lp-sub">TMDA-certified medical devices, hospital equipment and surgical supplies. Verified sellers. Shopper network across East Africa.</div>
-              <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:20px">
-                <button @click="showAuth=true" class="btn btn-p" style="padding:10px 24px;font-size:14px"><i class="fas fa-rocket"></i> Get Started Free</button>
-                <button @click="goTab('browse')" class="btn btn-s" style="padding:10px 24px;font-size:14px"><i class="fas fa-magnifying-glass"></i> Browse Products</button>
+              <div class="lp-cta-row">
+                <button @click="showAuth=true" class="btn btn-p lp-cta-btn"><i class="fas fa-rocket"></i> Get Started Free</button>
+                <button @click="goTab('browse')" class="btn btn-s lp-cta-btn"><i class="fas fa-magnifying-glass"></i> Browse Products</button>
               </div>
-              <!-- Trust signals -->
+              <!-- Trust signals — proper grid -->
               <div class="lp-trust">
-                <div class="lp-trust-item"><i class="fas fa-certificate" style="color:#1a7a4a"></i><span>TMDA Certified</span></div>
-                <div class="lp-trust-item"><i class="fas fa-shield-halved" style="color:#0066a1"></i><span>Verified Sellers</span></div>
-                <div class="lp-trust-item"><i class="fas fa-truck" style="color:#00a8b0"></i><span>All TZ Regions</span></div>
-                <div class="lp-trust-item"><i class="fab fa-whatsapp" style="color:#25d366"></i><span>WhatsApp Updates</span></div>
+                <div class="lp-trust-item">
+                  <div class="lp-trust-icon" style="background:rgba(26,122,74,0.15)"><i class="fas fa-certificate" style="color:#1a7a4a;font-size:14px"></i></div>
+                  <span>TMDA Certified</span>
+                </div>
+                <div class="lp-trust-item">
+                  <div class="lp-trust-icon" style="background:rgba(0,102,161,0.15)"><i class="fas fa-shield-halved" style="color:#0066a1;font-size:14px"></i></div>
+                  <span>Verified Sellers</span>
+                </div>
+                <div class="lp-trust-item">
+                  <div class="lp-trust-icon" style="background:rgba(0,168,176,0.15)"><i class="fas fa-truck" style="color:#00a8b0;font-size:14px"></i></div>
+                  <span>All TZ Regions</span>
+                </div>
+                <div class="lp-trust-item">
+                  <div class="lp-trust-icon" style="background:rgba(37,211,102,0.15)"><i class="fab fa-whatsapp" style="color:#25d366;font-size:14px"></i></div>
+                  <span>WhatsApp Updates</span>
+                </div>
               </div>
             </div>
-            <!-- Live stats -->
+            <!-- Live stats — 2x2 grid -->
             <div class="lp-stats">
-              <div class="lp-stat"><div class="lp-stat-val">{{  products.length  }}</div><div class="lp-stat-lbl">Products listed</div></div>
-              <div class="lp-stat"><div class="lp-stat-val">{{  products.filter(p=>p.tmda_certified).length  }}</div><div class="lp-stat-lbl">TMDA certified</div></div>
-              <div class="lp-stat"><div class="lp-stat-val">{{  fNum(usdToTzs)  }}</div><div class="lp-stat-lbl">USD/TZS today</div></div>
-              <div class="lp-stat"><div class="lp-stat-val">5+</div><div class="lp-stat-lbl">Tanzania regions</div></div>
+              <div class="lp-stat">
+                <div class="lp-stat-val">{{ products.length }}</div>
+                <div class="lp-stat-lbl">Products listed</div>
+              </div>
+              <div class="lp-stat">
+                <div class="lp-stat-val" style="color:#4dc8d0">{{ products.filter(p=>p.tmda_certified).length }}</div>
+                <div class="lp-stat-lbl">TMDA certified</div>
+              </div>
+              <div class="lp-stat">
+                <div class="lp-stat-val" style="font-size:16px">{{ fNum(usdToTzs) }}</div>
+                <div class="lp-stat-lbl">USD/TZS today</div>
+              </div>
+              <div class="lp-stat">
+                <div class="lp-stat-val">5+</div>
+                <div class="lp-stat-lbl">TZ regions</div>
+              </div>
             </div>
           </div>
 
@@ -2456,6 +2480,117 @@
 <script src="config.js"></script>
 <script src="app.js"></script>
 <!-- DEBUG: Remove after testing -->
+
+<!-- ── MOBILE BOTTOM NAV ── -->
+<div class="mob-bottom-nav">
+  <div class="mob-bottom-nav-inner">
+    <button class="mob-nav-btn" :class="{active:tab==='home'}" @click="goTab('home')">
+      <i class="fas fa-house"></i>
+      <span>Home</span>
+    </button>
+    <button class="mob-nav-btn" :class="{active:tab==='browse'}" @click="goTab('browse')">
+      <i class="fas fa-magnifying-glass"></i>
+      <span>Browse</span>
+      <span v-if="products.length" class="mob-nav-badge">{{ products.length }}</span>
+    </button>
+    <template v-if="profile && canBuy">
+      <button class="mob-nav-btn" :class="{active:tab==='my-requests'}" @click="goTab('my-requests')">
+        <i class="fas fa-clipboard-list"></i>
+        <span>Requests</span>
+        <span v-if="myActiveReqs.length" class="mob-nav-badge">{{ myActiveReqs.length }}</span>
+      </button>
+    </template>
+    <template v-if="profile && isAdmin">
+      <button class="mob-nav-btn" :class="{active:tab==='admin'}" @click="goTab('admin')">
+        <i class="fas fa-shield-halved"></i>
+        <span>Admin</span>
+        <span v-if="pendingAdminCount" class="mob-nav-badge">{{ pendingAdminCount }}</span>
+      </button>
+    </template>
+    <button class="mob-nav-btn" @click="profile ? showProfileModal=true : showAuth=true">
+      <i class="fas fa-user"></i>
+      <span>{{ profile ? 'Profile' : 'Sign In' }}</span>
+    </button>
+  </div>
+</div>
+
+<!-- 3D Model Viewer -->
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
+
+<!-- ── MOBILE BOTTOM NAV ── -->
+<div class="mob-bottom-nav" v-if="profile">
+  <div class="mob-nav-item" :class="{active:tab==='home'}" @click="goTab('home')">
+    <i class="fas fa-house"></i><span>Home</span>
+  </div>
+  <div class="mob-nav-item" :class="{active:tab==='browse'}" @click="goTab('browse')">
+    <i class="fas fa-magnifying-glass"></i><span>Browse</span>
+    <span v-if="products.length" class="mob-nav-chip">{{ products.length }}</span>
+  </div>
+  <div v-if="canBuy" class="mob-nav-item" :class="{active:tab==='my-requests'}" @click="goTab('my-requests')">
+    <i class="fas fa-clipboard-list"></i><span>Requests</span>
+    <span v-if="myActiveReqs.length" class="mob-nav-chip">{{ myActiveReqs.length }}</span>
+  </div>
+  <div v-if="canSell && !canBuy" class="mob-nav-item" :class="{active:tab==='my-listings'}" @click="goTab('my-listings')">
+    <i class="fas fa-store"></i><span>Listings</span>
+  </div>
+  <div v-if="isAdmin" class="mob-nav-item" :class="{active:tab==='admin'}" @click="goTab('admin')">
+    <i class="fas fa-shield-halved"></i><span>Admin</span>
+    <span v-if="pendingAdminCount" class="mob-nav-chip">{{ pendingAdminCount }}</span>
+  </div>
+  <div class="mob-nav-item" @click="showProfileModal=true">
+    <div class="mob-nav-av">
+      <img v-if="profile.avatar_url" :src="profile.avatar_url" style="width:100%;height:100%;object-fit:cover;border-radius:50%">
+      <span v-else>{{ userInitial }}</span>
+    </div>
+    <span>Profile</span>
+  </div>
+</div>
+<div class="mob-bottom-nav mob-bottom-nav-guest" v-else>
+  <div class="mob-nav-item" :class="{active:tab==='home'}" @click="goTab('home')">
+    <i class="fas fa-house"></i><span>Home</span>
+  </div>
+  <div class="mob-nav-item" :class="{active:tab==='browse'}" @click="goTab('browse')">
+    <i class="fas fa-magnifying-glass"></i><span>Browse</span>
+  </div>
+  <div class="mob-nav-item" @click="showAuth=true">
+    <i class="fas fa-sign-in-alt"></i><span>Sign In</span>
+  </div>
+</div>
+
+
+<!-- ── MOBILE BOTTOM NAV ── -->
+<div class="mob-bottom-nav">
+  <div class="mob-bottom-nav-inner">
+    <button class="mob-nav-btn" :class="{active:tab==='home'}" @click="goTab('home')">
+      <i class="fas fa-house"></i>
+      <span>Home</span>
+    </button>
+    <button class="mob-nav-btn" :class="{active:tab==='browse'}" @click="goTab('browse')">
+      <i class="fas fa-magnifying-glass"></i>
+      <span>Browse</span>
+      <span v-if="products.length" class="mob-nav-badge">{{ products.length }}</span>
+    </button>
+    <template v-if="profile && canBuy">
+      <button class="mob-nav-btn" :class="{active:tab==='my-requests'}" @click="goTab('my-requests')">
+        <i class="fas fa-clipboard-list"></i>
+        <span>Requests</span>
+        <span v-if="myActiveReqs.length" class="mob-nav-badge">{{ myActiveReqs.length }}</span>
+      </button>
+    </template>
+    <template v-if="profile && isAdmin">
+      <button class="mob-nav-btn" :class="{active:tab==='admin'}" @click="goTab('admin')">
+        <i class="fas fa-shield-halved"></i>
+        <span>Admin</span>
+        <span v-if="pendingAdminCount" class="mob-nav-badge">{{ pendingAdminCount }}</span>
+      </button>
+    </template>
+    <button class="mob-nav-btn" @click="profile ? showProfileModal=true : showAuth=true">
+      <i class="fas fa-user"></i>
+      <span>{{ profile ? 'Profile' : 'Sign In' }}</span>
+    </button>
+  </div>
+</div>
+
 <!-- 3D Model Viewer -->
 <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
 </body>
