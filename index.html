@@ -1730,7 +1730,12 @@
         <div class="pd-hero-badges">
           <span v-if="viewedProduct.tmda_certified" class="badge b-ok pd-hbadge"><i class="fas fa-certificate" style="font-size:9px"></i>TMDA Certified</span>
           <span v-if="viewedProduct.platform_type==='globaldoor'" class="badge pd-hbadge b-gd">GlobalDoor</span>
-          <span :class="['pc-stock pd-hbadge',stockClass(viewedProduct.stock_quantity)]" style="border-radius:var(--rp);padding:3px 10px;font-size:9px;font-weight:600">{{ stockLabel(viewedProduct.stock_quantity) }}</span>
+          <span class="pd-hbadge badge"
+            :style="viewedProduct.stock_quantity>10?'background:rgba(26,122,74,0.75)!important':viewedProduct.stock_quantity>0?'background:rgba(196,122,0,0.75)!important':'background:rgba(192,57,43,0.75)!important'"
+            style="border:1px solid rgba(255,255,255,0.2)!important;color:white!important">
+            <i :class="viewedProduct.stock_quantity>0?'fas fa-check':'fas fa-times'" style="font-size:8px"></i>
+            {{ stockLabel(viewedProduct.stock_quantity) }}
+          </span>
         </div>
         <button class="pd-close" @click="showProductDetail=false"><i class="fas fa-times"></i></button>
       </div>
@@ -1818,10 +1823,9 @@
             <div v-if="viewedProduct.base_price_eur" style="font-size:var(--txs);color:var(--tx-3);margin-top:2px">€{{ fNum(viewedProduct.base_price_eur) }} EUR</div>
           </div>
 
-          <!-- Stock + platform -->
-          <div style="display:flex;gap:var(--s2);margin-bottom:var(--s4)">
-            <span :class="['pc-stock',stockClass(viewedProduct.stock_quantity)]" style="font-size:var(--tsm)">{{ stockLabel(viewedProduct.stock_quantity) }}</span>
-            <span class="badge" :class="viewedProduct.platform_type==='techmedix'?'b-tm':'b-gd'">{{ viewedProduct.platform_type==='techmedix'?'TechMedixLink':' GlobalDoor' }}</span>
+          <!-- Stock status only in panel — platform already shown in hero -->
+          <div style="margin-bottom:var(--s3)">
+            <span :class="['pc-stock',stockClass(viewedProduct.stock_quantity)]" style="font-size:var(--tsm);font-weight:600">{{ stockLabel(viewedProduct.stock_quantity) }}</span>
           </div>
 
           <!-- CTA buttons -->
