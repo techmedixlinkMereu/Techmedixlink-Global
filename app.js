@@ -2,7 +2,7 @@
 // TechMedixLink · app.js  (requires config.js loaded first)
 // ─────────────────────────────────────────────────────────────────
 // SECTIONS:
-//   1.  Supabase client init 
+//   1.  Supabase client init
 //   2.  State — core, data, exchange rate, modals, auth, filters
 //   3.  Computed — roles, UI labels, request aggregates, filters
 //   4.  Status config — statusList, stepperStages, helpers
@@ -1242,7 +1242,17 @@
       }
 
       // ── PAYMENTS ──
-      function askPayment(r) { paymentReq.value = r; pmtF.amount = r.balance_due || 0; pmtF.method = 'mpesa'; pmtF.type = 'deposit'; pmtF.reference = ''; pmtF.notes = ''; pmtF.phone = profile.value?.phone || ''; }
+      function askPayment(r) {
+        paymentReq.value = r;
+        // Smart defaults: if partially paid → balance type, otherwise deposit
+        const alreadyPaid = r.deposit_paid || 0;
+        pmtF.type    = alreadyPaid > 0 ? 'balance' : 'deposit';
+        pmtF.amount  = r.balance_due || 0;
+        pmtF.method  = 'mpesa';
+        pmtF.reference = '';
+        pmtF.notes   = '';
+        pmtF.phone   = profile.value?.phone || '';
+      }
 
       async function doPayment(r) {
         if (!pmtF.amount || pmtF.amount <= 0) { toast('err','Invalid amount','Enter a valid payment amount'); return; }
@@ -1342,8 +1352,16 @@
       }
 
       async function acceptQuote(r) {
-        await updateStatus(r, 'deposit_paid');
-        toast('ok','Quote accepted','Proceed with payment to continue');
+        // Mark as accepted first (quoted → processing), then prompt payment
+        const { error } = await sb.from('requests').update({
+          status: 'processing',
+          updated_at: new Date().toISOString()
+        }).eq('id', r.id);
+        if (error) { toast('err','Error',error.message); return; }
+        await loadReqs();
+        // Open payment modal immediately — buyer must pay to proceed
+        askPayment({ ...r, status: 'processing' });
+        toast('ok', 'Quote accepted!', 'Please complete your deposit to begin sourcing.');
       }
 
       async function declineQuote(r) {
