@@ -6,7 +6,7 @@
      DEPLOYMENT: Upload index.html, app.css, app.js, config.js,
      manifest.json and favicon.svg to any static host.
 
-     FILES: 
+     FILES:
        index.html   — HTML structure & Vue template
        app.css      — All styles (508 lines, 23 sections)
        app.js       — Vue app logic (20 sections)
@@ -390,29 +390,43 @@
         <button class="plat-btn" :class="{'on-tm':platform==='techmedix'}" @click="setPlatform('techmedix')"><i class="fas fa-heart-pulse"></i>TechMedix</button>
         <button class="plat-btn" :class="{'on-gd':platform==='globaldoor'}" @click="setPlatform('globaldoor')"><i class="fas fa-globe"></i>GlobalDoor</button>
       </div>
-      <div v-if="profile" class="role-pill"><i class="fas" :class="roleIcon(profile.user_role)"></i>{{ roleLabel(profile.user_role) }}<span v-if="profile.is_verified" style="color:var(--ok);font-size:9px">✓</span></div>
+      <div v-if="profile && isAdmin" class="role-pill" style="background:rgba(192,57,43,0.18);color:#e8806a;border-color:rgba(192,57,43,0.30)">
+        <i class="fas fa-shield-halved"></i>Administrator
+      </div>
+      <div v-else-if="profile" class="role-pill">
+        <i class="fas" :class="roleIcon(profile.user_role)"></i>{{ roleLabel(profile.user_role) }}
+        <span v-if="profile.is_verified" style="color:var(--ok);font-size:9px">✓</span>
+      </div>
     </div>
     <nav class="sb-nav">
       <div class="nav-sect">Overview</div>
       <div class="nav-item" :class="{active:tab==='home'}" @click="goTab('home')"><i class="ni fas fa-house"></i>Dashboard</div>
-      <template v-if="canBuy">
+      <template v-if="canBuy && !isAdmin">
         <div class="nav-sect">Browse & Buy</div>
         <div class="nav-item" :class="{active:tab==='browse'}" @click="goTab('browse')"><i class="ni fas fa-magnifying-glass"></i>Browse Products<span v-if="products.length" class="nav-chip">{{ products.length }}</span></div>
         <div class="nav-item" :class="{active:tab==='my-requests'}" @click="goTab('my-requests')"><i class="ni fas fa-clipboard-list"></i>My Requests<span v-if="myActiveReqs.length" class="nav-chip">{{ myActiveReqs.length }}</span></div>
         <div class="nav-item" :class="{active:tab==='tracking'}" @click="goTab('tracking')"><i class="ni fas fa-location-dot"></i>Tracking</div>
         <div class="nav-item" :class="{active:tab==='payments'}" @click="goTab('payments')"><i class="ni fas fa-credit-card"></i>Payments<span v-if="pendingPayCount>0" class="nav-chip">{{ pendingPayCount }}</span></div>
       </template>
-      <template v-if="canSell">
+      <template v-if="canSell && !isAdmin">
         <div class="nav-sect">My Store</div>
         <div class="nav-item" :class="{active:tab==='my-listings'}" @click="goTab('my-listings')"><i class="ni fas fa-store"></i>My Listings<span v-if="myListings.length" class="nav-chip">{{ myListings.length }}</span></div>
         <div class="nav-item" :class="{active:tab==='inquiries'}" @click="goTab('inquiries')"><i class="ni fas fa-inbox"></i>Inquiries<span v-if="incomingReqs.length" class="nav-chip">{{ incomingReqs.length }}</span></div>
         <div class="nav-item" :class="{active:tab==='seller-analytics'}" @click="goTab('seller-analytics')"><i class="ni fas fa-chart-bar"></i>My Analytics</div>
       </template>
       <template v-if="isAdmin">
-        <div class="nav-sect">Administration</div>
-        <div class="nav-item" :class="{active:tab==='admin'}" @click="goTab('admin')"><i class="ni fas fa-shield-halved"></i>Dashboard<span v-if="pendingAdminCount>0" class="nav-dot"></span></div>
+        <div class="nav-sect">Platform Overview</div>
+        <div class="nav-item" :class="{active:tab==='admin'}" @click="goTab('admin')">
+          <i class="ni fas fa-shield-halved"></i>Dashboard
+          <span v-if="pendingAdminCount>0" class="nav-dot"></span>
+          <span v-else-if="adminTriage && (adminTriage.pendingPayments?.length||adminTriage.awaitingQuote?.length)" class="nav-chip" style="background:rgba(196,122,0,0.25);color:#f0a500">
+            {{ (adminTriage.pendingPayments?.length||0)+(adminTriage.awaitingQuote?.length||0) }}
+          </span>
+        </div>
+        <div class="nav-sect">Users &amp; Sellers</div>
         <div class="nav-item" :class="{active:tab==='admin-users'}" @click="goTab('admin-users')"><i class="ni fas fa-users"></i>All Users<span v-if="adminUsers.length" class="nav-chip">{{ adminUsers.length }}</span></div>
         <div class="nav-item" :class="{active:tab==='admin-listings'}" @click="goTab('admin-listings')"><i class="ni fas fa-boxes-stacked"></i>All Listings<span v-if="products.length" class="nav-chip">{{ products.length }}</span></div>
+        <div class="nav-sect">Operations</div>
         <div class="nav-item" :class="{active:tab==='analytics'}" @click="goTab('analytics')"><i class="ni fas fa-chart-line"></i>Analytics</div>
         <div class="nav-item" :class="{active:tab==='shoppers'}" @click="goTab('shoppers')"><i class="ni fas fa-people-carry-box"></i>Shoppers</div>
       </template>
@@ -482,7 +496,10 @@
         <button class="mob-btn" @click="sidebarOpen=!sidebarOpen"><i class="fas fa-bars"></i></button>
         <button class="mob-search-btn" @click.stop="$event.target.closest('.main').querySelector('.mob-search-bar').classList.toggle('open')"><i class="fas fa-search"></i></button>
         <div class="page-ttl">{{ pageTitle }}</div>
-        <div class="plat-tag"><i :class="platform==='techmedix'?'fas fa-heart-pulse':'fas fa-globe'"></i>{{ platform==='techmedix'?'TechMedixLink':'Global Door' }}</div>
+        <div v-if="isAdmin" class="admin-mode-tag">
+          <i class="fas fa-shield-halved"></i> Admin Mode
+        </div>
+        <div v-else class="plat-tag"><i :class="platform==='techmedix'?'fas fa-heart-pulse':'fas fa-globe'"></i>{{ platform==='techmedix'?'TechMedixLink':'Global Door' }}</div>
       </div>
       <div class="tb-r">
         <div class="srch-w"><i class="fas fa-search"></i><input type="text" v-model="globalSearch" placeholder="Search products…" @keydown.enter="performSearch"></div>
