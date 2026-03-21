@@ -853,3 +853,49 @@ model-viewer:focus{outline:none}
   .lp-card-lg{min-width:200px;max-width:200px}
   .lp-card-lg-img{height:130px}
 }
+
+/* ── Logo image support ── */
+.logo-mark-img{background:transparent!important;box-shadow:none!important;padding:0;overflow:hidden}
+.logo-img{width:100%;height:100%;object-fit:contain;border-radius:var(--r2)}
+
+/* ── Admin user card grid ── */
+.admin-user-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:var(--s3)}
+.admin-user-card{background:white;border:1px solid var(--ln-1);border-radius:var(--r3);padding:var(--s4);cursor:pointer;transition:all 0.15s;box-shadow:var(--sh1);display:flex;flex-direction:column;gap:var(--s3)}
+.admin-user-card:hover{border-color:var(--philips);box-shadow:var(--sh2);transform:translateY(-1px)}
+/* Avatar row */
+.auc-av{position:relative;width:48px;height:48px;border-radius:50%;background:var(--philips-l);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:var(--philips);flex-shrink:0;overflow:hidden}
+.auc-av-img{width:100%;height:100%;object-fit:cover}
+.auc-status{position:absolute;bottom:1px;right:1px;width:10px;height:10px;border-radius:50%;border:2px solid white}
+.auc-status.active{background:var(--ok)}
+.auc-status.inactive{background:var(--tx-4)}
+.auc-info{flex:1;min-width:0}
+.auc-name{font-size:var(--tsm);font-weight:700;color:var(--tx-1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.auc-email{font-size:var(--txs);color:var(--tx-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:1px}
+.auc-phone{font-size:var(--txs);color:var(--tx-3);margin-top:1px;display:flex;align-items:center;gap:3px}
+/* First row: avatar + info side by side */
+.admin-user-card{display:grid;grid-template-areas:"av info" "badges badges" "stats stats" "actions actions";grid-template-columns:48px 1fr;gap:var(--s2) var(--s3)}
+.auc-av{grid-area:av;align-self:center}
+.auc-info{grid-area:info}
+.auc-badges{grid-area:badges;display:flex;gap:4px;flex-wrap:wrap}
+.auc-stats{grid-area:stats;display:flex;gap:var(--s3);padding:var(--s2) 0;border-top:1px solid var(--ln-0);border-bottom:1px solid var(--ln-0)}
+.auc-stat{flex:1;text-align:center}
+.auc-stat-val{font-family:var(--fm);font-size:12px;font-weight:700;color:var(--tx-1)}
+.auc-stat-lbl{font-size:9px;color:var(--tx-3);text-transform:uppercase;letter-spacing:0.06em;margin-top:1px}
+.auc-actions{grid-area:actions;display:flex;gap:var(--s2);justify-content:flex-end}
+
+/* Mobile grid */
+@media(max-width:600px){
+  .admin-user-grid{grid-template-columns:1fr}
+}
+
+/* ── Admin triage panel ── */
+.triage-panel{background:white;border:1px solid var(--ln-1);border-left:3px solid var(--warn);border-radius:var(--r3);padding:var(--s3) var(--s4);margin-bottom:var(--s4);box-shadow:var(--sh1)}
+.triage-hd{font-size:var(--txs);font-weight:700;color:var(--warn);margin-bottom:var(--s2);display:flex;align-items:center;gap:6px;letter-spacing:0.04em;text-transform:uppercase}
+.triage-items{display:flex;flex-direction:column;gap:6px}
+.triage-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:var(--r2);font-size:var(--tsm);cursor:pointer;transition:all 0.15s}
+.triage-item:hover{filter:brightness(0.96)}
+.triage-item i:first-child{font-size:13px;width:18px;text-align:center;flex-shrink:0}
+.ti-warn{background:var(--warn-bg);color:var(--warn);border:1px solid var(--warn-bd)}
+.ti-info{background:var(--info-bg);color:var(--info);border:1px solid var(--info-bd)}
+.ti-ok{background:var(--ok-bg);color:var(--ok);border:1px solid var(--ok-bd)}
+.ti-err{background:var(--err-bg);color:var(--err);border:1px solid var(--err-bd)}
