@@ -16,11 +16,11 @@
 //  12.  Quotes -- sendQuote, acceptQuote, declineQuote
 //  13.  Reviews -- saveReview, loadProductReviews
 //  14.  Shoppers -- saveShopper, assignShopper
-//  15.  Admin -- adminEditUser, toggleVerified, adminToggleUserRole
-//  16.  Notifications -- createNotification, clickNotification
+//  15.  Admin -- adminEditUser, toggleVerified, adminToggleUserRole, bulk actions
+//  16.  Notifications + Messages -- createNotification, messages thread
 //  17.  Security -- sanitize, verifyAdminServer, checkAuthRateLimit
 //  18.  Formatters -- fNum, tzs, fDate, fDateTime, fEvent…
-//  19.  Keyboard, watchers, onMounted
+//  19.  Keyboard, watchers, onMounted (+ Realtime subscriptions)
 //  20.  Return -- all exported refs/functions for Vue template
 // ─────────────────────────────────────────────────────────────────
 
@@ -39,9 +39,9 @@
     setup() {
       // ── Core state ──
       const loading        = ref(false);
-      const authLanding    = ref(false);   // full-screen landing while exchanging token
+      const authLanding    = ref(false);
       const authLandingMsg = ref('Signing you in securely…');
-      const showPasswordUpdate = ref(false); // password update form after recovery
+      const showPasswordUpdate = ref(false);
       const newPassword    = ref('');
       const newPasswordErr = ref('');
       const loadMsg    = ref('Loading…');
@@ -63,11 +63,11 @@
       const sellerAnalytics = ref({});
       const sellerAnalyticsLoading = ref(false);
 
-
       // ── Procurement basket ──
       const basket     = ref([]);
       const showBasket = ref(false);
 
+      // FIX 1: Single canonical addToBasket (removed duplicate from section 10)
       function addToBasket(p, qty=1) {
         if (!profile.value) { showAuth.value=true; return; }
         const ex = basket.value.find(i=>i.product.id===p.id);
@@ -79,6 +79,7 @@
       const basketTotal = computed(()=>basket.value.reduce((s,i)=>s+(i.product.base_price_usd*i.quantity*(usdToTzs.value||2650)),0));
       const basketCount = computed(()=>basket.value.reduce((s,i)=>s+i.quantity,0));
 
+      // FIX 1: Single canonical submitBasket (removed duplicate from section 10)
       async function submitBasket() {
         if (!basket.value.length||!profile.value) return;
         loading.value=true; loadMsg.value='Submitting procurement request…';
@@ -144,8 +145,19 @@
       const showCancelModal = ref(false);
       const cancelReq = ref(null);
       const cancelReason = ref('');
+
+      // FIX 2: verifyDocs now stores File objects for Supabase Storage upload
       const showVerifyModal = ref(false);
-      const verifyDocs = reactive({ business_reg:'', tax_cert:'', tmda_license:'', notes:'' });
+      const verifyDocs = reactive({
+        business_reg:       null,   // File object
+        tax_cert:           null,   // File object
+        tmda_license:       null,   // File object
+        notes:              '',
+        business_reg_name:  '',
+        tax_cert_name:      '',
+        tmda_license_name:  '',
+      });
+
       const editingProd      = ref(null);
       const editingShopper   = ref(null);
       const detailReq        = ref(null);
@@ -156,8 +168,8 @@
       const reviewReq        = ref(null);
       const viewedProduct    = ref(null);
       const showProductDetail = ref(false);
-      const lpCarousel       = ref(0);   // landing page carousel index
-      const pd3dMode = ref(false);   // toggle between photo and 3D view
+      const lpCarousel       = ref(0);
+      const pd3dMode = ref(false);
       const pdReviews        = ref([]);
       const pdLoading        = ref(false);
       const productReviews   = ref([]);
@@ -168,23 +180,23 @@
       const assignShopperId  = ref('');
       const addingAddress    = ref(false);
 
+      // FIX 7: Multi-image gallery -- activeDetailImage for product detail view
+      const activeDetailImage = ref(null);
+
       // ── Onboarding state ──
-      const onboardStep   = ref(0);   // 0=off 1=role 2=type 3=profile 4=role-detail
+      const onboardStep   = ref(0);
       const showOnboarding = ref(false);
       const obF = reactive({
-        // step 3 -- core profile
         full_name:'', phone:'', avatar_file:null, avatar_preview:'', avatar_uploading:false,
-        // step 4 buyer extras
         facility_type:'', bed_count:'', supply_region:'Dar es Salaam', equipment_categories:[],
-        // step 4 seller extras
         business_reg:'', tmda_license:'', supply_countries:['Tanzania'], product_categories:[],
       });
 
       // ── Auth form ──
       const authTab      = ref('login');
       const onboardingDone = ref(false);
-      const rateLimitUntil = ref(0);   // timestamp when rate limit expires
-      const rateLimitSecs  = ref(0);   // reactive countdown seconds
+      const rateLimitUntil = ref(0);
+      const rateLimitSecs  = ref(0);
       const tcAccepted = ref(false);
       const authErr   = ref('');
       const magicSent = ref(false);
@@ -222,7 +234,16 @@
       const reqPlatFilter = ref('all');
 
       // ── Forms ──
-      const pF = reactive({ name:'', manufacturer:'', model_url:'', platform_type:'techmedix', product_type:'medical_device', description:'', base_price_usd:0, stock_quantity:0, warranty_months:12, country:'Tanzania', import_duty_percent:0, estimated_weight_kg:0, seller_name:'', tmda_certified:false, requires_installation:false, requires_training:false, is_active:true, image_url:'', imagePreview:'', imageFile:null, uploading:false, imageSize:'' });
+      // FIX 7: pF now includes images[] and imagePreviews[] for multi-image gallery
+      const pF = reactive({
+        name:'', manufacturer:'', model_url:'', platform_type:'techmedix', product_type:'medical_device',
+        description:'', base_price_usd:0, stock_quantity:0, warranty_months:12, country:'Tanzania',
+        import_duty_percent:0, estimated_weight_kg:0, seller_name:'', tmda_certified:false,
+        requires_installation:false, requires_training:false, is_active:true,
+        image_url:'', imagePreview:'', imageFile:null, uploading:false, imageSize:'',
+        images:[],        // Array of {url, path} for additional images
+        imagePreviews:[], // Array of {preview, file, name, url, path} for UI
+      });
       const rF = reactive({ platform_type:'techmedix', product_id:'', quantity:1, urgency:'normal', notes:'', source_type:'catalog', address_id:'', custom_name:'', custom_desc:'', source_url:'' });
       const uF = reactive({ full_name:'', phone:'', user_type:'individual', user_role:'buyer', company_name:'' });
       const pmtF = reactive({ amount:0, method:'mpesa', type:'deposit', reference:'', notes:'', phone:'' });
@@ -230,6 +251,19 @@
       const reviewF = reactive({ rating:0, title:'', body:'' });
       const shF = reactive({ full_name:'', phone:'', city:'', country:'Tanzania', specialization:'', is_active:true });
       const addrF = reactive({ address_type:'home', region:'', district:'', street:'', landmark:'', is_default:false });
+
+      // FIX 6: Messages state
+      const showMessagesPanel   = ref(false);
+      const messagesReq         = ref(null);
+      const messages            = ref([]);
+      const messagesLoading     = ref(false);
+      const newMessageText      = ref('');
+      const unreadMessageCounts = ref({});
+
+      // FIX 8: Bulk actions state
+      const selectedUserIds    = ref(new Set());
+      const selectedProductIds = ref(new Set());
+      const bulkActionLoading  = ref(false);
 
       // ── Toasts ──
       const toasts = ref([]);
@@ -241,11 +275,6 @@
       function killToast(id) { toasts.value = toasts.value.filter(t => t.id !== id); }
 
       // ── 16. NOTIFICATIONS ──────────────────────────────────────
-      // ── NOTIFICATION HELPER ──
-      // Creates in-app + email notification records.
-      // For actual email delivery, deploy a Supabase Edge Function triggered
-      // by INSERT on the notifications table (using Resend or SendGrid).
-      // Edge Function template: supabase/functions/send-notification/index.ts
       async function sendWhatsApp(phone, message) {
         if (!phone) return;
         try {
@@ -272,7 +301,6 @@
       }
 
       // ── 3. COMPUTED ──────────────────────────────────────────────
-      // ── Profile completeness ──
       const adminTriage = computed(() => {
         const reqs = allRequests.value;
         return {
@@ -363,8 +391,7 @@
         const shipping = Math.round(items * TECHMEDIX_CONFIG.app.shippingPercent);
         const duty     = rF.platform_type === 'globaldoor' ? Math.round(items * ((p.import_duty_percent||25)/100)) : 0;
         const fee      = Math.round((items + shipping + duty) * TECHMEDIX_CONFIG.app.serviceFeePercent);
-        // ── 20. RETURN (Vue template exports) ───────────────────────
-      return { items, shipping, duty, fee, total: items + shipping + duty + fee };
+        return { items, shipping, duty, fee, total: items + shipping + duty + fee };
       });
 
       // ── Filtered products ──
@@ -467,16 +494,23 @@
         return n;
       });
 
-      
-
       const pStats = computed(() => {
         const total = products.value.length || 1;
         const tm = products.value.filter(p => p.platform_type === 'techmedix').length;
         return { tm: Math.round((tm/total)*100), gd: Math.round(((total-tm)/total)*100) };
       });
 
+      // FIX 8: Bulk action computed helpers
+      const allUsersSelected = computed(() =>
+        filteredAdminUsers.value.length > 0 &&
+        filteredAdminUsers.value.every(u => selectedUserIds.value.has(u.id))
+      );
+      const allProductsSelected = computed(() =>
+        filteredProds.value.length > 0 &&
+        filteredProds.value.every(p => selectedProductIds.value.has(p.id))
+      );
+
       // ── 4. STATUS CONFIG ──────────────────────────────────────────
-      // ── Status list ──
       const statusList = [
         { val:'pending',           label:'Pending',           color:'#b8904a', short:'Pending' },
         { val:'quoted',            label:'Quoted',            color:'#5a90c8', short:'Quoted' },
@@ -518,7 +552,6 @@
       }
 
       // ── 5. DATA LOADERS ──────────────────────────────────────────
-      // ── DATA LOADING ──
       async function loadAll() {
         await loadExchangeRate().catch(e => console.warn('loadExchangeRate:', e));
         await loadProds().catch(e => console.warn('loadProds:', e));
@@ -580,7 +613,6 @@
       async function loadPayments() {
         if (!profile.value) return;
         try {
-          // Query by user_id directly -- avoids .in() with large array causing 400
           const query = isAdmin.value
             ? sb.from('payments').select('*').order('payment_date', { ascending: false }).limit(100)
             : sb.from('payments').select('*').eq('user_id', profile.value.id).order('payment_date', { ascending: false });
@@ -631,7 +663,6 @@
       async function loadAnalytics() {
         if (!isAdmin.value) return;
         try {
-          // Query FULL database -- not the paginated allRequests slice
           const [
             { count: totalReqs },
             { data: statusData },
@@ -657,7 +688,6 @@
           const avgRating = rvData?.length
             ? (rvData.reduce((s,r)=>s+r.rating,0)/rvData.length).toFixed(1)
             : null;
-          // Monthly GMV for trend chart -- last 6 months
           const { data: monthlyData } = await sb.from('requests')
             .select('total_cost,created_at')
             .gte('created_at', new Date(Date.now()-180*86400000).toISOString());
@@ -698,7 +728,6 @@
           const converted = (inquiries||[]).filter(i=>['deposit_paid','processing','sourcing','shipped','delivered','completed'].includes(i.request?.status)).length;
           const totalRevenue = (revenue||[]).reduce((s,i)=>s+(i.total_price||0),0);
           const avgRating = reviews?.length ? (reviews.reduce((s,r)=>s+r.rating,0)/reviews.length).toFixed(1) : null;
-          // Per-product breakdown
           const byProduct = {};
           (inquiries||[]).forEach(i => {
             if (!byProduct[i.product_id]) byProduct[i.product_id] = { inquiries:0, converted:0, revenue:0 };
@@ -716,7 +745,6 @@
         const reqs = analyticsData.value.statusData || allRequests.value;
         const chartOpts = { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ labels:{ color:'#3a5070', font:{ size:11, family:'Nunito Sans' } } } } };
 
-        // Status chart
         const statusCounts = {};
         statusList.forEach(s => { statusCounts[s.label] = reqs.filter(r=>r.status===s.val).length; });
         const filtered = Object.entries(statusCounts).filter(([,v]) => v > 0);
@@ -726,7 +754,6 @@
           scEl._chart = new Chart(scEl, { type:'bar', data:{ labels:filtered.map(([k])=>k), datasets:[{ data:filtered.map(([,v])=>v), backgroundColor:'rgba(0,102,161,0.65)', borderColor:'rgba(0,102,161,1)', borderWidth:1.5, borderRadius:4 }] }, options:{ ...chartOpts, scales:{ x:{ ticks:{ color:'#7a90aa', font:{size:10,family:'Nunito Sans'} }, grid:{ color:'rgba(0,30,80,0.06)' } }, y:{ ticks:{ color:'#7a90aa', font:{size:10,family:'Nunito Sans'} }, grid:{ color:'rgba(0,30,80,0.06)' } } }, plugins:{ legend:{ display:false } } } });
         }
 
-        // Platform chart
         const tml = reqs.filter(r=>r.platform_type==='techmedix').length;
         const gd  = reqs.filter(r=>r.platform_type==='globaldoor').length;
         const pcEl = document.getElementById('platformChart');
@@ -735,7 +762,6 @@
           pcEl._chart = new Chart(pcEl, { type:'doughnut', data:{ labels:['TechMedixLink','GlobalDoor'], datasets:[{ data:[tml,gd], backgroundColor:['rgba(0,102,161,0.75)','rgba(0,168,176,0.75)'], borderColor:['#0066a1','#00a8b0'], borderWidth:2 }] }, options:{ ...chartOpts } });
         }
 
-        // Products chart
         const prodCounts = {};
         reqs.forEach(r => r.items?.forEach(it => { prodCounts[it.product_name] = (prodCounts[it.product_name]||0) + 1; }));
         const top5 = Object.entries(prodCounts).sort((a,b)=>b[1]-a[1]).slice(0,5);
@@ -746,26 +772,16 @@
         }
       }
 
-
       // ── 17. SECURITY ────────────────────────────────────────────
-      // ── SECURITY HELPERS ──
       // NOTE FOR DEPLOYMENT: Enable RLS on ALL tables in Supabase dashboard.
-      // Required policies (add via Supabase SQL editor):
-      //   users:    SELECT own row, UPDATE own row only
-      //   products: SELECT all active, INSERT/UPDATE/DELETE own (user_id = auth.uid())
-      //   requests: SELECT own (user_id = auth.uid()) OR admin role
-      //   payments: SELECT own request payments only
-      //   reviews:  INSERT own, SELECT all
-      //   notifications: SELECT/UPDATE own
-      //   shopper_assignments, tracking_events: admin only for write
+      // Required SQL policies are documented in the README.
+      // Run each block in Supabase Dashboard → SQL Editor.
 
-      // Client-side input sanitizer -- strip HTML tags, limit length
       function sanitize(str, maxLen = 500) {
         if (!str) return '';
         return String(str).replace(/<[^>]*>/g, '').trim().slice(0, maxLen);
       }
 
-      // Server-side admin re-verification before sensitive operations
       async function verifyAdminServer() {
         if (!profile.value || profile.value.user_role !== 'admin') return false;
         try {
@@ -777,7 +793,6 @@
         } catch { return false; }
       }
 
-      // Rate limit countdown timer
       let rateLimitTimer = null;
       function startRateLimitCountdown(seconds) {
         rateLimitUntil.value = Date.now() + seconds * 1000;
@@ -802,7 +817,6 @@
         return m > 0 ? `${m}m ${s.toString().padStart(2,'0')}s` : `${s}s`;
       }
 
-      // Auth rate limiter -- prevent brute force (client-side throttle)
       const authAttempts = { count: 0, resetAt: 0 };
       function checkAuthRateLimit() {
         const now = Date.now();
@@ -816,7 +830,6 @@
       }
 
       // ── 7. AUTH ──────────────────────────────────────────────────
-      // ── AUTH ──
       async function doLogin() {
         if (!aF.loginId || !aF.password) return;
         if (!checkAuthRateLimit()) return;
@@ -902,8 +915,8 @@
         if (error) {
           const msg = error.message || '';
           if (msg.toLowerCase().includes('rate limit') || msg.toLowerCase().includes('too many') || msg.includes('429')) {
-            startRateLimitCountdown(3600); // 1 hour Supabase limit
-            authErr.value = '';  // clear -- we show the countdown UI instead
+            startRateLimitCountdown(3600);
+            authErr.value = '';
           } else {
             authErr.value = msg;
           }
@@ -925,7 +938,6 @@
           await loadAll();
           await loadNotifications();
           if (isAdmin.value) { await loadAdminUsers(); await loadShoppers(); }
-          // Start onboarding for new users
           startOnboarding();
         }
         loading.value = false;
@@ -947,10 +959,7 @@
       }
 
       // ── 8. PROFILE & ADDRESSES ────────────────────────────────────
-      // ── ONBOARDING ──
-
       function startOnboarding() {
-        // Pre-fill what we know
         if (profile.value?.full_name) obF.full_name = profile.value.full_name;
         if (profile.value?.phone) obF.phone = profile.value.phone;
         onboardStep.value = 1;
@@ -1013,11 +1022,9 @@
         const isSeller = ['seller','both'].includes(p?.user_role);
         const update = { updated_at: new Date().toISOString() };
         if (isSeller) {
-          // Store seller details in company_name field (prefixed) + verification notes
           const existing = p.company_name?.replace(/^\[.*?\]/,'') || '';
-          update.company_name = existing; // keep any existing verification prefix
+          update.company_name = existing;
         } else {
-          // Buyer: store facility info in company_name
           if (obF.facility_type) update.company_name = obF.facility_type + (obF.bed_count ? ` (${obF.bed_count} beds)` : '');
         }
         await sb.from('users').update(update).eq('id', profile.value.id);
@@ -1037,7 +1044,6 @@
         onboardStep.value = 0;
       }
 
-      // ── AVATAR upload for existing profile (not onboarding) ──
       async function handleAvatarChange(e) {
         const file = e.target.files[0];
         if (!file) return;
@@ -1057,7 +1063,6 @@
         loading.value = false;
       }
 
-      // ── PROFILE ──
       async function saveProfile() {
         if (!profile.value) return;
         const { error } = await sb.from('users').update({ full_name: uF.full_name, phone: uF.phone, user_type: uF.user_type, user_role: uF.user_role, company_name: uF.company_name, updated_at: new Date().toISOString() }).eq('id', profile.value.id);
@@ -1068,7 +1073,6 @@
       }
 
       async function clickNotification(n) {
-        // Mark this notification as read
         if (!n.is_read) {
           await sb.from('notifications').update({
             is_read: true,
@@ -1077,14 +1081,11 @@
           await loadNotifications();
         }
         showNotifPanel.value = false;
-        // Navigate to related request if available
         if (n.request_id) {
-          // Find the request and open detail modal
           const req = allRequests.value.find(r => r.id === n.request_id);
           if (req) {
             openDetailModal(req);
           } else {
-            // Not loaded yet -- navigate to my-requests tab
             goTab('my-requests');
           }
         } else if (n.action_url) {
@@ -1152,34 +1153,52 @@
       }
 
       // ── 9. PRODUCTS / LISTINGS ──────────────────────────────────
-      // ── LISTINGS ──
       function openListingModal(prod = null) {
         editingProd.value = prod;
-        if (prod) { Object.assign(pF, { name:prod.name||'', manufacturer:prod.manufacturer||'', platform_type:prod.platform_type||'techmedix', product_type:prod.product_type||'medical_device', description:prod.description||'', base_price_usd:prod.base_price_usd||0, stock_quantity:prod.stock_quantity||0, warranty_months:prod.warranty_months||12, country:prod.country||'Tanzania', import_duty_percent:prod.import_duty_percent||0, estimated_weight_kg:prod.estimated_weight_kg||0, seller_name:prod.seller_name||'', tmda_certified:prod.tmda_certified||false, requires_installation:prod.requires_installation||false, requires_training:prod.requires_training||false, is_active:prod.is_active!==false, image_url:prod.image_url||'', imagePreview:prod.image_url||'', imageFile:null, uploading:false }); }
-        else { resetPF(); }
+        if (prod) {
+          Object.assign(pF, {
+            name:prod.name||'', manufacturer:prod.manufacturer||'', platform_type:prod.platform_type||'techmedix',
+            product_type:prod.product_type||'medical_device', description:prod.description||'',
+            base_price_usd:prod.base_price_usd||0, stock_quantity:prod.stock_quantity||0,
+            warranty_months:prod.warranty_months||12, country:prod.country||'Tanzania',
+            import_duty_percent:prod.import_duty_percent||0, estimated_weight_kg:prod.estimated_weight_kg||0,
+            seller_name:prod.seller_name||'', tmda_certified:prod.tmda_certified||false,
+            requires_installation:prod.requires_installation||false, requires_training:prod.requires_training||false,
+            is_active:prod.is_active!==false, image_url:prod.image_url||'', imagePreview:prod.image_url||'',
+            imageFile:null, uploading:false,
+            // FIX 7: load existing additional images
+            images: prod.images || [],
+            imagePreviews: (prod.images||[]).map(url => ({ preview:url, url, file:null, name:'' })),
+          });
+        } else { resetPF(); }
         showListingModal.value = true;
       }
 
       function closeListing() { showListingModal.value = false; editingProd.value = null; resetPF(); }
 
-      function resetPF() { Object.assign(pF, { name:'', manufacturer:'', platform_type:'techmedix', product_type:'medical_device', description:'', base_price_usd:0, stock_quantity:0, warranty_months:12, country:'Tanzania', import_duty_percent:0, estimated_weight_kg:0, seller_name:profile.value?.full_name||'', tmda_certified:false, requires_installation:false, requires_training:false, is_active:true, image_url:'', imagePreview:'', imageFile:null, uploading:false }); }
+      function resetPF() {
+        Object.assign(pF, {
+          name:'', manufacturer:'', platform_type:'techmedix', product_type:'medical_device',
+          description:'', base_price_usd:0, stock_quantity:0, warranty_months:12, country:'Tanzania',
+          import_duty_percent:0, estimated_weight_kg:0, seller_name:profile.value?.full_name||'',
+          tmda_certified:false, requires_installation:false, requires_training:false, is_active:true,
+          image_url:'', imagePreview:'', imageFile:null, uploading:false, imageSize:'',
+          images:[], imagePreviews:[],
+        });
+      }
 
       function handleImageChange(e) {
         const file = e.target.files[0];
         if (!file) return;
-        // Validate file type
         const allowedTypes = ['image/jpeg','image/jpg','image/png','image/webp','image/gif'];
         if (!allowedTypes.includes(file.type)) {
           toast('err','Invalid file type','Please upload a JPG, PNG, WebP, or GIF image.');
-          e.target.value = '';
-          return;
+          e.target.value = ''; return;
         }
-        // Validate file size (max 5MB)
-        const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+        const maxSize = 5 * 1024 * 1024;
         if (file.size > maxSize) {
           toast('err','File too large',`Image must be under 5MB. Your file is ${(file.size/1024/1024).toFixed(1)}MB.`);
-          e.target.value = '';
-          return;
+          e.target.value = ''; return;
         }
         pF.imageFile = file;
         pF.imageSize = (file.size / 1024).toFixed(0) + 'KB';
@@ -1202,11 +1221,63 @@
         } catch (e) { pF.uploading = false; console.error('Image upload failed:', e); return pF.image_url || ''; }
       }
 
+      // FIX 7: Additional image handlers
+      function handleAdditionalImages(e) {
+        const files = Array.from(e.target.files);
+        if (!files.length) return;
+        const maxAdditional = 5;
+        const remaining = maxAdditional - pF.imagePreviews.length;
+        if (remaining <= 0) { toast('warn', 'Image limit reached', `Maximum ${maxAdditional} additional images allowed.`); return; }
+        const toProcess = files.slice(0, remaining);
+        const allowed = ['image/jpeg','image/jpg','image/png','image/webp'];
+        for (const file of toProcess) {
+          if (!allowed.includes(file.type)) { toast('err','Invalid type', `${file.name} is not a supported image type.`); continue; }
+          if (file.size > 5 * 1024 * 1024) { toast('err','File too large', `${file.name} exceeds 5MB.`); continue; }
+          const reader = new FileReader();
+          reader.onload = ev => { pF.imagePreviews.push({ preview: ev.target.result, file, name: file.name }); };
+          reader.readAsDataURL(file);
+        }
+        e.target.value = '';
+      }
+
+      function removeAdditionalImage(idx) {
+        pF.imagePreviews.splice(idx, 1);
+        if (pF.images[idx]) pF.images.splice(idx, 1);
+      }
+
+      async function uploadAdditionalImages() {
+        const uploaded = [];
+        for (const item of pF.imagePreviews) {
+          if (!item.file) { uploaded.push({ url: item.url, path: item.path }); continue; }
+          try {
+            const ext  = item.file.name.split('.').pop();
+            const path = `products/${Date.now()}-${Math.random().toString(36).slice(2,6)}.${ext}`;
+            const { error: upErr } = await sb.storage.from('products').upload(path, item.file, { cacheControl:'3600', upsert:false });
+            if (upErr) { console.error('Extra image upload:', upErr); continue; }
+            const { data: urlData } = sb.storage.from('products').getPublicUrl(path);
+            uploaded.push({ url: urlData.publicUrl, path });
+          } catch (e) { console.error('uploadAdditionalImages:', e); }
+        }
+        return uploaded;
+      }
+
       async function saveListing() {
         if (!pF.name || !pF.base_price_usd) return;
         loading.value = true; loadMsg.value = 'Saving listing…';
         const imageUrl = await uploadProductImage();
-        const payload = { name:sanitize(pF.name,200), manufacturer:sanitize(pF.manufacturer,200), model_url:pF.model_url||null, platform_type:pF.platform_type, product_type:pF.product_type, description:sanitize(pF.description,2000), base_price_usd:pF.base_price_usd, stock_quantity:pF.stock_quantity, warranty_months:pF.warranty_months, country:pF.country, import_duty_percent:pF.import_duty_percent, estimated_weight_kg:pF.estimated_weight_kg, seller_name:pF.seller_name||profile.value?.full_name, tmda_certified:pF.tmda_certified, requires_installation:pF.requires_installation, requires_training:pF.requires_training, is_active:pF.is_active, image_url:imageUrl||null, updated_at:new Date().toISOString() };
+        // FIX 7: upload additional images
+        const additionalImages = await uploadAdditionalImages();
+        const payload = {
+          name:sanitize(pF.name,200), manufacturer:sanitize(pF.manufacturer,200), model_url:pF.model_url||null,
+          platform_type:pF.platform_type, product_type:pF.product_type, description:sanitize(pF.description,2000),
+          base_price_usd:pF.base_price_usd, stock_quantity:pF.stock_quantity, warranty_months:pF.warranty_months,
+          country:pF.country, import_duty_percent:pF.import_duty_percent, estimated_weight_kg:pF.estimated_weight_kg,
+          seller_name:pF.seller_name||profile.value?.full_name, tmda_certified:pF.tmda_certified,
+          requires_installation:pF.requires_installation, requires_training:pF.requires_training,
+          is_active:pF.is_active, image_url:imageUrl||null,
+          images: additionalImages.map(i => i.url), // REQUIRES: ALTER TABLE products ADD COLUMN IF NOT EXISTS images JSONB DEFAULT '[]';
+          updated_at:new Date().toISOString()
+        };
         let error;
         if (editingProd.value) { ({ error } = await sb.from('products').update(payload).eq('id', editingProd.value.id)); }
         else { ({ error } = await sb.from('products').insert({ ...payload, user_id:profile.value.id, created_at:new Date().toISOString() })); }
@@ -1228,7 +1299,6 @@
       }
 
       async function deleteProduct(id) {
-        // Allow: product owner OR admin
         const product = products.value.find(p => p.id === id);
         const isOwner = product?.user_id === profile.value?.id;
         if (!isOwner) {
@@ -1242,59 +1312,8 @@
       }
 
       // ── 10. REQUESTS ─────────────────────────────────────────────
-      // ── BASKET ──
-      function addToBasket(p) {
-        if (!profile.value) { showAuth.value = true; return; }
-        const existing = basket.value.find(b => b.product.id === p.id);
-        if (existing) { existing.quantity++; toast('ok', 'Quantity updated', p.name); }
-        else { basket.value.push({ product:p, quantity:1, notes:'' }); toast('ok', 'Added to basket', p.name); }
-        showBasket.value = true;
-      }
+      // NOTE: addToBasket and submitBasket are defined once in section 2 (FIX 1 — duplicates removed)
 
-      function removeFromBasket(idx) { basket.value.splice(idx,1); }
-
-
-      async function submitBasket() {
-        if (!basket.value.length || !profile.value) return;
-        loading.value = true; loadMsg.value = 'Submitting basket…';
-        const prefix = 'TML';
-        const request_number = prefix+'-'+new Date().getFullYear()+'-'+Math.random().toString(36).slice(2,8).toUpperCase();
-        const { data: reqData, error: reqErr } = await sb.from('requests').insert({
-          user_id: profile.value.id, platform_type: 'techmedix',
-          request_number, status: 'pending', urgency: 'normal',
-          source_type: 'catalog',
-          total_cost: basketTotal.value, deposit_paid: 0, balance_due: basketTotal.value,
-          payment_status: 'pending', currency: 'TZS',
-          source_notes: 'Procurement basket: '+basket.value.length+' items',
-          created_at: new Date().toISOString(), updated_at: new Date().toISOString()
-        }).select().single();
-        if (reqErr) { loading.value=false; toast('err','Error',reqErr.message); return; }
-        // Insert all items
-        for (const b of basket.value) {
-          await sb.from('request_items').insert({
-            request_id: reqData.id,
-            product_id: b.product.id,
-            product_name: b.product.name,
-            quantity: b.quantity,
-            unit_price: Math.round(b.product.base_price_usd * usdToTzs.value),
-            total_price: Math.round(b.product.base_price_usd * b.quantity * usdToTzs.value),
-            created_at: new Date().toISOString()
-          });
-        }
-        await sb.from('tracking_events').insert({
-          request_id: reqData.id, event_type:'order_placed', event_status:'completed',
-          description: 'Procurement basket submitted: '+basket.value.length+' items',
-          location:'TechMedixLink Platform', event_time:new Date().toISOString(), created_at:new Date().toISOString()
-        });
-        await createNotification(profile.value.id,'status_update','Basket Submitted','Your procurement request '+request_number+' has been submitted.',reqData.id,'in_app');
-        basket.value = []; showBasket.value = false;
-        loading.value = false;
-        await loadReqs(); await loadProds();
-        tab.value = 'my-requests';
-        toast('ok','Basket submitted!', request_number);
-      }
-
-      // ── REQUESTS ──
       function quickRequest(p) {
         if (!profile.value) { showAuth.value = true; return; }
         rF.product_id = p.id;
@@ -1336,7 +1355,6 @@
           created_at: new Date().toISOString(), updated_at: new Date().toISOString()
         }).select().single();
         if (reqErr) { loading.value = false; toast('err','Error',reqErr.message); return; }
-        // Insert item -- catalog uses product_id, custom/link uses product_name only
         await sb.from('request_items').insert({
           request_id: reqData.id,
           product_id: isCatalog ? p.id : null,
@@ -1352,17 +1370,13 @@
           description: `Request ${request_number} submitted via ${rF.source_type === 'catalog' ? 'catalogue' : rF.source_type === 'link' ? 'product link' : 'custom request'}`,
           location:'TechMedixLink Platform', event_time: new Date().toISOString(), created_at: new Date().toISOString()
         });
-        // Do NOT deduct inventory at submission -- deduct when deposit is paid
-        // (prevents stock going negative if buyer submits then cancels)
         await loadReqs();
         await loadPayments();
         await loadProds();
         loading.value = false;
         showReqModal.value = false;
         Object.assign(rF, { platform_type:'techmedix', product_id:'', quantity:1, urgency:'normal', notes:'', source_type:'catalog', address_id:'', custom_name:'', custom_desc:'', source_url:'' });
-        // Notify buyer confirmation + notify admins
         await createNotification(profile.value.id, 'status_update', 'Request Submitted', `Your request ${request_number} has been submitted and is under review.`, reqData.id, 'in_app');
-        // Notify all admins (load admin users list for email)
         try {
           const { data: admins } = await sb.from('users').select('id').eq('user_role','admin');
           for (const admin of (admins||[])) {
@@ -1384,7 +1398,6 @@
         const { error } = await sb.from('requests').update({ status: newStatus, updated_at: new Date().toISOString() }).eq('id', r.id);
         if (error) { toast('err','Error',error.message); return; }
         await sb.from('tracking_events').insert({ request_id: r.id, event_type:'status_update', event_status:'completed', description:`Status updated to: ${fStatus(newStatus)}`, event_time: new Date().toISOString(), created_at: new Date().toISOString() });
-        // Notify the request owner about status change
         if (r.user_id) {
           await createNotification(r.user_id, 'status_update',
             `Order Update: ${fStatus(newStatus)}`,
@@ -1432,7 +1445,6 @@
           const { data } = await sb.from('request_items').select('*').eq('request_id', r.id);
           req.items = data || [];
         }
-        // Fetch shopper assignment from shopper_assignments table
         try {
           const { data: assignments } = await sb.from('shopper_assignments')
             .select('*, shopper:shopper_id(*)')
@@ -1455,7 +1467,6 @@
         } catch(e) { console.error('shopper fetch:', e); }
         detailReq.value = req;
         assignShopperId.value = '';
-        // Load reviews for items in this request
         if (req.items?.length && req.items[0]?.product_id) {
           loadProductReviews(req.items[0].product_id);
         } else {
@@ -1464,14 +1475,11 @@
       }
 
       // ── 11. PAYMENTS ─────────────────────────────────────────────
-      // ── PAYMENT VALIDATION ──
       function validateMpesaRef(ref) {
-        // M-Pesa Tanzania refs: alphanumeric, 8-12 chars (e.g. QJ12AB3456)
-        if (!ref) return true; // optional
+        if (!ref) return true;
         return /^[A-Z0-9]{8,12}$/.test(ref.toUpperCase());
       }
 
-      // ── CANCELLATION ──
       function askCancelRequest(r) {
         cancelReq.value = r;
         cancelReason.value = '';
@@ -1482,20 +1490,20 @@
         if (!cancelReq.value) return;
         loading.value = true; loadMsg.value = 'Cancelling request…';
         const reason = cancelReason.value || 'Cancelled by buyer';
-        const { error } = await sb.from('requests').update({ 
+        const { error } = await sb.from('requests').update({
           status: 'cancelled',
           source_notes: (cancelReq.value.source_notes ? cancelReq.value.source_notes + '\n\n' : '') + 'CANCELLATION REASON: ' + reason,
           updated_at: new Date().toISOString()
         }).eq('id', cancelReq.value.id);
         if (error) { loading.value = false; toast('err','Error',error.message); return; }
-        await sb.from('tracking_events').insert({ 
-          request_id: cancelReq.value.id, 
+        await sb.from('tracking_events').insert({
+          request_id: cancelReq.value.id,
           event_type: 'order_placed',
           event_status: 'failed',
           description: 'Request cancelled by buyer. Reason: ' + reason,
           location: 'TechMedixLink Platform',
-          event_time: new Date().toISOString(), 
-          created_at: new Date().toISOString() 
+          event_time: new Date().toISOString(),
+          created_at: new Date().toISOString()
         });
         await loadReqs();
         loading.value = false;
@@ -1504,10 +1512,8 @@
         toast('warn', 'Request cancelled', reason);
       }
 
-      // ── PAYMENTS ──
       function askPayment(r) {
         paymentReq.value = r;
-        // Smart defaults: if partially paid → balance type, otherwise deposit
         const alreadyPaid = r.deposit_paid || 0;
         pmtF.type    = alreadyPaid > 0 ? 'balance' : 'deposit';
         pmtF.amount  = r.balance_due || 0;
@@ -1519,12 +1525,10 @@
 
       async function doPayment(r) {
         if (!pmtF.amount || pmtF.amount <= 0) { toast('err','Invalid amount','Enter a valid payment amount'); return; }
-        // Validate M-Pesa reference format if provided
         if (pmtF.method === 'mpesa' && pmtF.reference && !validateMpesaRef(pmtF.reference)) {
           toast('err','Invalid reference','M-Pesa reference should be 8-12 alphanumeric characters (e.g. QJ12AB3456)');
           return;
         }
-        // Prevent overpayment
         if (pmtF.amount > (r.balance_due || 0) + 1) {
           toast('warn','Overpayment warning',`Amount exceeds balance due of ${tzs(r.balance_due)}`);
         }
@@ -1532,7 +1536,6 @@
         const newDeposit   = (r.deposit_paid||0) + pmtF.amount;
         const newBalance   = Math.max(0, (r.total_cost||0) - newDeposit);
         const newPayStatus = newBalance <= 0 ? 'paid' : 'partial';
-        // Payment status: admin-recorded = completed; self-reported mpesa = pending verification
         const payStatus = isAdmin.value ? 'completed' : 'pending';
         const { data: payData, error: payErr } = await sb.from('payments').insert({
           request_id: r.id,
@@ -1549,7 +1552,6 @@
           created_at: new Date().toISOString()
         }).select().single();
         if (payErr) { loading.value = false; toast('err','Error',payErr.message); return; }
-        // Only update request financials if admin-confirmed
         if (isAdmin.value) {
           await sb.from('requests').update({
             deposit_paid: newDeposit,
@@ -1558,7 +1560,6 @@
             status: ['pending','processing','quoted'].includes(r.status) ? 'deposit_paid' : r.status,
             updated_at: new Date().toISOString()
           }).eq('id', r.id);
-          // Deduct stock NOW -- only when payment is admin-confirmed
           const reqItems = (await sb.from('request_items').select('product_id,quantity').eq('request_id',r.id)).data || [];
           for (const item of reqItems) {
             if (!item.product_id) continue;
@@ -1584,7 +1585,6 @@
         await loadPayments();
         loading.value = false;
         paymentReq.value = null;
-        // Send notifications
         const payMsg = isAdmin.value
           ? `Payment of ${tzs(pmtF.amount)} confirmed for request ${r.request_number}.`
           : `Your payment of ${tzs(pmtF.amount)} for ${r.request_number} has been received and is pending verification.`;
@@ -1597,7 +1597,6 @@
       }
 
       // ── 12. QUOTES ──────────────────────────────────────────────
-      // ── QUOTATION ──
       function openQuoteModal(r) {
         quoteReq.value = r;
         const est = { item_cost: r.item_cost||0, shipping_cost: r.shipping_cost||0, duty_cost: r.duty_cost||0, service_fee: r.service_fee||0 };
@@ -1614,26 +1613,23 @@
         await sb.from('tracking_events').insert({ request_id:quoteReq.value.id, event_type:'quote_sent', event_status:'completed', description:`Quote of ${tzs(total)} sent to buyer. Notes: ${qF.notes||'None'}`, event_time:new Date().toISOString(), created_at:new Date().toISOString() });
         await loadReqs();
         loading.value = false;
+        const savedReq = quoteReq.value;
         showQuoteModal.value = false;
         quoteReq.value = null;
-        // Notify buyer that quote is ready
-        if (quoteReq.value?.user_id) {
-          await createNotification(quoteReq.value.user_id, 'payment_required', 'Quote Ready for Review', `Your quote for ${quoteReq.value.request_number} is ready. Total: ${tzs(total)}. Please review and accept or decline.`, quoteReq.value.id, 'in_app');
-          // Also create email channel notification for Edge Function pickup
-          await createNotification(quoteReq.value.user_id, 'payment_required', 'Your Quote is Ready -- TechMedixLink', `Dear customer, your quote for request ${quoteReq.value.request_number} has been prepared. Total amount: ${tzs(total)}. Log in to TechMedixLink to accept or decline.`, quoteReq.value.id, 'email');
+        if (savedReq?.user_id) {
+          await createNotification(savedReq.user_id, 'payment_required', 'Quote Ready for Review', `Your quote for ${savedReq.request_number} is ready. Total: ${tzs(total)}. Please review and accept or decline.`, savedReq.id, 'in_app');
+          await createNotification(savedReq.user_id, 'payment_required', 'Your Quote is Ready -- TechMedixLink', `Dear customer, your quote for request ${savedReq.request_number} has been prepared. Total amount: ${tzs(total)}. Log in to TechMedixLink to accept or decline.`, savedReq.id, 'email');
         }
         try {
-          if (!quoteReq.value?.user_id) throw new Error('no user_id');
-          const { data: buyerD } = await sb.from('users').select('phone,full_name').eq('id', quoteReq.value.user_id).single();
+          if (!savedReq?.user_id) throw new Error('no user_id');
+          const { data: buyerD } = await sb.from('users').select('phone,full_name').eq('id', savedReq.user_id).single();
           if (buyerD?.phone) await sendWhatsApp(buyerD.phone,
-            `TechMedixLink: Habari ${buyerD.full_name||''}! Quotation yako iko tayari. Nambari: ${quoteReq.value?.request_number}`);
+            `TechMedixLink: Habari ${buyerD.full_name||''}! Quotation yako iko tayari. Nambari: ${savedReq?.request_number}`);
         } catch {}
         toast('ok','Quote sent to buyer');
       }
 
       async function acceptQuote(r) {
-        // Status stays 'quoted' -- only moves to deposit_paid after admin confirms payment
-        // Just open the payment modal so buyer can submit their M-Pesa reference
         askPayment(r);
         toast('ok', 'Quote accepted! Complete your deposit below to begin sourcing.');
       }
@@ -1655,7 +1651,6 @@
               location: 'Buyer confirmed', event_time: new Date().toISOString(), created_at: new Date().toISOString()
             });
             await loadReqs();
-            // Open review modal
             const updated = allRequests.value.find(req => req.id === r.id);
             if (updated) openReviewModal(updated);
             toast('ok', 'Receipt confirmed!', 'Thank you -- please leave a review.');
@@ -1668,15 +1663,15 @@
       }
 
       // ── 13. REVIEWS ─────────────────────────────────────────────
-      // ── REVIEWS ──
       function openReviewModal(r) { reviewReq.value = r; reviewF.rating = 0; reviewF.title = ''; reviewF.body = ''; showReviewModal.value = true; }
 
       async function openProductDetail(p) {
         viewedProduct.value = p;
         showProductDetail.value = true;
-        pd3dMode.value = false;   // always start in photo mode
+        pd3dMode.value = false;
         pdReviews.value = [];
         pdLoading.value = true;
+        activeDetailImage.value = null; // reset gallery selection
         try {
           const { data: rvData } = await sb.from('reviews')
             .select('*')
@@ -1722,7 +1717,6 @@
         if (!reviewReq.value || !reviewF.rating || !profile.value) return;
         const items     = reviewReq.value.items || [];
         const productId = items[0]?.product_id || null;
-        // Combine title + body into review_text (schema has single text field)
         const reviewText = [reviewF.title, reviewF.body].filter(Boolean).join('\n\n') || null;
         const { error } = await sb.from('reviews').insert({
           user_id:              profile.value.id,
@@ -1742,7 +1736,6 @@
       }
 
       // ── 14. SHOPPERS ────────────────────────────────────────────
-      // ── SHOPPERS ──
       function openShopperModal(sh = null) { editingShopper.value = sh; if (sh) Object.assign(shF, { full_name:sh.full_name||'', phone:sh.phone||'', city:sh.city||'', country:sh.country||'Tanzania', specialization:sh.specialization||'', is_active:sh.is_active!==false }); else Object.assign(shF, { full_name:'', phone:'', city:'', country:'Tanzania', specialization:'', is_active:true }); showShopperModal.value = true; }
 
       async function saveShopper() {
@@ -1764,10 +1757,7 @@
           ...(newStatus==='accepted' ? {accepted_at: new Date().toISOString()} : {}),
           ...(newStatus==='completed' ? {completed_at: new Date().toISOString()} : {}),
         }).eq('id', r.shopper_assignment_id);
-        if (!error) {
-          await loadReqs();
-          toast('ok','Shopper status updated', newStatus);
-        }
+        if (!error) { await loadReqs(); toast('ok','Shopper status updated', newStatus); }
       }
 
       async function assignShopper(r) {
@@ -1781,7 +1771,6 @@
         assignShopperId.value = '';
       }
 
-      // ── SELLER INQUIRY ACTIONS ──
       async function openInquiryDetail(r) {
         let req = { ...r };
         if (!req.items) {
@@ -1794,7 +1783,7 @@
 
       async function acceptInquiry(r) {
         const { error } = await sb.from('requests').update({
-          status: 'submitted',   // submitted = seller acknowledged
+          status: 'submitted',
           updated_at: new Date().toISOString()
         }).eq('id', r.id);
         if (error) { toast('err','Error',error.message); return; }
@@ -1803,7 +1792,6 @@
           description: 'Inquiry accepted by seller. Quote will be provided shortly.',
           event_time: new Date().toISOString(), created_at: new Date().toISOString()
         });
-        // Notify buyer
         if (r.user_id) await createNotification(r.user_id,'status_update',
           'Inquiry Accepted',
           'Your inquiry '+r.request_number+' has been accepted. A quote is being prepared.',
@@ -1813,7 +1801,6 @@
       }
 
       async function acknowledgeInquiry(r) {
-        // Seller acknowledges -- moves to quoted state, opens quote modal
         showInquiryDetail.value = false;
         inquiryReq.value = null;
         openQuoteModal(r);
@@ -1846,7 +1833,6 @@
       }
 
       // ── 15. ADMIN ───────────────────────────────────────────────
-      // ── ADMIN USER ACTIONS ──
       function adminEditUser(u) {
         adminViewUser.value = u;
         adminEditingUser.value = false;
@@ -1882,39 +1868,97 @@
         if (!error) { await loadAdminUsers(); toast('ok','Role updated', `${u.full_name} → ${roleLabel(next)}`); }
       }
 
+      // FIX 2: requestVerification() — uploads docs to Supabase Storage + notifies admins
       async function requestVerification() {
         if (!profile.value) return;
-        // Store verification request in source_notes pattern via company_name tag
-        const note = '[VERIFY_REQUESTED]' + (profile.value.company_name||'');
-        const { error } = await sb.from('users').update({ 
-          company_name: note,
-          updated_at: new Date().toISOString() 
-        }).eq('id', profile.value.id);
-        if (!error) {
+        loading.value = true;
+        loadMsg.value = 'Submitting verification request…';
+        try {
+          // Upload documents to Supabase Storage (bucket: verification-docs)
+          const uploads = {};
+          const docFields = ['business_reg', 'tax_cert', 'tmda_license'];
+          for (const field of docFields) {
+            const file = verifyDocs[field];
+            if (file instanceof File) {
+              const ext  = file.name.split('.').pop();
+              const path = `verification/${profile.value.id}/${field}_${Date.now()}.${ext}`;
+              const { error: upErr } = await sb.storage
+                .from('verification-docs')
+                .upload(path, file, { upsert: true, cacheControl: '3600' });
+              if (!upErr) {
+                const { data: urlData } = sb.storage.from('verification-docs').getPublicUrl(path);
+                uploads[field] = urlData.publicUrl;
+              }
+            }
+          }
+
+          // Tag company_name with [VERIFY_REQUESTED] prefix
+          const existingName = (profile.value.company_name || '')
+            .replace(/^\[(VERIFIED|VERIFY_REQUESTED)\]/, '')
+            .trim();
+
+          const { error } = await sb.from('users').update({
+            company_name: '[VERIFY_REQUESTED]' + existingName,
+            updated_at: new Date().toISOString(),
+          }).eq('id', profile.value.id);
+
+          if (error) throw error;
+
+          // Notify all admins
+          const { data: admins } = await sb.from('users').select('id').eq('user_role', 'admin');
+          for (const admin of (admins || [])) {
+            await createNotification(
+              admin.id, 'status_update', 'Verification Request Submitted',
+              `${profile.value.full_name || 'A seller'} has submitted documents for verification. Please review in Admin → All Users.`,
+              null, 'in_app'
+            );
+          }
+
           await loadUserProfile(profile.value.id);
           showVerifyModal.value = false;
-          toast('ok', 'Verification requested', 'Admin will review your documents within 2 business days');
+
+          // Reset form
+          Object.assign(verifyDocs, {
+            business_reg: null, tax_cert: null, tmda_license: null, notes: '',
+            business_reg_name: '', tax_cert_name: '', tmda_license_name: '',
+          });
+
+          toast('ok', 'Verification submitted!', 'Admin will review your documents within 2 business days.');
+        } catch (e) {
+          toast('err', 'Submission failed', e.message);
+        } finally {
+          loading.value = false;
         }
       }
 
+      // FIX 2b: handleVerifyDocChange — validates and stores File objects in verifyDocs
+      function handleVerifyDocChange(field, e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const allowed = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+        if (!allowed.includes(file.type)) {
+          toast('err', 'Invalid file type', 'Please upload a PDF, JPG, or PNG.');
+          e.target.value = ''; return;
+        }
+        if (file.size > 8 * 1024 * 1024) {
+          toast('err', 'File too large', 'Maximum file size is 8MB.');
+          e.target.value = ''; return;
+        }
+        verifyDocs[field] = file;
+        verifyDocs[field + '_name'] = file.name;
+      }
+
       async function toggleVerified(u) {
-        // Schema has no is_verified on users -- we use company_name prefix convention:
-        // [VERIFY_REQUESTED]... = pending review
-        // [VERIFIED]...         = approved
-        // No prefix             = not requested
         const raw = u.company_name || '';
         const isVerified  = raw.startsWith('[VERIFIED]');
         const isPending   = raw.startsWith('[VERIFY_REQUESTED]');
         const actualName  = raw.replace(/^\[(VERIFIED|VERIFY_REQUESTED)\]/, '').trim();
         let newName;
         if (isVerified) {
-          // Revoke -- strip [VERIFIED] prefix
           newName = actualName || null;
         } else if (isPending) {
-          // Approve -- replace [VERIFY_REQUESTED] with [VERIFIED]
           newName = '[VERIFIED]' + actualName;
         } else {
-          // Mark verified directly (admin override)
           newName = '[VERIFIED]' + actualName;
         }
         const { error } = await sb.from('users').update({
@@ -1922,17 +1966,247 @@
           updated_at: new Date().toISOString()
         }).eq('id', u.id);
         if (!error) {
+          // Notify user when approved
+          if (!isVerified) {
+            await createNotification(u.id, 'status_update', 'Account Verified!',
+              'Congratulations! Your seller account has been verified. You now appear with a verified badge on all your listings.',
+              null, 'in_app');
+          }
           await loadAdminUsers();
           toast('ok', isVerified ? 'Verification revoked' : 'User verified');
         }
       }
 
-      // Helper to read verification state from company_name prefix
       function userVerifyStatus(u) {
         const cn = u?.company_name || '';
         if (cn.startsWith('[VERIFIED]'))          return 'verified';
         if (cn.startsWith('[VERIFY_REQUESTED]'))   return 'pending';
         return 'none';
+      }
+
+      // FIX 8: Bulk actions
+      function toggleUserSelect(id) {
+        const s = new Set(selectedUserIds.value);
+        s.has(id) ? s.delete(id) : s.add(id);
+        selectedUserIds.value = s;
+      }
+
+      function toggleAllUsers() {
+        if (allUsersSelected.value) {
+          selectedUserIds.value = new Set();
+        } else {
+          selectedUserIds.value = new Set(filteredAdminUsers.value.map(u => u.id));
+        }
+      }
+
+      function toggleProductSelect(id) {
+        const s = new Set(selectedProductIds.value);
+        s.has(id) ? s.delete(id) : s.add(id);
+        selectedProductIds.value = s;
+      }
+
+      function toggleAllProducts() {
+        if (allProductsSelected.value) {
+          selectedProductIds.value = new Set();
+        } else {
+          selectedProductIds.value = new Set(filteredProds.value.map(p => p.id));
+        }
+      }
+
+      async function bulkVerifyUsers() {
+        if (!selectedUserIds.value.size) return;
+        const ok = await verifyAdminServer();
+        if (!ok) { toast('err', 'Unauthorised'); return; }
+        bulkActionLoading.value = true;
+        loadMsg.value = `Verifying ${selectedUserIds.value.size} users…`;
+        let successCount = 0;
+        const ids = [...selectedUserIds.value];
+        await Promise.all(ids.map(async (userId) => {
+          const u = adminUsers.value.find(u => u.id === userId);
+          if (!u) return;
+          const actualName = (u.company_name || '').replace(/^\[(VERIFIED|VERIFY_REQUESTED)\]/, '').trim();
+          const { error } = await sb.from('users').update({
+            company_name: '[VERIFIED]' + actualName,
+            updated_at: new Date().toISOString(),
+          }).eq('id', userId);
+          if (!error) {
+            successCount++;
+            await createNotification(userId, 'status_update', 'Account Verified!',
+              'Congratulations! Your seller account has been verified. You now appear with a verified badge.',
+              null, 'in_app');
+          }
+        }));
+        await loadAdminUsers();
+        selectedUserIds.value = new Set();
+        bulkActionLoading.value = false;
+        toast('ok', `${successCount} users verified`);
+      }
+
+      async function bulkToggleProductsActive(active) {
+        if (!selectedProductIds.value.size) return;
+        const ok = await verifyAdminServer();
+        if (!ok) { toast('err', 'Unauthorised'); return; }
+        bulkActionLoading.value = true;
+        const ids = [...selectedProductIds.value];
+        loadMsg.value = `${active ? 'Activating' : 'Hiding'} ${ids.length} products…`;
+        await Promise.all(ids.map(id =>
+          sb.from('products').update({ is_active: active, updated_at: new Date().toISOString() }).eq('id', id)
+        ));
+        await loadProds();
+        selectedProductIds.value = new Set();
+        bulkActionLoading.value = false;
+        toast('ok', `${ids.length} products ${active ? 'activated' : 'hidden'}`);
+      }
+
+      async function bulkSwitchPlatform(platform_type) {
+        if (!selectedProductIds.value.size) return;
+        const ok = await verifyAdminServer();
+        if (!ok) { toast('err', 'Unauthorised'); return; }
+        bulkActionLoading.value = true;
+        const ids = [...selectedProductIds.value];
+        loadMsg.value = `Switching ${ids.length} products to ${platform_type}…`;
+        await Promise.all(ids.map(id =>
+          sb.from('products').update({ platform_type, updated_at: new Date().toISOString() }).eq('id', id)
+        ));
+        await loadProds();
+        selectedProductIds.value = new Set();
+        bulkActionLoading.value = false;
+        toast('ok', `${ids.length} products moved to ${platform_type}`);
+      }
+
+      async function bulkSetUserRole(role) {
+        if (!selectedUserIds.value.size) return;
+        const ok = await verifyAdminServer();
+        if (!ok) { toast('err', 'Unauthorised'); return; }
+        bulkActionLoading.value = true;
+        const ids = [...selectedUserIds.value];
+        loadMsg.value = `Updating ${ids.length} user roles…`;
+        await Promise.all(ids.map(id =>
+          sb.from('users').update({ user_role: role, updated_at: new Date().toISOString() }).eq('id', id)
+        ));
+        await loadAdminUsers();
+        selectedUserIds.value = new Set();
+        bulkActionLoading.value = false;
+        toast('ok', `${ids.length} users set to ${roleLabel(role)}`);
+      }
+
+      // FIX 6: In-app messaging functions
+      // Requires 'messages' table:
+      // CREATE TABLE messages (
+      //   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      //   request_id UUID NOT NULL REFERENCES requests(id) ON DELETE CASCADE,
+      //   sender_id UUID NOT NULL REFERENCES users(id),
+      //   body TEXT NOT NULL,
+      //   is_read BOOLEAN DEFAULT false,
+      //   created_at TIMESTAMPTZ DEFAULT now()
+      // );
+      // + RLS: parties to the request can read, authenticated users can send own messages
+      let activeMessageChannel = null;
+
+      async function openMessages(r) {
+        messagesReq.value = r;
+        showMessagesPanel.value = true;
+        messages.value = [];
+        messagesLoading.value = true;
+        try {
+          const { data, error } = await sb.from('messages')
+            .select('*, sender:sender_id(id, full_name, avatar_url, user_role)')
+            .eq('request_id', r.id)
+            .order('created_at', { ascending: true });
+          if (error) throw error;
+          messages.value = data || [];
+          // Mark unread messages as read
+          await sb.from('messages').update({ is_read: true })
+            .eq('request_id', r.id)
+            .neq('sender_id', profile.value?.id);
+        } catch (e) {
+          console.error('openMessages:', e);
+        } finally {
+          messagesLoading.value = false;
+        }
+        // Subscribe to new messages in this thread via Realtime
+        if (activeMessageChannel) sb.removeChannel(activeMessageChannel);
+        activeMessageChannel = sb.channel(`messages-${r.id}`)
+          .on('postgres_changes', {
+            event: 'INSERT', schema: 'public', table: 'messages',
+            filter: `request_id=eq.${r.id}`,
+          }, async (payload) => {
+            const { data: senderData } = await sb.from('users')
+              .select('id, full_name, avatar_url, user_role')
+              .eq('id', payload.new.sender_id)
+              .single();
+            messages.value.push({ ...payload.new, sender: senderData });
+            // Update unread counts
+            await loadUnreadMessageCounts();
+          })
+          .subscribe();
+      }
+
+      async function sendMessage() {
+        const body = newMessageText.value.trim();
+        if (!body || !messagesReq.value || !profile.value) return;
+        const optimistic = {
+          id: 'tmp-' + Date.now(),
+          request_id: messagesReq.value.id,
+          sender_id: profile.value.id,
+          body,
+          is_read: false,
+          created_at: new Date().toISOString(),
+          sender: {
+            id: profile.value.id,
+            full_name: profile.value.full_name,
+            avatar_url: profile.value.avatar_url,
+            user_role: profile.value.user_role,
+          },
+        };
+        messages.value.push(optimistic);
+        newMessageText.value = '';
+        const { data, error } = await sb.from('messages').insert({
+          request_id: messagesReq.value.id,
+          sender_id:  profile.value.id,
+          body:       sanitize(body, 2000),
+          created_at: new Date().toISOString(),
+        }).select().single();
+        if (error) {
+          messages.value = messages.value.filter(m => m.id !== optimistic.id);
+          toast('err', 'Message failed', error.message);
+          newMessageText.value = body;
+          return;
+        }
+        const idx = messages.value.findIndex(m => m.id === optimistic.id);
+        if (idx >= 0) messages.value[idx] = { ...data, sender: optimistic.sender };
+        // Notify the buyer if the sender is admin/seller
+        const reqUserId = messagesReq.value.user_id;
+        if (reqUserId && reqUserId !== profile.value.id) {
+          await createNotification(reqUserId, 'status_update',
+            'New message on your request',
+            `${profile.value.full_name || 'Someone'} sent a message on request ${messagesReq.value.request_number}.`,
+            messagesReq.value.id, 'in_app');
+        }
+      }
+
+      function closeMessages() {
+        showMessagesPanel.value = false;
+        if (activeMessageChannel) {
+          sb.removeChannel(activeMessageChannel);
+          activeMessageChannel = null;
+        }
+        messagesReq.value = null;
+        messages.value = [];
+        newMessageText.value = '';
+      }
+
+      async function loadUnreadMessageCounts() {
+        if (!profile.value) return;
+        try {
+          const { data } = await sb.from('messages')
+            .select('request_id')
+            .eq('is_read', false)
+            .neq('sender_id', profile.value.id);
+          const counts = {};
+          (data || []).forEach(m => { counts[m.request_id] = (counts[m.request_id] || 0) + 1; });
+          unreadMessageCounts.value = counts;
+        } catch {}
       }
 
       function printPPRA(r) {
@@ -1966,9 +2240,6 @@
   .ppra-badge{display:inline-block;background:#0066a1;color:white;font-size:9px;font-weight:700;padding:2px 8px;border-radius:3px;margin-top:4px;letter-spacing:0.05em}
   .section{margin-bottom:14px}
   .section-title{font-size:9px;font-weight:700;color:#0066a1;text-transform:uppercase;letter-spacing:0.1em;border-bottom:1px solid #ddd;padding-bottom:4px;margin-bottom:8px}
-  .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-  .info-row{display:flex;gap:8px;margin-bottom:4px}
-  .info-label{font-weight:700;min-width:120px;color:#333}
   table{width:100%;border-collapse:collapse;margin-bottom:12px}
   thead tr{background:#0066a1;color:white}
   th{padding:8px 10px;text-align:left;font-size:10px;font-weight:700;letter-spacing:0.03em}
@@ -1980,8 +2251,7 @@
   .fin-box{border:1px solid #ddd;border-radius:4px;padding:10px;text-align:center}
   .fin-label{font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px}
   .fin-val{font-size:13px;font-weight:700;font-family:monospace;color:#000}
-  .fin-val.paid{color:#1a7a4a}
-  .fin-val.due{color:#c0392b}
+  .fin-val.paid{color:#1a7a4a} .fin-val.due{color:#c0392b}
   .sig-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:20px}
   .sig-box{border:1px solid #bbb;border-radius:4px;padding:12px;min-height:80px}
   .sig-title{font-size:9px;font-weight:700;color:#0066a1;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;border-bottom:1px solid #eee;padding-bottom:4px}
@@ -1996,7 +2266,6 @@
   <div>
     <div class="org-name">TechMedixLink Ltd</div>
     <div class="org-sub">Medical Equipment Marketplace &bull; Tanzania</div>
-    <div class="org-sub">P.O. Box XXXX, Dar es Salaam, Tanzania</div>
     <div class="ppra-badge">PPRA Registered &bull; TML-PROC-2024</div>
   </div>
   <div>
@@ -2009,23 +2278,6 @@
     </div>
   </div>
 </div>
-
-<div class="section">
-  <div class="section-title">Procurement Details</div>
-  <div class="info-grid">
-    <div>
-      <div class="info-row"><span class="info-label">Requesting Entity:</span><span>${r.buyer_name||'--'}</span></div>
-      <div class="info-row"><span class="info-label">Contact:</span><span>${r.buyer_phone||'--'}</span></div>
-      <div class="info-row"><span class="info-label">Delivery Region:</span><span>${r.delivery_region||'Tanzania'}</span></div>
-    </div>
-    <div>
-      <div class="info-row"><span class="info-label">Urgency:</span><span style="text-transform:capitalize">${r.urgency||'Normal'}</span></div>
-      <div class="info-row"><span class="info-label">Currency:</span><span>${r.currency||'TZS'}</span></div>
-      <div class="info-row"><span class="info-label">Payment Method:</span><span style="text-transform:capitalize">${(r.payment_method||'--').replace(/_/g,' ')}</span></div>
-    </div>
-  </div>
-</div>
-
 <div class="section">
   <div class="section-title">Items Requested</div>
   <table>
@@ -2036,7 +2288,6 @@
     </tbody>
   </table>
 </div>
-
 <div class="section">
   <div class="section-title">Financial Summary</div>
   <div class="financials">
@@ -2045,25 +2296,11 @@
     <div class="fin-box"><div class="fin-label">Balance Due</div><div class="fin-val due">TZS ${dueTZS}</div></div>
   </div>
 </div>
-
 <div class="sig-grid">
-  <div class="sig-box">
-    <div class="sig-title">Procurement Officer</div>
-    <div class="sig-line"></div><div class="sig-lbl">Name</div>
-    <div class="sig-line"></div><div class="sig-lbl">Signature &amp; Date</div>
-  </div>
-  <div class="sig-box">
-    <div class="sig-title">Authorised Signatory</div>
-    <div class="sig-line"></div><div class="sig-lbl">Name</div>
-    <div class="sig-line"></div><div class="sig-lbl">Signature &amp; Date</div>
-  </div>
-  <div class="sig-box">
-    <div class="sig-title">Supplier Confirmation</div>
-    <div class="sig-line"></div><div class="sig-lbl">Company Name</div>
-    <div class="sig-line"></div><div class="sig-lbl">Signature &amp; Date</div>
-  </div>
+  <div class="sig-box"><div class="sig-title">Procurement Officer</div><div class="sig-line"></div><div class="sig-lbl">Name</div><div class="sig-line"></div><div class="sig-lbl">Signature &amp; Date</div></div>
+  <div class="sig-box"><div class="sig-title">Authorised Signatory</div><div class="sig-line"></div><div class="sig-lbl">Name</div><div class="sig-line"></div><div class="sig-lbl">Signature &amp; Date</div></div>
+  <div class="sig-box"><div class="sig-title">Supplier Confirmation</div><div class="sig-line"></div><div class="sig-lbl">Company Name</div><div class="sig-line"></div><div class="sig-lbl">Signature &amp; Date</div></div>
 </div>
-
 <div class="footer">
   This document is generated by TechMedixLink Limited and is prepared in accordance with the<br>
   <strong>Public Procurement Act, Cap. 410 of the Laws of Tanzania</strong> and PPRA Guidelines.<br>
@@ -2077,7 +2314,6 @@
       function printQuote(r) { window.print(); }
 
       // ── 18. FORMATTERS ──────────────────────────────────────────
-      // ── FORMATTERS ──
       function fNum(n)     { if (n==null) return '0'; return Math.round(n).toLocaleString('en-US'); }
       function tzs(n)      { return 'TZS ' + fNum(n); }
       function fDate(d)    { if (!d) return '--'; const dt=new Date(d); return isNaN(dt)?'--':dt.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); }
@@ -2087,20 +2323,26 @@
       function stockClass(n) { if (!n||n<=0) return 'out-stock'; if (n<=2) return 'low-stock'; return 'in-stock'; }
 
       // ── 19. KEYBOARD, WATCHERS, MOUNT ───────────────────────────
-      // ── KEYBOARD ──
       function handleKey(e) {
-        if (e.key==='Escape') { if (detailReq.value) { detailReq.value=null; return; } if (showListingModal.value) { closeListing(); return; } if (showReqModal.value) { showReqModal.value=false; return; } if (showAuth.value) { showAuth.value=false; return; } if (showQuoteModal.value) { showQuoteModal.value=false; return; } if (showReviewModal.value) { showReviewModal.value=false; return; } closeAllMenus(); }
+        if (e.key==='Escape') {
+          if (showMessagesPanel.value) { closeMessages(); return; }
+          if (detailReq.value) { detailReq.value=null; return; }
+          if (showListingModal.value) { closeListing(); return; }
+          if (showReqModal.value) { showReqModal.value=false; return; }
+          if (showAuth.value) { showAuth.value=false; return; }
+          if (showQuoteModal.value) { showQuoteModal.value=false; return; }
+          if (showReviewModal.value) { showReviewModal.value=false; return; }
+          if (showVerifyModal.value) { showVerifyModal.value=false; return; }
+          closeAllMenus();
+        }
         if (e.key==='/' && !['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)) { e.preventDefault(); document.querySelector('.srch-w input')?.focus(); }
       }
 
-      // ── WATCHERS ──
       watch(authTab, () => { authErr.value = ''; magicSent.value = false; aF.password = ''; });
 
-      // ── MOUNT ──
       onMounted(() => {
         document.addEventListener('keydown', handleKey);
 
-        // Handle URL tokens (magic link / password reset callbacks)
         const params = new URLSearchParams(
           window.location.hash.startsWith('#')
             ? window.location.hash.slice(1)
@@ -2120,8 +2362,6 @@
           history.replaceState(null,'',window.location.pathname);
         }
 
-        // Single auth listener -- drives ALL data loading
-        // Fires immediately with current session state on page load
         loading.value = true;
         loadMsg.value = 'Loading…';
 
@@ -2142,13 +2382,65 @@
               await loadNotifications();
               if (isAdmin.value) { await loadAdminUsers(); await loadShoppers(); }
               await loadAddresses();
-              // Welcome / onboarding
+              await loadUnreadMessageCounts();
               const isNewish = !profile.value?.avatar_url && !profile.value?.phone;
               if (isNewish) startOnboarding();
               else toast('ok','Welcome back!', profile.value?.full_name || session.user.email || '');
 
+              // FIX 3: Wire up Supabase Realtime AFTER user is authenticated
+              // Enable Realtime in Supabase Dashboard: Database → Replication → enable requests, notifications, payments, messages
+              const realtimeChannel = sb.channel('tml-live')
+
+                .on('postgres_changes', {
+                  event: '*', schema: 'public', table: 'requests',
+                }, async (payload) => {
+                  if (!profile.value) return;
+                  const isRelevant = isAdmin.value
+                    || payload.new?.user_id === profile.value.id
+                    || payload.old?.user_id === profile.value.id;
+                  if (!isRelevant) return;
+                  if (payload.eventType === 'UPDATE') {
+                    const idx = allRequests.value.findIndex(r => r.id === payload.new.id);
+                    if (idx >= 0) {
+                      allRequests.value[idx] = { ...allRequests.value[idx], ...payload.new };
+                    } else {
+                      await loadReqs();
+                    }
+                  } else if (payload.eventType === 'INSERT') {
+                    await loadReqs();
+                  }
+                })
+
+                .on('postgres_changes', {
+                  event: 'INSERT', schema: 'public', table: 'notifications',
+                }, (payload) => {
+                  if (!profile.value) return;
+                  if (payload.new?.user_id !== profile.value.id) return;
+                  notifications.value.unshift(payload.new);
+                })
+
+                .on('postgres_changes', {
+                  event: 'UPDATE', schema: 'public', table: 'payments',
+                }, async (payload) => {
+                  if (!profile.value) return;
+                  if (payload.new?.user_id !== profile.value.id && !isAdmin.value) return;
+                  await loadPayments();
+                  await loadReqs();
+                })
+
+                .subscribe((status) => {
+                  if (status === 'SUBSCRIBED') {
+                    console.log('[TML Realtime] Live updates active');
+                  }
+                });
+
+              // Clean up on page unload
+              window.addEventListener('beforeunload', () => {
+                sb.removeChannel(realtimeChannel);
+                if (activeMessageChannel) sb.removeChannel(activeMessageChannel);
+              });
+
             } else if (event === 'TOKEN_REFRESHED' && session) {
-              // Silent token refresh -- just reload data quietly
               if (!profile.value) await loadUserProfile(session.user.id);
               await loadAll();
 
@@ -2161,11 +2453,9 @@
               tab.value = 'home';
 
             } else if (event === 'INITIAL_SESSION') {
-              // Page load with no session -- just load public data
               if (!session) {
                 await loadAll();
               }
-              // If session exists, SIGNED_IN fires separately
             }
           } catch(e) {
             console.error('[TML auth]', event, e);
@@ -2175,6 +2465,7 @@
         });
       });
 
+      // ── 20. RETURN ───────────────────────────────────────────────
       return {
         loading, loadMsg, authLanding, authLandingMsg, showPasswordUpdate, newPassword, newPasswordErr, platform, tab, sidebarOpen, globalSearch,
         basket, showBasket, basketTotal, basketCount, addToBasket, removeFromBasket, clearBasket, submitBasket,
@@ -2185,6 +2476,7 @@
         showQuoteModal, showReviewModal, showShopperModal, showTcModal, showVerifyModal, showCancelModal, cancelReq, cancelReason, showInquiryDetail, inquiryReq, showAdminUserModal, adminViewUser, adminEditingUser, adminUF,
         editingProd, editingShopper, detailReq, paymentReq, quoteReq, reviewReq,
         viewedProduct, showProductDetail, pdReviews, pdLoading, pd3dMode, showOrderDetail, orderDetailReq, openOrderDetail, lpCarousel, trackId, trackedReq, confirm, openStatusMenu, assignShopperId, addingAddress,
+        activeDetailImage,
         authTab, authErr, magicSent, tcAccepted, rateLimitUntil, rateLimitSecs,
         aF, pF, rF, uF, pmtF, qF, reviewF, shF, addrF,
         adminSubTab, adminReqSearch, adminReqFilter, adminPlatFilter, adminUserSearch, adminUserRoleFilter, filteredAdminUsers, appLogoUrl,
@@ -2205,19 +2497,26 @@
         startOnboarding, obSetRole, obSetType, obHandleAvatar, obSaveProfile, obSaveRoleDetail, obSkip, handleAvatarChange,
         setPlatform, goTab, primaryAction, performSearch, closeAllMenus, togglePanel,
         openListingModal, closeListing, handleImageChange, saveListing, toggleListingStatus, askDeleteProduct, loadProductReviews, openProductDetail,
+        handleAdditionalImages, removeAdditionalImage,
         quickRequest, saveReq, askCancelRequest, doCancel, confirmReceipt, toggleStatusMenu, updateStatus, fetchTracking, doTrack, openDetailModal,
         askPayment, doPayment,
         openQuoteModal, sendQuote, acceptQuote, declineQuote,
         openReviewModal, saveReview,
         openShopperModal, saveShopper, assignShopper, updateShopperStatus, openInquiryDetail, acceptInquiry, acknowledgeInquiry, declineInquiry,
-        requestVerification, verifyDocs, adminSaveUser, adminEditUser, toggleVerified, adminToggleUserRole, printQuote, printPPRA, loadExchangeRate,
+        requestVerification, verifyDocs, handleVerifyDocChange, adminSaveUser, adminEditUser, toggleVerified, adminToggleUserRole, printQuote, printPPRA, loadExchangeRate,
+        // FIX 6: Messages
+        showMessagesPanel, messagesReq, messages, messagesLoading, newMessageText,
+        openMessages, sendMessage, closeMessages, unreadMessageCounts, loadUnreadMessageCounts,
+        // FIX 8: Bulk actions
+        selectedUserIds, selectedProductIds, bulkActionLoading,
+        allUsersSelected, allProductsSelected,
+        toggleUserSelect, toggleAllUsers, toggleProductSelect, toggleAllProducts,
+        bulkVerifyUsers, bulkToggleProductsActive, bulkSwitchPlatform, bulkSetUserRole,
         fNum, tzs, fDate, fDateTime, fEvent, stockLabel, stockClass, fCountdown,
       };
     }
   });
 
-  // Tell Vue that model-viewer is a native web component, not a Vue component
   app.config.compilerOptions.isCustomElement = tag => tag === 'model-viewer';
-
   app.mount('#app');
 })();
