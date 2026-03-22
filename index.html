@@ -755,7 +755,7 @@
             <div class="kpi"><div class="kpi-ico"><i class="fas fa-store"></i></div><div class="kpi-lbl">Live Listings</div><div class="kpi-val">{{  myListings.filter(p=>p.is_active).length  }}</div><div class="kpi-sub">{{  myListings.length  }} total</div></div>
             <div class="kpi"><div class="kpi-ico"><i class="fas fa-inbox"></i></div><div class="kpi-lbl">Inquiries</div><div class="kpi-val">{{  incomingReqs.length  }}</div><div class="kpi-sub" :class="incomingReqs.filter(r=>r.status==='pending').length?'up':''">{{  incomingReqs.filter(r=>r.status==='pending').length  }} pending</div></div>
             <div class="kpi"><div class="kpi-ico"><i class="fas fa-dollar-sign"></i></div><div class="kpi-lbl">Avg. Price</div><div class="kpi-val sm ac">${{  fNum(avgListingPrice)  }}</div><div class="kpi-sub">USD listed</div></div>
-            <div class="kpi" style="cursor:pointer" @click="if(userVerifyStatus(profile)==='none') showVerifyModal=true">
+            <div class="kpi" style="cursor:pointer" @click="userVerifyStatus(profile)==='none' ? showVerifyModal=true : null">
               <div class="kpi-ico" :style="userVerifyStatus(profile)==='verified'?'background:var(--ok-bg);border-color:var(--ok-bd);color:var(--ok)':userVerifyStatus(profile)==='pending'?'background:var(--warn-bg);border-color:var(--warn-bd);color:var(--warn)':''">
                 <i class="fas fa-shield-halved"></i>
               </div>
