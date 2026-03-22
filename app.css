@@ -826,3 +826,220 @@ input,select,textarea{font-family:var(--fb)}
 
 /* ── Price filter inputs ── */
 .price-range-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:var(--s2) 0}
+
+/* ════════════════════════════════════════════════════════════════
+   NEW FEATURES — Messages, Verification, Bulk Actions, Gallery
+   All fixes applied directly to canonical stylesheet
+════════════════════════════════════════════════════════════════ */
+
+/* ── FIX 3: Realtime — notification bell pulse on new messages ── */
+@keyframes bell-pulse {
+  0%,100% { transform: rotate(0deg); }
+  15%      { transform: rotate(12deg); }
+  30%      { transform: rotate(-10deg); }
+  45%      { transform: rotate(8deg); }
+  60%      { transform: rotate(-6deg); }
+}
+.bell-has-unread { animation: bell-pulse 0.6s ease-in-out; }
+
+/* ── FIX 2: Verified badge shimmer for newly verified sellers ── */
+@keyframes verified-shimmer {
+  0%   { box-shadow: 0 0 0 0 rgba(26,122,74,0.4); }
+  70%  { box-shadow: 0 0 0 6px rgba(26,122,74,0); }
+  100% { box-shadow: 0 0 0 0 rgba(26,122,74,0); }
+}
+.badge.b-ok.verified-pulse { animation: verified-shimmer 1.5s ease-out 3; }
+
+/* ── FIX 2: Verify document upload areas ── */
+.verify-upload-zone {
+  border: 1.5px dashed var(--ln-2);
+  border-radius: var(--r3);
+  padding: var(--s4);
+  background: var(--bg-1);
+  transition: border-color var(--fast), background var(--fast);
+  cursor: pointer;
+  text-align: center;
+}
+.verify-upload-zone:hover { border-color: var(--philips); background: var(--philips-l); }
+.verify-upload-zone.has-file { border-color: var(--ok); border-style: solid; background: var(--ok-bg); }
+.verify-upload-zone .upload-ico { font-size: 22px; color: var(--tx-4); margin-bottom: 6px; }
+.verify-upload-zone.has-file .upload-ico { color: var(--ok); }
+.verify-file-name {
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: var(--tsm); color: var(--tx-1);
+}
+
+/* ── FIX 6: Messages panel (slide-in drawer) ── */
+.messages-panel {
+  position: fixed; top: 0; right: 0; bottom: 0;
+  width: 400px; max-width: 100vw;
+  background: white;
+  border-left: 1px solid var(--ln-2);
+  display: flex; flex-direction: column;
+  z-index: 450;
+  box-shadow: -4px 0 24px rgba(10,31,60,0.12);
+  animation: slideFromRight 0.22s var(--ease);
+}
+@keyframes slideFromRight {
+  from { transform: translateX(100%); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+.messages-panel-hd {
+  padding: var(--s4) var(--s5);
+  border-bottom: 2px solid var(--philips);
+  background: var(--sidebar);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+.messages-panel-title { font-family: var(--fd); font-size: 16px; color: white; }
+.messages-panel-sub   { font-size: var(--txs); color: rgba(255,255,255,0.45); font-family: var(--fm); margin-top: 2px; }
+.messages-list {
+  flex: 1; overflow-y: auto; padding: var(--s4);
+  display: flex; flex-direction: column; gap: var(--s3);
+}
+.msg-empty {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; padding: var(--s8) var(--s5); text-align: center;
+  color: var(--tx-3);
+}
+.msg-empty i { font-size: 28px; margin-bottom: var(--s3); opacity: 0.4; }
+.msg-bubble-wrap { display: flex; flex-direction: column; }
+.msg-bubble-wrap.mine  { align-items: flex-end; }
+.msg-bubble-wrap.theirs { align-items: flex-start; }
+.msg-sender-label { font-size: 10px; color: var(--tx-3); margin-bottom: 3px; display: flex; align-items: center; gap: 5px; }
+.msg-bubble {
+  max-width: 82%; padding: var(--s2) var(--s3);
+  font-size: var(--tsm); line-height: 1.55; word-break: break-word;
+  border-radius: var(--r3);
+}
+.msg-bubble.mine   { background: var(--philips); color: white; border-radius: var(--r3) var(--r3) var(--r1) var(--r3); }
+.msg-bubble.theirs { background: var(--bg-1); border: 1px solid var(--ln-1); color: var(--tx-1); border-radius: var(--r3) var(--r3) var(--r3) var(--r1); }
+.msg-time { font-size: 9px; color: var(--tx-4); margin-top: 2px; }
+.messages-compose {
+  padding: var(--s3) var(--s4);
+  border-top: 1px solid var(--ln-1);
+  background: var(--bg-1);
+  flex-shrink: 0;
+}
+.messages-compose-row { display: flex; gap: var(--s2); align-items: flex-end; }
+.messages-compose textarea {
+  flex: 1; background: white; border: 1px solid var(--ln-2);
+  border-radius: var(--r2); padding: var(--s2) var(--s3);
+  font-size: var(--tsm); resize: none; line-height: 1.5;
+  max-height: 100px; outline: none; font-family: var(--fb);
+  transition: border-color var(--fast);
+}
+.messages-compose textarea:focus { border-color: var(--philips); }
+.messages-compose-hint { font-size: 9px; color: var(--tx-4); margin-top: 4px; }
+
+/* Message unread badge on request rows */
+.msg-unread-badge {
+  position: absolute; top: -4px; right: -4px;
+  min-width: 14px; height: 14px;
+  background: var(--err); color: white;
+  border-radius: 99px; font-size: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--fm); font-weight: 700; padding: 0 3px;
+  border: 2px solid white;
+}
+
+/* ── FIX 7: Product image gallery strip ── */
+.img-gallery-strip {
+  display: flex; gap: var(--s2); flex-wrap: wrap; margin-top: var(--s3);
+}
+.img-gallery-thumb {
+  position: relative; width: 68px; height: 68px;
+  border-radius: var(--r2); overflow: hidden;
+  border: 2px solid transparent;
+  cursor: pointer; transition: border-color var(--fast);
+  flex-shrink: 0;
+}
+.img-gallery-thumb:hover { border-color: var(--philips); }
+.img-gallery-thumb.active { border-color: var(--philips); box-shadow: 0 0 0 2px var(--philips-l); }
+.img-gallery-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.img-gallery-thumb .img-remove-btn {
+  position: absolute; top: 2px; right: 2px;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: rgba(10,31,60,0.7); border: none;
+  color: white; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 7px; transition: background var(--fast);
+}
+.img-gallery-thumb .img-remove-btn:hover { background: var(--err); }
+.img-gallery-add {
+  width: 68px; height: 68px;
+  border-radius: var(--r2);
+  border: 1.5px dashed var(--ln-2);
+  background: var(--bg-1);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 3px; cursor: pointer; transition: border-color var(--fast), background var(--fast);
+}
+.img-gallery-add:hover { border-color: var(--philips); background: var(--philips-l); }
+.img-gallery-add i { font-size: 14px; color: var(--tx-3); }
+.img-gallery-add span { font-size: 9px; color: var(--tx-3); }
+
+/* Product detail gallery (buyer view) */
+.pd-gallery-strip {
+  display: flex; gap: var(--s2); margin-top: var(--s3); flex-wrap: wrap;
+}
+.pd-gallery-thumb {
+  width: 52px; height: 52px;
+  border-radius: var(--r2); overflow: hidden;
+  border: 2px solid transparent; cursor: pointer;
+  transition: border-color var(--fast);
+  flex-shrink: 0;
+}
+.pd-gallery-thumb:hover { border-color: var(--philips); }
+.pd-gallery-thumb.active { border-color: var(--philips); box-shadow: 0 0 0 2px var(--philips-l); }
+.pd-gallery-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+/* ── FIX 8: Bulk actions toolbar ── */
+.bulk-toolbar {
+  background: var(--philips-l);
+  border: 1px solid var(--tm-b);
+  border-radius: var(--r2);
+  padding: var(--s2) var(--s4);
+  margin-bottom: var(--s3);
+  display: flex; align-items: center; gap: var(--s3); flex-wrap: wrap;
+  animation: fu 0.18s var(--ease) both;
+}
+.bulk-toolbar-count {
+  font-size: var(--tsm); font-weight: 700; color: var(--philips);
+  min-width: 80px; display: flex; align-items: center; gap: 5px;
+}
+.bulk-toolbar-divider { height: 20px; width: 1px; background: var(--ln-2); }
+.bulk-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 12px; border-radius: var(--r2);
+  font-size: var(--txs); font-weight: 600; cursor: pointer;
+  border: 1px solid; transition: all var(--fast);
+}
+.bulk-btn.verify  { background: var(--ok-bg);   color: var(--ok);   border-color: var(--ok-bd); }
+.bulk-btn.seller  { background: var(--tm-s);    color: var(--tm);   border-color: var(--tm-b); }
+.bulk-btn.buyer   { background: var(--bg-2);    color: var(--tx-2); border-color: var(--ln-2); }
+.bulk-btn.activate{ background: var(--ok-bg);   color: var(--ok);   border-color: var(--ok-bd); }
+.bulk-btn.hide    { background: var(--warn-bg); color: var(--warn); border-color: var(--warn-bd); }
+.bulk-btn.tml     { background: var(--tm-s);    color: var(--tm);   border-color: var(--tm-b); }
+.bulk-btn.gd      { background: var(--gd-s);    color: var(--gd);   border-color: var(--gd-b); }
+.bulk-btn:hover   { filter: brightness(0.94); transform: translateY(-1px); }
+.bulk-btn:disabled{ opacity: 0.45; cursor: not-allowed; transform: none; }
+.bulk-clear-btn {
+  margin-left: auto; font-size: var(--txs); color: var(--tx-3);
+  background: none; border: none; cursor: pointer; padding: 3px 6px;
+}
+.bulk-clear-btn:hover { color: var(--tx-1); }
+
+/* Checkbox column in admin tables */
+.tbl th.cb-col, .tbl td.cb-col {
+  width: 36px; text-align: center; padding-left: var(--s3); padding-right: 0;
+}
+.tbl input[type="checkbox"] {
+  accent-color: var(--philips); width: 14px; height: 14px; cursor: pointer;
+}
+.tbl tbody tr.selected td { background: var(--philips-l) !important; }
+
+/* ── Mobile responsive ── */
+@media(max-width:768px) {
+  .messages-panel { width: 100vw; }
+  .bulk-toolbar { gap: var(--s2); }
+}
